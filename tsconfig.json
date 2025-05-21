@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "target": "ES2017",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./*"]
+    }
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/app/layout.jsx", "src/app/page.jsx", "src/app/layout.jsx", "src/app/user/layout.jsx", "src/app/user/signup/page.jsx", "src/app/user/resetPassword/page.jsx", "src/app/user/login/page.jsx", "src/app/user/checkEmail/page.jsx", "src/app/products/page.jsx", "src/app/products/reviews/page.jsx", "src/app/products/productDetails/page.jsx", "src/app/products/(with-layout)/layout.jsx", "src/app/viewProductDetails/[id]/page.jsx", "src/app/checkout/page.jsx", "src/lib/store/api/user/api.js", "src/component/user/SignupValidation.jsx", "src/component/user/Signup.jsx", "src/component/user/Login.jsx", "src/component/reusables/RegNavBar.jsx", "src/component/reusables/Navbar.jsx", "src/component/reusables/Hero.jsx", "src/component/reusables/Footer.jsx", "src/component/reusables/Categories.jsx", "src/component/reusables/CartTable.jsx", "src/component/reusables/Card.jsx", "src/component/reusables/ApplicationTabSlider.jsx", "src/component/product/ViewProductDetails.jsx", "src/component/product/ViewProduct.jsx", "src/component/product/SpecsAndReviews.jsx", "src/component/product/Specifications.jsx", "src/component/product/Reviews.jsx", "src/component/product/ProductDetails.jsx", "src/component/ForgotPassword/ResetPassword.jsx", "src/component/ForgotPassword/CheckEmail.jsx", "src/component/checkout/Cart.jsx", "src/app/products/(with-layout)/checkout/delivery/page.jsx"],
+  "exclude": ["node_modules"]
+}
