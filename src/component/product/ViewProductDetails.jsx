@@ -1,17 +1,19 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import Image from 'next/image'; // Use Next.js's Image component
-import { useParams, useRouter } from 'next/navigation'; // For navigation
+import Image from 'next/image'; 
+import { useParams, useRouter } from 'next/navigation'; 
 // import Breadcrumbs from '@/components/Breadcrumbs'; // Import Breadcrumbs component
 // import { useCartStore } from '@/store/cart'; 
-import yellowWoman from '../../assets/yellowWoman.png'; // Adjust the path as necessary
+import yellowWoman from '../../assets/yellowWoman.png'; 
 import { FaHeart } from 'react-icons/fa';
 import SpecsAndReviews from './SpecsAndReviews';
 import { FiShoppingCart } from 'react-icons/fi';
 import { FiHeart } from 'react-icons/fi';
 import { useCartStore } from '@/src/lib/store/useCart';
 import { Rating } from '@mui/material';
+import useProductsQuery from '@/src/lib/hooks/useProductMutation';
+import useAddToCartMutation from "../../lib/hooks/useAddToCartMutation"
 
 
 const sizes = [8, 10, 12, 14, 16, 18, 20];
@@ -21,7 +23,7 @@ const ViewProductDetails = () => {
   const [selectedSize, setSelectedSize] = useState(null);
   const [selectedColor, setSelectedColor] = useState(null);
   const [quantity, setQuantity] = useState(1);
-  const [images] = useState(Array(5).fill(yellowWoman)); // Duplicate image 5 times
+  const [images] = useState(Array(5).fill(yellowWoman)); 
   const [breadcrumbs] = useState([
     { label: 'Home', path: '/' },
     { label: 'Category', path: '/category' },
@@ -33,16 +35,27 @@ const ViewProductDetails = () => {
   const [ratingValue, setRatingValue] = useState(3.5);
   
   const { addToCart } = useCartStore();
+  const { data, isLoading } = useProductsQuery();
+  const products = data?.data ?? [];
+  const product = products.find(p => p._id === id);
 
-  useEffect(() => {
-    if (!id) {
-      // If the product ID is missing, log an error or handle it accordingly
-      console.error("Product ID is not available.");
-    }
-  }, [id]);
+  if (isLoading) {
+    return <div>Loading...</div>; 
+  }
+  if (!product) {
+    return <div>Product not found</div>; // Handle case where product is not found
+  }
+
+  // useEffect(() => {
+  //   if (!id) {
+  //     // If the product ID is missing, log an error or handle it accordingly
+  //     console.error("Product ID is not available.");
+  //   }
+  // }, [id]);
 
   const increaseQuantity = () => setQuantity((prev) => prev + 1);
   const decreaseQuantity = () => setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
+   const { mutate: addToCartMutation, isPending, error } = useAddToCartMutation();
 
   const handleAddToCart = () => {
     if (!selectedSize) {
@@ -56,18 +69,20 @@ const ViewProductDetails = () => {
     }
 
     const newItem = {
-      id: id,
+      id: product._id,
       quantity,
       size: selectedSize,
       color: selectedColor,
-      name: "Golden Yellow Butterfly Bodycon Dress", // Changed title to name for consistency
-      image: yellowWoman.src, // Using .src to get the string URL
-      price: 100.00, // Example price in dollars
-      description: "Beautiful butterfly bodycon dress in golden yellow color"
+      name: product.name, // Changed title to name for consistency
+      image: product?.variations?.[0]?.images?.[0] || yellowWoman.src,
+      price: product.price?.$numberDecimal ?? "0.00",
+      description: product.description || "No description",
     };
 
     console.log('Adding to cart:', newItem);
-    addToCart(newItem); // Add to Zustand store
+    addToCart(newItem);
+    addToCartMutation(newItem);
+
     
     // Change this to /cart to match your new route
     router.push('/viewProductDetails/checkout/cart');
@@ -82,10 +97,26 @@ const ViewProductDetails = () => {
         <div className="flex flex-row gap-10 py-8 h-[calc(100vh-160px)]">
           <div className='flex flex-col gap-4'>
             <div className="flex flex-col gap-4">
-              <Image alt="Product image" src={yellowWoman} width={550} height={550} className="rounded-t-lg" />
+              <Image
+                alt="Main product"
+                src={
+                  product?.variations?.[0]?.images?.[0] ??
+                  yellowWoman.src // fallback
+                  
+                }
+                width={550} height={550} className="rounded-t-lg" 
+              />
               <div className="grid grid-cols-6 gap-2 overflow-hidden">
-                {images.map((image, index) => (
-                  <Image key={index} alt="Thumbnail" src={image} width={96} height={128} className="object-cover" />
+                {(product?.variations?.[0]?.images ?? [yellowWoman.src]).map((img, idx) => (
+                  <Image key={idx} 
+                    // alt="Thumbnail" 
+                    // src={image} 
+                    alt={`Product thumbnail ${idx}`}
+                    src={img}
+                    width={96} 
+                    height={128} 
+                    className="object-cover" 
+                  />
                 ))}
               </div>
             </div>
@@ -94,8 +125,8 @@ const ViewProductDetails = () => {
             </div>
           </div>
           <div className="">
-            <h1 className="text-3xl font-bold text-[#061410] mb-6 text-left text-nowrap">Golden Yellow Butterfly Bodycon Dress</h1>
-            <p className="text-left text-[#061410] text-lg font-bold">120,00</p>
+            <h1 className="text-3xl font-bold text-[#061410] mb-6 text-left text-nowrap">{product.name}</h1>
+            <p className="text-left text-[#061410] text-lg font-bold">{product.price?.$numberDecimal ?? "N/A"}</p>
             <div className="card-content flex justify-left gap-2">
               <Rating
                 value={ratingValue}

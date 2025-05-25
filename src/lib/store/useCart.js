@@ -6,10 +6,14 @@ export const useCartStore = create(
     (set, get) => ({
       cartItems: [],
       savedForLater: [],
+      setCartItems: (items) => set({ cartItems: items }),
       
       // Add item to cart
       addToCart: (item) => {
-        const { cartItems } = get();
+        let { cartItems } = get();
+        if (!Array.isArray(cartItems)) {
+          cartItems = [];
+        };
         const existingItem = cartItems.find(cartItem => cartItem.id === item.id);
         
         if (existingItem) {
@@ -96,7 +100,13 @@ export const useCartStore = create(
     }),
     {
       name: 'cart-storage', // unique name for localStorage
-      getStorage: () => localStorage // use localStorage for persistence
+      getStorage: () => localStorage,
+      partialize: (state) => ({
+        ...state,
+        cartItems: Array.isArray(state.cartItems) ? state.cartItems : [],
+        savedForLater: Array.isArray(state.savedForLater) ? state.savedForLater : [],
+      }),
+
     }
   )
 );

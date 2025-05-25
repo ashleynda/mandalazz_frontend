@@ -7,7 +7,7 @@ import instagram from "../../assets/instagram.png";
 const Footer = () => {
   return (
     <footer className="bg-[#0B261F] border-t border-gray-200 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+      <div className="w-full px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
         
         {/* Logo and Address Section */}
         <div className="flex flex-col items-center sm:items-start text-center sm:text-left md:text-center">

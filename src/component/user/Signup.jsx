@@ -92,7 +92,9 @@ const Signup = () => {
 
     signupMutation.mutate(formData, {
       onSuccess: () => {
-        router.push('/signup-validation');
+         console.log('Signup successful!');
+        router.push('/verify');
+        sessionStorage.setItem("email", formData.email); 
       },
       onError: (error) => {
         alert(error.message);
@@ -135,7 +137,7 @@ const Signup = () => {
   
 
   const handleSignIn = () => {
-    router.push('/user/login');
+    router.push('/login');
   };
 
   
@@ -241,7 +243,8 @@ const Signup = () => {
                   backgroundColor: '#1f5f4a', // Set a darker color on hover (optional)
                 },
               }}
-            onClick={handleClick}
+            // onClick={handleClick}
+            type='submit'
             className='px-4 py-2 rounded-lg w-full transition-all duration-200 bg-[#26735B] text-white cursor-pointer'
             disabled={!checkFormValidity()}
         >
