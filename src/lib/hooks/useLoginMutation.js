@@ -4,7 +4,7 @@ const useLoginMutation = () => {
     return useMutation({
         mutationFn: async (data) => {
         const res = await fetch(
-            "https://mandalazz-copy-production.up.railway.app/api/user/login",
+            "https://mandelazz-webapp.azurewebsites.net/api/user/login",
             {
             method: "POST",
             headers: { "Content-Type": "application/json" },

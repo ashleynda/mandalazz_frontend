@@ -41,7 +41,7 @@ const Login= () => {
     loginMutation.mutate({ email, password }, {
       onSuccess: (data) => {
         console.log('Login successful:', data)
-        router.push('/dashboard')
+        router.push('/products')
       },
       onError: (error) => {
         console.error('Login failed:', error)
@@ -84,7 +84,7 @@ const Login= () => {
   }
 
   const handleReset = () => {
-    router.push('/user/forgotPassword')
+    router.push('/resetPassword')
   }
 
 
@@ -107,7 +107,7 @@ const Login= () => {
               id="email"
               type="email"
               placeholder="Enter Email Address"
-              className="border p-2 rounded-md text-[#131735] placeholder-[#A1A2AE]"
+              className="border border-gray-300 p-2 rounded-md text-[#131735] placeholder-[#A1A2AE]"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />

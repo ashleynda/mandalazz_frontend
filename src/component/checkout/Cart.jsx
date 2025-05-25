@@ -5,6 +5,8 @@ import ReusableCartTable from '../reusables/CartTable';
 import { useCartStore } from '../../lib/store/useCart'; 
 import OrderSummary from '../checkout/OrderSummary';
 import Favourites from '../../component/favourites'; 
+import useFetchCartQuery from "../../lib/hooks/useFetchCartMutation"; // Adjust the import path as necessary
+import { useRemoveFromCart } from "../../lib/hooks/useRemoveFromCart"; // Adjust the import path as necessary
 
 // import Layout from '@/components/Layout';
 // import ReusableCartTable from '../../../component/reusables/CartTable';
@@ -15,21 +17,41 @@ const Cart = () => {
   const cartItems = useCartStore((state) => state.cartItems);
   const removeFromCart = useCartStore((state) => state.removeFromCart);
   const updateCartItemQuantity = useCartStore((state) => state.updateCartItemQuantity);
+  const { data,  isLoading, error } = useFetchCartQuery();
+  const { mutate: removeItem, isPending, isSuccess } = useRemoveFromCart();
+  const setCartItems = useCartStore((state) => state.setCartItems); // Zustand setter for syncing
+console.log('Cart items:', cartItems);
 
-  const handleRemove = (id) => {
-    removeFromCart(id);
+  useEffect(() => {
+    if (data) {
+      setCartItems(data); // <- A Zustand setter for syncing
+    }
+  }, [data]);
+
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error loading cart: {error.message}</div>;
+
+  const handleRemove = (productId) => {
+    removeItem(productId, {
+      onSuccess: () => {
+        removeFromCart(productId);
+      },
+    });
   };
 
   const handleSaveForLater = (id) => {
     console.log('Saving for later:', id);
   };
 
-  const handleQuantityChange = (id) => {
-    const updated = cartItems.map(item =>
-      item.id === id ? { ...item, quantity: newQty } : item
-    );
-    // Replace cartItems (you need to update this based on how your store works)
-    console.warn('⚠️ Quantity updated in UI only. Sync with store if needed:', updated);
+  // const handleQuantityChange = (id) => {
+  //   const updated = cartItems.map(item =>
+  //     item.id === id ? { ...item, quantity: newQty } : item
+  //   );
+  //   // Replace cartItems (you need to update this based on how your store works)
+  //   console.warn('⚠️ Quantity updated in UI only. Sync with store if needed:', updated);
+  // };
+   const handleQuantityChange = (productId, newQty) => {
+    updateCartItemQuantity(productId, newQty);
   };
 
   const headers = ['Item Details', 'Quantity', 'Price', 'Actions'];
@@ -80,8 +102,11 @@ const Cart = () => {
             <ReusableCartTable
               headers={headers}
               items={cartItems}
-              onQuantityChange={(id, newQty) => handleQuantityChange(id, newQty)}
-              showImageColumn={true} // Assuming your component supports this prop
+              // onQuantityChange={(id, newQty) => handleQuantityChange(id, newQty)}
+              onQuantityChange={handleQuantityChange}
+              showImageColumn={true}
+              onRemove={handleRemove}
+              onSaveForLater={handleSaveForLater}
             />
           </div>
           <div>

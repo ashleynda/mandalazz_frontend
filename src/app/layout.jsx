@@ -56,18 +56,48 @@ export default function RootLayout({ children }) {
   const [queryClient] = useState(() => new QueryClient());
   const pathname = usePathname();
   const isDetailPage = pathname.startsWith('/viewProductDetails');
+  const isAuthPage =
+  pathname.startsWith('/signup') ||
+  pathname.startsWith('/login') ||
+  pathname.startsWith('/checkEmail') ||
+  pathname.startsWith('/forgotPassword') ||
+  pathname.startsWith('/resetPassword') ||
+  pathname.startsWith('/verify') ||
+  pathname.startsWith('/validation');
 
-  return (
+  // return (
+  //   <html lang="en" className={figtree.className}>
+  //     <body>
+  //       <QueryClientProvider client={queryClient}>
+  //         <Navbar />
+  //         <div className='pt-18'>
+  //         <Categories />
+  //         {!isDetailPage && <HeroSection />}
+  //         {children}
+  //         {!isDetailPage && <Footer />}
+  //         </div>
+  //       </QueryClientProvider>
+  //     </body>
+  //   </html>
+  // );
+   return (
     <html lang="en" className={figtree.className}>
       <body>
         <QueryClientProvider client={queryClient}>
-          <Navbar />
-          <div className='pt-18'>
-          <Categories />
-          {!isDetailPage && <HeroSection />}
-          {children}
-          {!isDetailPage && <Footer />}
-          </div>
+          {!isAuthPage ? (
+            <>
+              <Navbar />
+              <div className="pt-18">
+                <Categories />
+                {!isDetailPage && <HeroSection />}
+                {children}
+                {!isDetailPage && <Footer />}
+              </div>
+            </>
+          ) : (
+            // If auth page, render only children
+            children
+          )}
         </QueryClientProvider>
       </body>
     </html>

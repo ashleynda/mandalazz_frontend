@@ -1,42 +1,3 @@
-// "use client";
-
-// import React, { useState } from 'react';
-// import { FaList, FaAngleDown } from 'react-icons/fa';
-
-// const Categories = () => {
-//   const [isOpen, setIsOpen] = useState(false);
-
-//   return (
-//     <div className="fixed top-[72px] left-0 w-full z-40 border-t-2 border-b-1 border-gray-200">
-//       <div className="flex items-center justify-center gap-12 p-2 bg-[#0B261F] border-t-2 border-b-1 border-gray-200 h-[43px]">
-//         {/* Brands Dropdown */}
-//         <div className="flex items-center gap-4 cursor-pointer" onClick={() => setIsOpen(!isOpen)}>
-//           {/* <FaList style={{ fontSize: '1.2rem' }} /> */}
-//           <p className="text-base font-normal font-manrope text-[#FFFFFF] leading-5">Foreign Brands</p>
-//           <FaAngleDown style={{ fontSize: '1rem', color: '#FFFFFF' }} />
-//         </div>
-//         <div className="flex items-center gap-4 cursor-pointer" onClick={() => setIsOpen(!isOpen)}>
-//           {/* <FaList style={{ fontSize: '1.2rem' }} /> */}
-//           <p className="text-base font-normal font-manrope text-[#FFFFFF] leading-5">Nigerian Brands</p>
-//           <FaAngleDown style={{ fontSize: '1rem', color: '#FFFFFF' }} />
-//         </div>
-
-//         {/* Category Links */}
-//         {/* <div className="flex items-center justify-between gap-4 text-base font-normal font-manrope text-[#FFFFFF] leading-5"> */}
-//           <p>Men</p>
-//           <p>Women</p>
-//           <p>Unisex</p>
-//           <p>Children</p>
-//           <p>Shoes</p>
-//           <p>Bags</p>
-//           <p>Accessories</p>
-//         {/* </div> */}
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default Categories;
 "use client";
 
 import React, { useState } from 'react';
@@ -48,9 +9,22 @@ import {
   MenuItem, 
   Box,
   Container,
-  Typography
+  Typography,
+  IconButton,
+  Drawer,
+  List,
+  ListItem,
+  ListItemText,
+  Collapse,
+  useMediaQuery,
+  useTheme
+
 } from '@mui/material';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import MenuIcon from '@mui/icons-material/Menu';
+import ExpandLess from '@mui/icons-material/ExpandLess';
+import ExpandMore from '@mui/icons-material/ExpandMore';
+
 
 const Categories = () => {
   // State for each dropdown menu
@@ -60,6 +34,32 @@ const Categories = () => {
   const [womenAnchorEl, setWomenAnchorEl] = useState(null);
   const [unisexAnchorEl, setUnisexAnchorEl] = useState(null);
   const [accessoriesAnchorEl, setAccessoriesAnchorEl] = useState(null);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const [drawerOpen, setDrawerOpen] = useState(false);
+    const [openCategories, setOpenCategories] = useState({
+    foreign: false,
+    local: false,
+    men: false,
+    women: false,
+    unisex: false,
+    accessories: false
+  });
+
+   const toggleDrawer = (open) => (event) => {
+    if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
+      return;
+    }
+    setDrawerOpen(open);
+  };
+
+  // Toggle category collapse in mobile menu
+  const handleCategoryToggle = (category) => {
+    setOpenCategories({
+      ...openCategories,
+      [category]: !openCategories[category]
+    });
+  };
 
   // Foreign brands dropdown handlers
   const handleForeignClick = (event) => {
@@ -114,15 +114,22 @@ const Categories = () => {
   const localBrands = ['Veekee James', 'Mai Atafo', 'Balenciaga', 'Fenty', 'Botega Venetta']; // Replace with actual local brands
   const menBrands = ['Prada', 'Gucci', 'Balenciaga', 'Fenty', 'Botega Venetta'];
   const womenBrands = ['Prada', 'Gucci', 'Balenciaga', 'Fenty', 'Botega Venetta'];
-  const unisexBrands = ['Prada', 'Gucci', 'Balenciaga', 'Fenty', 'Botega Venetta'];
+  const unisexBrands = 
+  ['Prada', 'Gucci', 'Balenciaga', 'Fenty', 'Botega Venetta'];
   const accessoriesBrands = ['Shoes', 'Bags', 'Jewelries', 'Pouches', 'Ring Lights', 'wefgyu', 'ewfgfg', 'tdfeyfy'];
+
+
+ 
+    if (isMobile) {
+    return null; // Hide AppBar and dropdowns on mobile
+  }
 
   return (
     // <div className=''>
       <AppBar position="sticky" sx={{ backgroundColor: '#0B261F', color: 'white', top: 0, zIndex: 1100, minHeight: '20px' }}>
         <Container maxWidth="xl">
           <Toolbar disableGutters sx={{ justifyContent: 'center', gap: 4 }}>
-            {/* Foreign Brands */}
+            <>
             <Box sx={{ position: 'relative' }}>
               <Button
                 onClick={handleForeignClick}
@@ -371,6 +378,8 @@ const Categories = () => {
                 ))}
               </Menu>
             </Box>
+            </>
+          
           </Toolbar>
         </Container>
       </AppBar>

@@ -12,7 +12,7 @@ const SignupValidation = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       // Redirect to login page after 3 seconds
-      router.push('/user/login') // Replace '/login' with your actual login route
+      router.push('/products') // Replace '/login' with your actual login route
     }, 3000)
 
     return () => clearTimeout(timer)

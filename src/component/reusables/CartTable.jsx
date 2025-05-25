@@ -190,11 +190,12 @@ const formatPrice = (price) =>
   }).format(price);
 
 const ReusableCartTable = ({
-  items,
+  items = [],
   onRemove = () => {},
   onSaveForLater = () => {},
   onQuantityChange = () => {},
 }) => {
+  const safeItems = Array.isArray(items) ? items : [];
   const incrementQuantity = (item) => {
     onQuantityChange(item.id, item.quantity + 1);
   };
@@ -212,8 +213,8 @@ const ReusableCartTable = ({
       </div> */}
       
       <div className="flex flex-col gap-4">
-        {items.map(item => (
-          <div key={item.id} className="flex flex-row items-center py-4 border-b">
+        {safeItems.map((item, index) => (
+          <div key={`${item.id}-${index}`} className="flex flex-row items-center py-4 border-b">
             {/* Product Image */}
             <div className="w-20 h-24 mr-4">
               <img
@@ -225,7 +226,7 @@ const ReusableCartTable = ({
             
             {/* Product Details */}
             <div className="flex-grow">
-              <h3 className={`font-normal text-sm text-[#061410] ${figtree.className}`}>{item.name || 'Golden Yellow Butterfly Bodycon Dress'}</h3>
+              <h3 className={`font-normal text-sm text-[#061410] ${figtree.className}`}>{item.name || ''}</h3>
               <div className="flex gap-2 text-sm text-gray-600 mt-1">
                 <p className='text-[#667085] text-[13px]'>Colour: <span className="font-normal text-sm text-[#061410]">{getColorName(item.color) || 'Black'}</span></p>
                 <p className='text-[#667085] text-[13px] font-normal'>Size: <span className="text-sm font-normal text-[#061410]">{item.size || '12'}</span></p>

@@ -1,10 +1,9 @@
-// hooks/useSignupMutation.js
 import { useMutation } from '@tanstack/react-query';
 
-const useSignupMutation = () => {
+const useForgotPasswordMutation = () => {
   return useMutation({
     mutationFn: async (data) => {
-      const res = await fetch('https://mandelazz-webapp.azurewebsites.net/api/user/register', {
+      const res = await fetch('https://mandelazz-webapp.azurewebsites.net/api/user/forgot-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
@@ -20,4 +19,4 @@ const useSignupMutation = () => {
   });
 };
 
-export default useSignupMutation;
+export default useForgotPasswordMutation;
