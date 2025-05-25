@@ -66,7 +66,7 @@ export default function Verify() {
                 onSuccess: () => {
                     console.log('Verification successful!');
                     // navigate or show success toast
-                    router.push('/validation')
+                    router.push('/products');
                 },
                 onError: (error) => {
                     console.error(error);
