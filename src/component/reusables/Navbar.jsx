@@ -31,6 +31,38 @@ const Navbar = ({ onSearch }) => {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const cartItemCount = useCartStore(state => state.getCartItemCount());
 
+  useEffect(() => {
+  const token = localStorage.getItem('authToken');
+  const isUserLoggedIn = !!token;
+  setIsLoggedIn(isUserLoggedIn);
+
+  const localCartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
+
+  // Sync localStorage cart with Zustand store for guests
+  if (!isUserLoggedIn && localCartItems.length > 0) {
+    useCartStore.getState().setCartItems(localCartItems);
+  }
+
+  if (isUserLoggedIn) {
+    const fetchNotifications = async () => {
+      try {
+        const response = await fetch("https://mandelazz-webapp.azurewebsites.net/api/notifications/all", {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const result = await response.json();
+        const unreadCount = result.filter((notif) => !notif.read).length;
+        setNotificationCount(unreadCount);
+      } catch (err) {
+        console.error("Error fetching notifications:", err);
+      }
+    };
+
+    fetchNotifications();
+  }
+}, []);
+
+
+
 
 
   useEffect(() => {
@@ -108,7 +140,7 @@ const Navbar = ({ onSearch }) => {
 
   const renderCartIcon = () => {
     // User is not logged in & cart is empty
-    if (!isLoggedIn && cartItemCount === 0) {
+    if (!isLoggedIn ) {
       return (
         <div className="flex gap-2 cursor-pointer" onClick={() => router.push('/products/checkout/cart')}>
           <FiShoppingCart className="w-6 h-6 text-gray-700 hover:text-primary" />
@@ -121,14 +153,21 @@ const Navbar = ({ onSearch }) => {
     return (
       <div className="relative cursor-pointer" onClick={() => router.push('/products/checkout/cart')}>
         <FiShoppingCart className="w-6 h-6 text-gray-700 hover:text-primary" />
-        <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-          {cartItemCount}
-        </span>
+        {cartItemCount > 0 && (
+          <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+            {cartItemCount}
+          </span>
+        )}
         
       </div>
     );
   };
 
+  //   const logout = () => {
+  //   localStorage.removeItem('authToken');
+  //   useCartStore.getState().clearCart(); // clear Zustand cart
+  //   router.push('/login');
+  // };
 
   return (
 
@@ -155,6 +194,9 @@ const Navbar = ({ onSearch }) => {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             onKeyDown={handleKeyDown}
+            // sx={{ width: '500px' }}
+            sx={{ width: { xs: '100%', sm: '300px', md: '400px' } }}
+
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">

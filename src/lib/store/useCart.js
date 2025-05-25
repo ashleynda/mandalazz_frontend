@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import syncGuestCart from '../../lib/utils/syncGuestCarts';
 
 export const useCartStore = create(
   persist(
@@ -9,29 +10,81 @@ export const useCartStore = create(
       setCartItems: (items) => set({ cartItems: items }),
       
       // Add item to cart
-      addToCart: (item) => {
-        let { cartItems } = get();
-        if (!Array.isArray(cartItems)) {
-          cartItems = [];
-        };
-        const existingItem = cartItems.find(cartItem => cartItem.id === item.id);
+      // addToCart: (item) => {
+      //   let { cartItems } = get();
+      //   if (!Array.isArray(cartItems)) {
+      //     cartItems = [];
+      //   };
+      //   const existingItem = cartItems.find(cartItem => cartItem.id === item.id);
         
-        if (existingItem) {
-          // If item exists, update quantity
-          set({
-            cartItems: cartItems.map(cartItem => 
-              cartItem.id === item.id 
-                ? { ...cartItem, quantity: cartItem.quantity + (item.quantity || 1) }
-                : cartItem
-            )
-          });
-        } else {
-          // If new item, add to cart
-          set({ 
-            cartItems: [...cartItems, { ...item, quantity: item.quantity || 1 }] 
-          });
-        }
-      },
+      //   if (existingItem) {
+      //     // If item exists, update quantity
+      //     set({
+      //       cartItems: cartItems.map(cartItem => 
+      //         cartItem.id === item.id 
+      //           ? { ...cartItem, quantity: cartItem.quantity + (item.quantity || 1) }
+      //           : cartItem
+      //       )
+      //     });
+      //   } else {
+      //     // If new item, add to cart
+      //     set({ 
+      //       cartItems: [...cartItems, { ...item, quantity: item.quantity || 1 }] 
+      //     });
+      //   }
+      // },
+      addToCart: async (item) => {
+  let { cartItems } = get();
+  if (!Array.isArray(cartItems)) cartItems = [];
+
+  const existingItem = cartItems.find(cartItem => cartItem.id === item.id);
+  const token = localStorage.getItem('authToken');
+
+  if (existingItem) {
+    const updatedCart = cartItems.map(cartItem =>
+      cartItem.id === item.id
+        ? { ...cartItem, quantity: cartItem.quantity + (item.quantity || 1) }
+        : cartItem
+    );
+
+    set({ cartItems: updatedCart });
+    syncGuestCart(updatedCart);
+
+    if (token) {
+      try {
+        await fetch(`https://mandelazz-webapp.azurewebsites.net/api/cart/update/${item.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ quantity: existingItem.quantity + (item.quantity || 1) })
+        });
+      } catch (err) {
+        console.error('Failed to update cart item on backend:', err);
+      }
+    }
+  } else {
+    const newCart = [...cartItems, { ...item, quantity: item.quantity || 1 }];
+    set({ cartItems: newCart });
+
+    if (token) {
+      try {
+        await fetch('https://mandelazz-webapp.azurewebsites.net/api/cart/add', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ productId: item.id, qty: item.quantity || 1 }),
+        });
+      } catch (err) {
+        console.error('Failed to add item to cart on backend:', err);
+      }
+    }
+  }
+},
+
       
       // Remove item from cart
       removeFromCart: (id) => {
