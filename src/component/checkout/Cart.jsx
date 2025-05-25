@@ -20,7 +20,7 @@ const Cart = () => {
   const { data,  isLoading, error } = useFetchCartQuery();
   const { mutate: removeItem, isPending, isSuccess } = useRemoveFromCart();
   const setCartItems = useCartStore((state) => state.setCartItems); // Zustand setter for syncing
-  const { mutate: addToFav } = useAddToFavorites();
+  // const { mutate: addToFav } = useAddToFavorites();
 console.log('Cart items:', cartItems);
 
   useEffect(() => {

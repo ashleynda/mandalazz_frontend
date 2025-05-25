@@ -39,7 +39,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useState } from 'react';
 import './globals.css';
-import { Figtree } from '@next/font/google';
+import { Figtree } from 'next/font/google';
 import Navbar from '../component/reusables/Navbar';
 import Categories from '../component/reusables/Categories';
 import HeroSection from '../component/reusables/Hero';
