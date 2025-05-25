@@ -203,7 +203,7 @@ const Navbar = ({ onSearch }) => {
                     borderColor: 'black',
                   }
                 }}
-                onClick={() => router.push('/user/signup')}
+                onClick={() => router.push('/signup')}
               >
                 Sign Up
               </Button>
@@ -222,7 +222,7 @@ const Navbar = ({ onSearch }) => {
                     backgroundColor: '#333',
                   }
                 }}
-                onClick={() => router.push('/user/login')}
+                onClick={() => router.push('/login')}
               >
                 Log In
               </Button>

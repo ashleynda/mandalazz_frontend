@@ -93,7 +93,7 @@ const Signup = () => {
     signupMutation.mutate(formData, {
       onSuccess: () => {
          console.log('Signup successful!');
-        router.push('/verify');
+        router.push('/validation');
         sessionStorage.setItem("email", formData.email); 
       },
       onError: (error) => {
@@ -163,7 +163,7 @@ const Signup = () => {
   return (
     <>
         {/* <RegNavbar /> */}
-<div className="flex min-h-screen items-center justify-center bg-[#f9fafb] px-4">
+<div className="flex min-h-screen items-center justify-center px-4">
   <div className="w-full max-w-md bg-white p-6 rounded-xl shadow-lg">
     <h1 className="text-xl font-semibold text-[#101828] mb-1">Create An Account</h1>
     <p className="text-sm text-[#667085] mb-6">Enter your details to create an account.</p>
