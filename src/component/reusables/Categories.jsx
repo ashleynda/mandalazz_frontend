@@ -126,7 +126,7 @@ const Categories = () => {
 
   return (
     // <div className=''>
-      <AppBar position="sticky" sx={{ backgroundColor: '#0B261F', color: 'white', top: 0, zIndex: 1100, minHeight: '20px' }}>
+      <AppBar position="fixed" sx={{ backgroundColor: '#0B261F', color: 'white', top: 60, zIndex: 999, height: 50, overflowX: 'none', whiteSpace: 'nowrap' }}>
         <Container maxWidth="xl">
           <Toolbar disableGutters sx={{ justifyContent: 'center', gap: 4 }}>
             <>

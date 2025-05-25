@@ -4,7 +4,7 @@ import rectangle from '../../assets/Rectangle 2.png'
 
 const HeroSection = () => {
   return (
-    <div className="pt-[10px]">
+    <div className="pt-[40px]">
       <div className="relative flex flex-col items-center text-center mt-8">
         {/* Image for the Hero Section */}
         <Image 

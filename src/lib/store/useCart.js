@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import syncGuestCart from '../../lib/utils/syncGuestCarts';
+import { syncGuestCart } from '../../lib/utils/syncGuestCarts';
 
 export const useCartStore = create(
   persist(
