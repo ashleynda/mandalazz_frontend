@@ -94,7 +94,8 @@ const ViewProducts = () => {
   return (
     <div className="p-4 md:p-10 ">
       <p className="text-2xl md:text-3xl font-bold text-[#061410] mb-6 text-center md:text-left md:ml-12">Best Sellers</p>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 ml-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 ml-8 cursor-pointer"
+        onClick={() => handleOptions(product._id)}>
         {products.map((product) => (
           <div key={product.id} className="w-full max-w-[300px]">
             <div
