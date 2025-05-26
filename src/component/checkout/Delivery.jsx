@@ -37,7 +37,7 @@ export default function Delivery() {
   const [altCountryCode, setAltCountryCode] = useState("+234")
 
   return (
-    <div className="max-w-7xl mx-auto py-8 px-4">
+    <div className="max-w-7xl mx-auto py-8 px-4 mt-7">
       <h1 className="text-xl font-bold mb-6 text-[#061410]">Cart (4 items)</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6">

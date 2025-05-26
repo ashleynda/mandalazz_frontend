@@ -92,7 +92,7 @@ console.log('Cart items:', cartItems);
       //     <OrderSummary />
       //   </div>
       // </div>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 mt-7">
       {/* Cart Header */}
       <h1 className="text-2xl font-bold text-[#061410]">Cart ({cartItems.length} items)</h1>
       
