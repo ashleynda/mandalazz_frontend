@@ -36,6 +36,7 @@ const ViewProductDetails = () => {
   
   const { addToCart } = useCartStore();
   const { data, isLoading } = useProductsQuery();
+  const { mutate: addToCartMutation, isPending, error } = useAddToCartMutation();
   const products = data?.data ?? [];
   const product = products.find(p => p._id === id);
 
@@ -55,7 +56,6 @@ const ViewProductDetails = () => {
 
   const increaseQuantity = () => setQuantity((prev) => prev + 1);
   const decreaseQuantity = () => setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
-   const { mutate: addToCartMutation, isPending, error } = useAddToCartMutation();
 
   const handleAddToCart = () => {
     if (!selectedSize) {
@@ -94,7 +94,7 @@ const ViewProductDetails = () => {
         <div className="">
           {/* <Breadcrumbs breadcrumbs={breadcrumbs} /> */}
         </div>
-        <div className="flex flex-row gap-10 py-8 h-[calc(100vh-160px)]">
+        <div className="flex flex-row gap-10 py-8 h-[calc(100vh-160px)] mt-[45px]">
           <div className='flex flex-col gap-4'>
             <div className="flex flex-col gap-4">
               <Image
