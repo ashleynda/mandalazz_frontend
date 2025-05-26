@@ -188,7 +188,7 @@ const ViewProductDetails = () => {
 
             <div className="flex flex-row gap-4">
               <div className="flex-1">
-                <button className="bg-[#26735B] text-white px-4 py-2 rounded-lg w-full h-full flex items-center justify-center gap-2" onClick={handleAddToCart}>
+                <button className="bg-[#26735B] text-white px-4 py-2 rounded-lg w-full h-full flex items-center justify-center gap-2 cursor-pointer" onClick={handleAddToCart}>
                    <FiShoppingCart className="w-6 h-6 text-white" />
                   Add to Cart
                 </button>
