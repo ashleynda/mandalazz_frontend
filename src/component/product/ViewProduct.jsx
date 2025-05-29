@@ -1,17 +1,19 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Rating } from '@mui/material';
 
 
 // Importing the image
-import yellowWoman from '../../assets/yellowWoman.png'; // Adjust the path as necessary
+import yellowWoman from '../../assets/yellowWoman.png';
 
 import { StaticImageData } from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
 import useProductsQuery from '../../lib/hooks/useProductMutation';
 import { FiHeart } from 'react-icons/fi';
 import useAddToFavorites from '../../lib/hooks/useAddToFavourites';
+import useRemoveFavoriteMutation from '../../lib/hooks/useRemoveFavourites';
+import useFavoritesQuery from '@/src/lib/hooks/useFavouritesQuery';
 
 
 // interface Product {
@@ -49,24 +51,50 @@ const ViewProducts = () => {
   console.log('Router:', router); // Check if router is defined
   const params = useParams();
   const id = params?.id; 
+  const token = sessionStorage.getItem('authToken');
   const { data, isLoading, isError, error } = useProductsQuery();
   const products = data?.data ?? [];
   console.log('Products:', products);
   const { mutate: addToFavorites, isPending } = useAddToFavorites();
   const [favorites, setFavorites] = useState([]);
+  const deleteFavorite = useRemoveFavoriteMutation();
+  const { data: favoritesQuery } = useFavoritesQuery(token);
+  console.log('Favorites Query:', favoritesQuery);
+
+  useEffect(() => {
+    if (favoritesQuery && Array.isArray(favoritesQuery.favorites)) {
+      setFavorites(favoritesQuery.favorites);
+    }
+  }, [favoritesQuery]);
 
   const handleAddToFavorites = (productId) => {
-    addToFavorites(productId, {
-      onSuccess: (response) => {
-        setFavorites((prevFavorites) => [...prevFavorites, productId]);
-        console.log('Product added to favorites:', response.data);
-      },
-      onError: (error) => {
-        alert('User is not logged in. Please log in to add favorites.');
-        console.error('Error adding product to favorites:', error);
-      },
-    });
+    if (favorites.includes(productId)) {
+      deleteFavorite.mutate(productId, {
+        onSuccess: (response) => {
+          setFavorites((prevFavorites) => prevFavorites.filter(id => id !== productId));
+          console.log('Product removed from favorites:', response.data);
+        },
+        onError: (error) => {
+          console.error('Error removing product from favorites:', error);
+        },
+      });
+    } else {
+      addToFavorites(productId, {
+        onSuccess: (response) => {
+          setFavorites((prevFavorites) => [...prevFavorites, productId]);
+          console.log('Product added to favorites:', response.data);
+        },
+        onError: (error) => {
+          alert('User is not logged in. Please log in to add favorites.');
+          console.error('Error adding product to favorites:', error);
+        },
+      });
+    }
   };
+
+  // const handleDelete = () => {
+  //   deleteFavorite.mutate(favoriteId);
+  // };
 
 
 
@@ -86,7 +114,7 @@ const ViewProducts = () => {
       console.error('Error: Product ID is undefined');
       return;
     }
-    console.log(`Navigating to ViewDetailsPage for product ID: ${id}`);
+    console.log(`Navigating to ViewDetailsPage for product ID: ${productId}`);
     router.push(`/viewProductDetails/${productId}`);
   };
   
@@ -114,11 +142,7 @@ const ViewProducts = () => {
                   className="w-full rounded-t-lg object-cover h-[250px]"
                 />
                 <button
-                  // disabled={favorites.includes(product._id)}
-                  // onClick={() => onSaveForLater(product._id)}
                   onClick={() => handleAddToFavorites(product._id)}
-                  // className="absolute top-2 right-2 bg-white p-2 rounded-full shadow-md hover:scale-105 transition"
-                  // className="absolute bottom-2 right-2 bg-white p-2 rounded-full shadow-md hover:scale-105 transition"
                   className={`absolute bottom-2 right-2 p-2 rounded-full shadow-md transition hover:scale-105
                   ${favorites.includes(product._id) ? "bg-[#26735B]" : "bg-white"}`}
                   aria-label="Save for later"

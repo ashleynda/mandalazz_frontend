@@ -40,11 +40,17 @@ const Login= () => {
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!validateForm()) return;
+    setLoading(true);
 
     loginMutation.mutate({ email, password }, {
       onSuccess: (data) => {
         console.log('Login successful:', data)
-        router.push('/products')
+        const token = data?.message?.token;
+        if (token) {
+          sessionStorage.setItem('authToken', token); // Store token in sessionStorage
+          router.push('/products')
+        }
+        setLoading(false);
       },
       onError: (error) => {
         console.error('Login failed:', error)

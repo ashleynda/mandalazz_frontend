@@ -38,7 +38,7 @@ export const useCartStore = create(
   if (!Array.isArray(cartItems)) cartItems = [];
 
   const existingItem = cartItems.find(cartItem => cartItem.id === item.id);
-  const token = localStorage.getItem('authToken');
+  const token = sessionStorage.getItem('authToken');
 
   if (existingItem) {
     const updatedCart = cartItems.map(cartItem =>

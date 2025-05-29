@@ -3,8 +3,8 @@ import { useMutation } from '@tanstack/react-query';
 const useAddToFavorites = () => {
   return useMutation({
     mutationFn: async (productId) => {
-      const token = localStorage.getItem('authToken'); 
-      if (!token) {
+      const token = sessionStorage.getItem('authToken'); 
+      if (!token || token === "undefined") {
         throw new Error("User is not logged in. Please log in to add favorites.");
       }
 

@@ -21,6 +21,7 @@ const ResetPassword = () => {
       onSuccess: (data) => {
         console.log('Success:', data);
         alert('Password reset link sent to your email!');
+        router.push('/checkEmai')
       },
       onError: (error) => {
         console.error('Error:', error);
