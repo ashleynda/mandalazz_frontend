@@ -79,17 +79,42 @@ const Navbar = ({ onSearch }) => {
 
 
 
+  // useEffect(() => {
+  //   // Example check for auth token (customize for your project)
+  //   const token = sessionStorage.getItem('authToken');
+  //   setIsLoggedIn(!!token);
+  //   console.log("Is user logged in:", token);
+
+  //   // Example: fetch cart items from localStorage
+  //   const cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
+  //   setCartCount(cartItems.length);
+
+  //   // Simulate notification API call
+  //   const fetchNotifications = async () => {
+  //     try {
+  //       const response = await fetch("http://localhost:3030/api/notifications/all", {
+  //         headers: { Authorization: `Bearer ${token}` }
+  //       });
+  //       const result = await response.json();
+  //       const unreadCount = result.filter((notif) => !notif.read).length;
+  //       setNotificationCount(unreadCount);
+  //     } catch (err) {
+  //       console.error("Error fetching notifications:", err);
+  //     }
+  //   };
+
+  //   if (token) {
+  //     fetchNotifications();
+  //   }
+  // }, []);
   useEffect(() => {
-    // Example check for auth token (customize for your project)
+  if (typeof window !== 'undefined') {
     const token = sessionStorage.getItem('authToken');
     setIsLoggedIn(!!token);
-    console.log("Is user logged in:", token);
 
-    // Example: fetch cart items from localStorage
     const cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
     setCartCount(cartItems.length);
 
-    // Simulate notification API call
     const fetchNotifications = async () => {
       try {
         const response = await fetch("http://localhost:3030/api/notifications/all", {
@@ -106,7 +131,9 @@ const Navbar = ({ onSearch }) => {
     if (token) {
       fetchNotifications();
     }
-  }, []);
+  }
+}, []);
+
 
   useEffect(() => {
     const checkAuth = () => {
