@@ -51,15 +51,23 @@ const ViewProducts = () => {
   console.log('Router:', router); // Check if router is defined
   const params = useParams();
   const id = params?.id; 
-  const token = sessionStorage.getItem('authToken');
+  const [token, setToken] = useState('');
   const { data, isLoading, isError, error } = useProductsQuery();
   const products = data?.data ?? [];
   console.log('Products:', products);
   const { mutate: addToFavorites, isPending } = useAddToFavorites();
   const [favorites, setFavorites] = useState([]);
   const deleteFavorite = useRemoveFavoriteMutation();
-  const { data: favoritesQuery } = useFavoritesQuery(token);
+  const { data: favoritesQuery } = useFavoritesQuery(token || null);
   console.log('Favorites Query:', favoritesQuery);
+
+  useEffect(() => {
+  if (typeof window !== 'undefined') {
+    const storedToken = sessionStorage.getItem('authToken');
+    setToken(storedToken || '');
+  }
+}, []);
+
 
   useEffect(() => {
     if (favoritesQuery && Array.isArray(favoritesQuery.favorites)) {
