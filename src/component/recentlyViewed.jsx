@@ -10,9 +10,6 @@ import shirt from '../assets/shirt.png';
 import brown from '../assets/brown.png';
 import denim from '../assets/denim.png';
 import Image from 'next/image';
-import useFavoritesQuery from '../lib/hooks/useFavouritesQuery';
-import { useEffect, useState } from 'react';
-import { truncateText } from '../lib/utils';
 
 
 
@@ -39,7 +36,7 @@ const products = [
     isFavorite: true,
   },
    {
-    id: 1,
+    id: 2,
     name: "Golden",
     description: "File (218.89) × 222.68 dycon...",
     price: 120000,
@@ -50,7 +47,7 @@ const products = [
     isFavorite: true,
   },
    {
-    id: 1,
+    id: 3,
     name: "Golden",
     description: "File (218.89) × 222.68 dycon...",
     price: 120000,
@@ -60,36 +57,43 @@ const products = [
     image: denim, // Replace with your actual image path
     isFavorite: true,
   },
+   {
+    id: 4,
+    name: "Golden",
+    description: "File (218.89) × 222.68 dycon...",
+    price: 120000,
+    originalPrice: 150000,
+    rating: 3.5,
+    reviewCount: "400+",
+    image: denim, // Replace with your actual image path
+    isFavorite: true,
+  },
+   {
+    id: 5,
+    name: "Golden",
+    description: "File (218.89) × 222.68 dycon...",
+    price: 120000,
+    originalPrice: 150000,
+    rating: 3.5,
+    reviewCount: "400+",
+    image: denim, // Replace with your actual image path
+    isFavorite: true,
+  },
+ 
   // Add more products as needed
 ];
 
-export default function Favourites() {
-    const [token, setToken] = useState(null);
-
-  useEffect(() => {
-    const storedToken = sessionStorage.getItem('authToken'); // or localStorage
-    if (storedToken) setToken(storedToken);
-  }, []);
-
-  const {
-    data,
-    isLoading,
-    isError,
-    error,
-  } = useFavoritesQuery(token);
-  const favorites = Array.isArray(data?.data) ? data.data.map(item => item.productId) : [];
-  console.log('favorites from query:', favorites);
-
+export default function RecentlyViewed() {
     return (
         <div className="bg-white max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <p className='text-[#061410] text-xl font-bold'>Favourites</p>
+            <p className='text-[#061410] text-xl font-bold'>Recently Viewed</p>
             <Stack direction="row" spacing={2}>
-                {favorites.map((product, idx) => (
+                {products.map((product, idx) => (
                     <Card sx={{ minWidth: 220, 
                         maxWidth: 240, position: 'relative', 
                         borderRadius: '8px', 
                         boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }} 
-                        key={product._id || idx}>
+                        key={product.id}>
                         <Box sx={{ position: 'relative' }}>
                             <Image
                                 component="img"
@@ -139,18 +143,18 @@ export default function Favourites() {
                                 >
                                 {product.name}
                                 </Typography>
-                                {/* <Typography 
+                                <Typography 
                                 variant="caption" 
                                 sx={{ 
                                     color: 'text.secondary',
                                     fontSize: '10px'
                                 }}
                                 >
-                                {truncateText(product.description, 30)}
-                                </Typography> */}
+                                {product.description}
+                                </Typography>
                             </Box>
                             
-                            <Box sx={{ mb: 0.5 }} className="flex items-center gap-2">
+                            <Box sx={{ mb: 0.5 }}>
                                 <Typography 
                                 variant="body1" 
                                 sx={{ 
@@ -158,7 +162,7 @@ export default function Favourites() {
                                     fontSize: '16px'
                                 }}
                                 >
-                                ₦{Number(product.price?.$numberDecimal || 0).toLocaleString()}
+                                ₦{product.price.toLocaleString()}
                                 </Typography>
                                 <Typography 
                                 variant="caption" 
@@ -168,7 +172,7 @@ export default function Favourites() {
                                     fontSize: '12px'
                                 }}
                                 >
-                                ₦{Number(product.originalPrice?.$numberDecimal || 0).toLocaleString()}
+                                ₦{product.originalPrice.toLocaleString()}
                                 </Typography>
                             </Box>
                             

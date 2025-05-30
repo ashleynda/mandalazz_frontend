@@ -63,7 +63,8 @@ export default function RootLayout({ children }) {
   pathname.startsWith('/forgotPassword') ||
   pathname.startsWith('/resetPassword') ||
   pathname.startsWith('/verify') ||
-  pathname.startsWith('/validation');
+  pathname.startsWith('/validation') ||
+  pathname.startsWith('/newPassword');
 
   // return (
   //   <html lang="en" className={figtree.className}>

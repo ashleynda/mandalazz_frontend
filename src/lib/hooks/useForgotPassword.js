@@ -20,3 +20,4 @@ const useForgotPasswordMutation = () => {
 };
 
 export default useForgotPasswordMutation;
+

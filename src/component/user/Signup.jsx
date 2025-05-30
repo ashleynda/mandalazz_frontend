@@ -176,7 +176,7 @@ const Signup = () => {
           placeholder="Enter First Name"
           value={formData.firstName}
           onChange={handleChange}
-          className="mt-1 w-full border text-[#131735] placeholder-[#A1A2AE] border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#26735B]"
+          className="mt-1 w-full border text-[#131735] placeholder-[#A1A2AE] border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#26735B]  placeholder:text-sm placeholder:font-normal"
         />
         {errors.firstName && <p className="text-red-500 text-xs mt-1">{errors.firstName}</p>}
       </div>
@@ -188,7 +188,7 @@ const Signup = () => {
           placeholder="Enter Last Name"
           value={formData.lastName}
           onChange={handleChange}
-          className="mt-1 w-full text-[#131735] placeholder-[#A1A2AE] border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#26735B]"
+          className="mt-1 w-full text-[#131735] placeholder-[#A1A2AE] border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#26735B] placeholder:text-sm placeholder:font-normal"
         />
         {errors.lastName && <p className="text-red-500 text-xs mt-1">{errors.lastName}</p>}
       </div>
@@ -201,7 +201,7 @@ const Signup = () => {
           placeholder="Enter Email Address"
           value={formData.email}
           onChange={handleChange}
-          className="mt-1 w-full text-[#131735] placeholder-[#A1A2AE] border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#26735B]"
+          className="mt-1 w-full text-[#131735] placeholder-[#A1A2AE] border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#26735B]  placeholder:text-sm placeholder:font-normal"
         />
         {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
       </div>
@@ -216,7 +216,7 @@ const Signup = () => {
             placeholder="Enter Password"
             value={formData.password}
             onChange={handleChange}
-            className="mt-1 w-full text-[#131735] placeholder-[#A1A2AE] border border-gray-300 rounded-md px-4 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-[#26735B]"
+            className="mt-1 w-full text-[#131735] placeholder-[#A1A2AE] border border-gray-300 rounded-md px-4 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-[#26735B]  placeholder:text-sm placeholder:font-normal"
           />
            <span
               onClick={() => setShowPassword(!showPassword)}

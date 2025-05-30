@@ -6,7 +6,8 @@ import { useCartStore } from '../../lib/store/useCart';
 import OrderSummary from '../checkout/OrderSummary';
 import Favourites from '../../component/favourites'; 
 import useFetchCartQuery from "../../lib/hooks/useFetchCartMutation"; // Adjust the import path as necessary
-import { useRemoveFromCart } from "../../lib/hooks/useRemoveFromCart"; // Adjust the import path as necessary
+import { useRemoveFromCart } from "../../lib/hooks/useRemoveFromCart"; 
+import RecentlyViewed from '../../component/recentlyViewed'; 
 
 // import Layout from '@/components/Layout';
 // import ReusableCartTable from '../../../component/reusables/CartTable';
@@ -112,6 +113,9 @@ console.log('Cart items:', cartItems);
           </div>
           <div>
             <Favourites />
+          </div>
+          <div>
+            <RecentlyViewed />
           </div>
         </div>
         
