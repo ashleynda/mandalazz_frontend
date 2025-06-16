@@ -1,9 +1,11 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import { Card, CardContent, Typography, Button, Box, Divider, CircularProgress } from '@mui/material';
 import StarIcon from '@mui/icons-material/Star';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
 import { useComments } from "../../lib/hooks/useGetReviews";
 import ReviewModal from "../../component/reusables/reviewModal";
-import { useState } from 'react';
 
 
 const Stars = ({ rating }) => {

@@ -1,11 +1,12 @@
+import { Suspense } from "react";
 import ViewProductsByCategory from "../../component/product/ViewByCategory"
 
 const page=()=>{
     return(
-        <div>      
+         <Suspense fallback={<div>Loading...</div>}>    
             <ViewProductsByCategory />  
           
-        </div>
+        </Suspense>
     )
 }
 export default page
