@@ -45,6 +45,8 @@ import Categories from '../component/reusables/Categories';
 import HeroSection from '../component/reusables/Hero';
 import Footer from '../component/reusables/Footer';
 import { usePathname } from 'next/navigation';
+import GlobalSnackbar from '../lib/store/Snackbar/reducer';
+import { useMediaQuery, useTheme } from '@mui/material';
 
 const figtree = Figtree({
   subsets: ['latin'],
@@ -56,6 +58,9 @@ export default function RootLayout({ children }) {
   const [queryClient] = useState(() => new QueryClient());
   const pathname = usePathname();
   const isDetailPage = pathname.startsWith('/viewProductDetails');
+  const isDashboardPage = pathname.startsWith('/dashboard');
+  const isViewProductByCategoryPage = pathname.startsWith('/viewProductByCategory');
+  const isProductPage = pathname.startsWith('/products');
   const isAuthPage =
   pathname.startsWith('/signup') ||
   pathname.startsWith('/login') ||
@@ -65,6 +70,8 @@ export default function RootLayout({ children }) {
   pathname.startsWith('/verify') ||
   pathname.startsWith('/validation') ||
   pathname.startsWith('/newPassword');
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   // return (
   //   <html lang="en" className={figtree.className}>
@@ -90,8 +97,9 @@ export default function RootLayout({ children }) {
               <Navbar />
               <div className="pt-18">
                 <Categories />
-                {!isDetailPage && <HeroSection />}
+                {!isDetailPage && !isDashboardPage && !isViewProductByCategoryPage && !(isProductPage && isMobile) && <HeroSection />}
                 {children}
+                <GlobalSnackbar />
                 {!isDetailPage && <Footer />}
               </div>
             </>

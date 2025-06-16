@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { FiShoppingCart, FiBell } from 'react-icons/fi';
 import { FaUserCircle } from 'react-icons/fa';
-import logo from '../../assets/logo.png'; // Adjust the path as necessary
+import logo from '../../assets/EM.png'; // Adjust the path as necessary
 import { Button, InputAdornment, TextField, useMediaQuery, useTheme } from '@mui/material';
 import SearchIcon from "@mui/icons-material/Search";
 import { useState, useEffect } from 'react';
@@ -13,7 +13,7 @@ import CategoriesMobile from '../../component/reusables/CategoriesMobile';
 import { useCartStore } from '../../lib/store/useCart'; 
 import UploadAvatars from '../../component/profile';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
-import {AccountDropdownMenu} from '../../component/reusables/AccountDropDownMenu';
+import ProfileDropdown, {AccountDropdownMenu} from '../../component/reusables/AccountDropDownMenu';
 
 
 
@@ -115,22 +115,22 @@ const Navbar = ({ onSearch }) => {
     const cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
     setCartCount(cartItems.length);
 
-    const fetchNotifications = async () => {
-      try {
-        const response = await fetch("http://localhost:3030/api/notifications/all", {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        const result = await response.json();
-        const unreadCount = result.filter((notif) => !notif.read).length;
-        setNotificationCount(unreadCount);
-      } catch (err) {
-        console.error("Error fetching notifications:", err);
-      }
-    };
+    // const fetchNotifications = async () => {
+    //   try {
+    //     const response = await fetch("https://mandelazz-webapp.azurewebsites.net/api/notifications/all", {
+    //       headers: { Authorization: `Bearer ${token}` }
+    //     });
+    //     const result = await response.json();
+    //     const unreadCount = result.filter((notif) => !notif.read).length;
+    //     setNotificationCount(unreadCount);
+    //   } catch (err) {
+    //     console.error("Error fetching notifications:", err);
+    //   }
+    // };
 
-    if (token) {
-      fetchNotifications();
-    }
+    // if (token) {
+    //   fetchNotifications();
+    // }
   }
 }, []);
 
@@ -226,7 +226,39 @@ const Navbar = ({ onSearch }) => {
   //   useCartStore.getState().clearCart(); // clear Zustand cart
   //   router.push('/login');
   // };
+ if (isMobile) {
+    return (
+      <div className="flex items-center justify-between p-4 bg-white fixed top-0 left-0 w-full z-50 h-[60px]">
+        {/* Left: Hamburger Menu and Logo */}
+        <div className="flex items-center gap-0">
+          <CategoriesMobile isMobile={isMobile} />
+          <Image
+            src={logo}
+            alt="logo"
+            width={80}
+            height={32}
+            className="h-8 w-auto cursor-pointer "
+            onClick={() => router.push('/products')}
+          />
+        </div>
 
+        {/* Right: Cart and Profile Icons */}
+        <div className="flex items-center gap-4">
+          {renderCartIcon()}
+          
+          {isLoggedIn ? (
+            <div className="cursor-pointer hover:opacity-80 transition-opacity">
+              <FaUserCircle className="w-6 h-6 text-gray-400" />
+            </div>
+          ) : (
+            <div className="cursor-pointer hover:opacity-80 transition-opacity">
+              <FaUserCircle className="w-6 h-6 text-gray-400" />
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
   return (
 
     // <div className="logo flex items-center justify-between p-4 px-20 bg-white divide-x divide-[#e5e7eb] fixed top-0 left-0 w-full z-50">
@@ -343,6 +375,11 @@ const Navbar = ({ onSearch }) => {
       </div> */}
 
       <div className={`logo flex items-center justify-between ${isMobile ? 'p-2 px-8' : 'p-4 px-20'} bg-white divide-x divide-[#e5e7eb] fixed top-0 left-0 w-full z-1000 h-[60px]`}>
+        {/* {isMobile && (
+            <div className="ml-2 bg-none">
+              <CategoriesMobile isMobile={isMobile} />
+            </div>
+          )} */}
         <div className="flex items-center">
           <Image
             src={logo}
@@ -378,11 +415,7 @@ const Navbar = ({ onSearch }) => {
           
             {renderCartIcon()}
           
-          {isMobile && !isLoggedIn && (
-            <div className="ml-2 bg-none">
-              <CategoriesMobile isMobile={isMobile} />
-            </div>
-          )}
+          
         {/* </div> */}
         {!isLoggedIn && (
           <div className='flex gap-4'>
@@ -435,7 +468,8 @@ const Navbar = ({ onSearch }) => {
             //   <p className='text-sm font-normal text-[#191818] '>My Account</p>
             //   <ArrowDropDownIcon style={{ color: '#191818' }} />
             // </div>
-            <AccountDropdownMenu />
+            // <AccountDropdownMenu />
+            <ProfileDropdown />
           )}
         </div>
       </div>    

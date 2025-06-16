@@ -139,20 +139,44 @@ const CategoriesMobile = () => {
   if (!isMobile) return null;
 
   return (
+    // <>
+    //   <AppBar position="sticky" sx={{ backgroundColor: '#fff', color: '#222', boxShadow: 0 }}>
+    //     <Toolbar>
+    //       <IconButton
+    //         edge="start"
+    //         color="inherit"
+    //         aria-label="menu"
+    //         onClick={() => setDrawerOpen(true)}
+    //         sx={{ mr: 2 }}
+    //       >
+    //         <MenuIcon />
+    //       </IconButton>
+    //     </Toolbar>
+    //   </AppBar>
+    //   <Drawer
+    //     anchor="left"
+    //     open={drawerOpen}
+    //     onClose={() => setDrawerOpen(false)}
+    //   >
+    //     {drawerContent}
+    //   </Drawer>
+    // </>
     <>
-      <AppBar position="sticky" sx={{ backgroundColor: '#fff', color: '#222', boxShadow: 0 }}>
-        <Toolbar>
-          <IconButton
-            edge="start"
-            color="inherit"
-            aria-label="menu"
-            onClick={() => setDrawerOpen(true)}
-            sx={{ mr: 2 }}
-          >
-            <MenuIcon />
-          </IconButton>
-        </Toolbar>
-      </AppBar>
+      <IconButton
+        edge="start"
+        color="inherit"
+        aria-label="menu"
+        onClick={() => setDrawerOpen(true)}
+        sx={{ 
+          padding: 2,
+          color: '#222',
+          '&:hover': {
+            backgroundColor: 'rgba(0, 0, 0, 0.04)'
+          }
+        }}
+      >
+        <MenuIcon />
+      </IconButton>
       <Drawer
         anchor="left"
         open={drawerOpen}

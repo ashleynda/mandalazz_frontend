@@ -7,8 +7,9 @@ import useLoginMutation from '../../lib/hooks/useLoginMutation'
 import useLoginStore from '../../lib/store/useLoginStore'
 import { LoadingButton } from '@mui/lab';
 import { CircularProgress } from '@mui/material';
+import useSnackbarStore from '../../lib/store/useSnackbarStore';
 
-const Login= () => {
+const Login = () => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
@@ -17,6 +18,7 @@ const Login= () => {
   const [showPassword, setShowPassword] = useState(false)
   const { formData, setFormData, errors, setErrors } = useLoginStore();
   const loginMutation = useLoginMutation();
+  const { showSnackbar } = useSnackbarStore();
 
   // const [errors, setErrors] = useState<{ email?: string; password?: string; general?: string }>({})
 
@@ -47,14 +49,20 @@ const Login= () => {
         console.log('Login successful:', data)
         const token = data?.message?.token;
         if (token) {
-          sessionStorage.setItem('authToken', token); // Store token in sessionStorage
-          router.push('/products')
+          sessionStorage.setItem('authToken', token);
+          showSnackbar({ message: 'Login successful', severity: 'success' });
+          // router.push('/products')
+          setTimeout(() => {
+            router.push('/products');
+          }, 3000);
         }
         setLoading(false);
       },
       onError: (error) => {
         console.error('Login failed:', error)
-        setErrors({ ...errors, general: 'Email or password is incorrect' }) // Set the general error
+        setErrors({ ...errors, general: 'Email or password is incorrect' });
+        showSnackbar({ message: 'Login failed. Please check your credentials.', severity: 'error' });
+        setLoading(false);
       },
     })
   };
@@ -96,7 +104,7 @@ const Login= () => {
     router.push('/resetPassword')
   }
 
-   const checkFormValidity = () => {
+  const checkFormValidity = () => {
     return (
       email.trim() !== '' &&
       password.trim() !== ''
@@ -112,13 +120,13 @@ const Login= () => {
 
           <h1 className="text-lg font-bold text-[#000000]">Sign Into your Account</h1>
           <p className="text-xs text-[#667085] font-normal mb-6">Enter your email and password to login.</p>
-        
+
           <form
             onSubmit={handleSubmit}
             className="flex flex-col gap-4 
             "
-            // max-w-md mx-auto border rounded shadow-none p-4 sm:p-6 md:p-8
-          >          
+          // max-w-md mx-auto border rounded shadow-none p-4 sm:p-6 md:p-8
+          >
 
             <div className="flex flex-col gap-1">
               <label htmlFor="email" className='text-sm font-medium text-gray-700'>Email Address</label>
@@ -154,7 +162,7 @@ const Login= () => {
                 </span>
               </div>
               {/* {errors.password && <div className="text-red-500 text-sm">{errors.password}</div>} */}
-              {errors.general && <div className="text-red-500 text-sm">{errors.general}</div>}
+              {errors.general && <div className="text-[#F04438] text-xs font-medium">{errors.general}</div>}
             </div>
 
             <div>
@@ -169,22 +177,22 @@ const Login= () => {
                 Sign In
               </button> */}
               <LoadingButton
-              loading={loading}
-              loadingIndicator={<CircularProgress size={24} />}
-              variant="contained"
-              sx={{
+                loading={loading}
+                loadingIndicator={<CircularProgress size={24} />}
+                variant="contained"
+                sx={{
                   backgroundColor: '#26735B', // Set the background color
                   '&:hover': {
                     backgroundColor: '#1f5f4a', // Set a darker color on hover (optional)
                   },
                 }}
-              // onClick={handleClick}
-              type='submit'
-              className='px-4 py-2 rounded-lg w-full transition-all duration-200 bg-[#26735B] text-white cursor-pointer'
-              disabled={!checkFormValidity()}
-          >
-              Sign In
-          </LoadingButton>
+                // onClick={handleClick}
+                type='submit'
+                className='px-4 py-2 rounded-lg w-full transition-all duration-200 bg-[#26735B] text-white cursor-pointer'
+                disabled={!checkFormValidity()}
+              >
+                Sign In
+              </LoadingButton>
               <p className="text-sm font-normal text-black text-center">
                 Don&apos;t have an account?{' '}
                 <span

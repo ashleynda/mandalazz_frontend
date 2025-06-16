@@ -7,7 +7,7 @@
 //          <h2 className="text-base font-bold text-[#061410]">Order Summary </h2>
 //          {/* <p>({items.length} items)</p> */}
 
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 //         </div>
 //         <div className="flex flex-col gap-4 mt-4">
@@ -34,7 +34,15 @@ import { useRouter } from "next/navigation";
 // export default OrderSummary;
 
 const OrderSummary = () => {
-    const router = useRouter();
+  const router = useRouter();
+  const pathname = usePathname();
+  const subTotal = 120000;
+  const vat = 1000;
+  const delivery = 900;
+  const total = subTotal + vat + delivery;
+
+  const isDelivery = pathname.includes("delivery");
+  const isCart = pathname.includes("cart");
     return (
       <div className="order-summary bg-white rounded-lg flex flex-col justify-center items-start p-6 w-full max-w-md">
         <div className="w-full">
@@ -45,16 +53,26 @@ const OrderSummary = () => {
   
           <div className="flex flex-col gap-4 w-full mb-6">
             <div className="flex justify-between">
-              <p className="text-sm font-normal text-[#061410]">VAT</p>
-              <p className="text-sm font-normal text-[#061410]">#1,000</p>
-            </div>
-            <div className="flex justify-between">
               <p className="text-sm font-normal text-[#061410]">Sub Total</p>
               <p className="text-sm font-normal text-[#061410]">#120,000</p>
             </div>
+            {isDelivery && (
+              <>
+                <div className="flex justify-between">
+                  <p className="text-sm font-normal text-[#061410]">Delivery</p>
+                  <p className="text-sm font-normal text-[#061410]">#{delivery.toLocaleString()}</p>
+                </div>
+                <div className="flex justify-between">
+                  <p className="text-sm font-normal text-[#061410]">VAT</p>
+                  <p className="text-sm font-normal text-[#061410]">#1,000</p>
+                </div>
+              </>
+            )}
             <div className="flex justify-between border-t border-[#F7F7F7] pt-4">
               <p className="text-base font-bold text-[#061410]">Total</p>
-              <p className="text-base font-bold text-[#061410]">#130,000</p>
+              <p className="text-base font-bold text-[#061410]">
+                #{isDelivery ? total.toLocaleString() : subTotal.toLocaleString()}
+              </p>
             </div>
           </div>
   

@@ -57,28 +57,28 @@ const products = [
     image: denim, // Replace with your actual image path
     isFavorite: true,
   },
-   {
-    id: 4,
-    name: "Golden",
-    description: "File (218.89) × 222.68 dycon...",
-    price: 120000,
-    originalPrice: 150000,
-    rating: 3.5,
-    reviewCount: "400+",
-    image: denim, // Replace with your actual image path
-    isFavorite: true,
-  },
-   {
-    id: 5,
-    name: "Golden",
-    description: "File (218.89) × 222.68 dycon...",
-    price: 120000,
-    originalPrice: 150000,
-    rating: 3.5,
-    reviewCount: "400+",
-    image: denim, // Replace with your actual image path
-    isFavorite: true,
-  },
+//    {
+//     id: 4,
+//     name: "Golden",
+//     description: "File (218.89) × 222.68 dycon...",
+//     price: 120000,
+//     originalPrice: 150000,
+//     rating: 3.5,
+//     reviewCount: "400+",
+//     image: denim, // Replace with your actual image path
+//     isFavorite: true,
+//   },
+//    {
+//     id: 5,
+//     name: "Golden",
+//     description: "File (218.89) × 222.68 dycon...",
+//     price: 120000,
+//     originalPrice: 150000,
+//     rating: 3.5,
+//     reviewCount: "400+",
+//     image: denim, // Replace with your actual image path
+//     isFavorite: true,
+//   },
  
   // Add more products as needed
 ];

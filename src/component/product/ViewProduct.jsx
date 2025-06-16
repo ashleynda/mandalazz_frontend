@@ -14,6 +14,7 @@ import { FiHeart } from 'react-icons/fi';
 import useAddToFavorites from '../../lib/hooks/useAddToFavourites';
 import useRemoveFavoriteMutation from '../../lib/hooks/useRemoveFavourites';
 import useFavoritesQuery from '@/src/lib/hooks/useFavouritesQuery';
+import useSnackbarStore from '@/src/lib/store/useSnackbarStore';
 
 
 // interface Product {
@@ -53,13 +54,39 @@ const ViewProducts = () => {
   const id = params?.id; 
   const [token, setToken] = useState('');
   const { data, isLoading, isError, error } = useProductsQuery();
-  const products = data?.data ?? [];
+  // const products = data?.data ?? [];
+   let products = [];
+  
+  if (data) {
+    // Try different possible data structures
+    if (Array.isArray(data)) {
+      products = data;
+      console.log('Using data directly as array');
+    } else if (Array.isArray(data.data)) {
+      products = data.data;
+      console.log('Using data.data as array');
+    } else if (Array.isArray(data.products)) {
+      products = data.products;
+      console.log('Using data.products as array');
+    } else if (data.data && Array.isArray(data.data.products)) {
+      products = data.data.products;
+      console.log('Using data.data.products as array');
+    } else {
+      console.log('Could not find products array in data structure');
+      console.log('Available keys in data:', Object.keys(data));
+    }
+  }
+  
+  console.log('Final products array:', products);
+  console.log('Products length:', products.length);
+  console.log('Is products an array?', Array.isArray(products));
   console.log('Products:', products);
   const { mutate: addToFavorites, isPending } = useAddToFavorites();
   const [favorites, setFavorites] = useState([]);
   const deleteFavorite = useRemoveFavoriteMutation();
   const { data: favoritesQuery } = useFavoritesQuery(token || null);
   console.log('Favorites Query:', favoritesQuery);
+  const { showSnackbar } = useSnackbarStore();
 
   useEffect(() => {
   if (typeof window !== 'undefined') {
@@ -91,10 +118,12 @@ const ViewProducts = () => {
         onSuccess: (response) => {
           setFavorites((prevFavorites) => [...prevFavorites, productId]);
           console.log('Product added to favorites:', response.data);
+          showSnackbar({ message: 'Product added to favorites', severity: 'success' });
         },
         onError: (error) => {
           alert('User is not logged in. Please log in to add favorites.');
           console.error('Error adding product to favorites:', error);
+          showSnackbar({ message: 'Product is already in favorites', severity: 'error' });
         },
       });
     }
@@ -129,17 +158,16 @@ const ViewProducts = () => {
 
   return (
     <div className="p-4 md:p-10 ">
-      <p className="text-2xl md:text-3xl font-bold text-[#061410] mb-6 text-center md:text-left md:ml-12">Best Sellers</p>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 ml-8 cursor-pointer"
-        onClick={() => handleOptions(product._id)}>
+      <p className="text-2xl md:text-3xl font-bold text-[#061410] mb-6 text-center md:text-left md:ml-12 hidden md:block">Best Sellers</p>
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 md:ml-8 cursor-pointer">
         {products.map((product) => (
-          <div key={product.id} className="w-full max-w-[300px]">
+          <div key={product._id} className="w-full">
             <div
-              style={{ width: '400px', borderRadius: '8px', overflow: 'hidden' }}
+              style={{ borderRadius: '8px', overflow: 'hidden' }}
               className="card-container"
             >
               {/* Header */}
-              <div className="card-header w-full relative h-[250px]">
+              <div className="card-header w-full relative h:[200px] md:h-[250px]">
                 {/* <img alt="custom header" src={typeof yellowWoman === 'string' ? yellowWoman : yellowWoman.src} className="w-full rounded-t-lg" /> */}
                 <img
                   alt={product.name}
@@ -147,7 +175,7 @@ const ViewProducts = () => {
                   product.variations?.[0]?.images?.[0] ??
                   yellowWoman.src // fallback image
                 }
-                  className="w-full rounded-t-lg object-cover h-[250px]"
+                  className="w-full rounded-t-lg object-cover h-[166px] md:h-full"
                 />
                 <button
                   onClick={() => handleAddToFavorites(product._id)}
@@ -163,29 +191,31 @@ const ViewProducts = () => {
               {/* Title */}
               <div className="card-title w-full mt-2">
                 {/* <p className="text-left text-base font-normal font-figtree text-[#061410]">{product.title}</p> */}
-                <p className="text-center sm:text-left text-base font-normal font-figtree text-[#061410]">{product.name}</p>
+                <p className="text-left text-sm font-normal font-figtree text-[#061410]">{product.name}</p>
 
               </div>
 
               {/* Subtitle (Price) */}
-              <div className="card-subtitle w-full">
-                <p className="text-center sm:text-left text-[#061410] text-lg font-bold">
+              <div className="card-subtitle w-full flex gap-2 ">
+                <p className="text-left text-[#061410] text-base font-bold">
                   {/* {product.price} */}
                   {/* {product.price.$numberDecimal} */}
                    {product.price?.$numberDecimal ?? "N/A"}
                 </p>
+                <span class="text-[11px] font-normal text-[#667085] line-through mt-1">₦150,000</span>
               </div>
 
               {/* Content (Rating) */}
-              <div className="card-content flex justify-center sm:justify-start gap-2 w-full mt-2">
+              <div className="card-content flex justify-center sm:justify-start w-full mt-2 text-nowrap">
                 <Rating
                   value={ratingValue}
                   onChange={(event, newValue) => setRatingValue(newValue ?? 0)}
                   precision={0.5}
                   size="small"
+                  className='w-[63px]'
                 />
                 <p className='text-[#061410] text-xs font-medium'>{ratingValue ? Math.round(ratingValue).toFixed(1) : 'N/A'}</p>
-                <p className='text-[#061410] text-xs font-medium'>(400 + Reviews)</p>
+                <p className='text-[#061410] text-xs font-medium tracking-tighter'>(400 + Reviews)</p>
               </div>
 
               {/* Footer */}
