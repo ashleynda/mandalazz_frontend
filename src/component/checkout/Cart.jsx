@@ -63,44 +63,13 @@ console.log('Cart items:', cartItems);
   }, [cartItems]);
 
   return (
-    // <div className='flex'>
-    //   <div className=" mx-auto overflow-hidden mt-44">
-    //     <ReusableCartTable
-    //       headers={headers}
-    //       items={cartItems}
-    //       onRemove={handleRemove}
-    //       onSaveForLater={handleSaveForLater}
-    //       onQuantityChange={handleQuantityChange}
-    //     />
-    //   </div>
-    //   <OrderSummary />
-    // </div>
-    
-      // <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-8 mx-auto mt-44 px-4">
-      //   {/* Cart Table */}
-      //   <div className="flex-1">
-      //     <ReusableCartTable
-      //       headers={headers}
-      //       items={cartItems}
-      //       onRemove={handleRemove}
-      //       onSaveForLater={handleSaveForLater}
-      //       onQuantityChange={handleQuantityChange}
-      //     />
-      //   </div>
-    
-      //   {/* Order Summary */}
-      //   <div className="lg:w-80">
-      //     <OrderSummary />
-      //   </div>
-      // </div>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 mt-7">
-      {/* Cart Header */}
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 mt-7">
       <h1 className="text-2xl font-bold text-[#061410]">Cart ({cartItems.length} items)</h1>
-      
+        
       <div className="flex flex-col lg:flex-row gap-8 mt-2 ">
         {/* Cart Table */}
-        <div className='flex flex-col lg:flex-col gap-8'>
-          <div className="flex-1 bg-white">
+        <div className='flex flex-col lg:flex-col gap-8 w-[748px] '>
+          <div className="flex-1 bg-white ">
             <ReusableCartTable
               headers={headers}
               items={cartItems}
@@ -111,10 +80,10 @@ console.log('Cart items:', cartItems);
               onSaveForLater={handleSaveForLater}
             />
           </div>
-          <div>
+          <div >
             <Favourites />
           </div>
-          <div>
+          <div >
             <RecentlyViewed />
           </div>
         </div>

@@ -82,7 +82,8 @@ export default function Verify() {
     return (
         <>
             <form onSubmit={handleSubmit}>
-                <div className="flex flex-col justify-center h-[calc(70vh-115px)] w-full md:overflow-y-auto gap-4 mt-[45px]">
+                <div   className="flex flex-col gap-4 w-[343px] md:w-full bg-white mx-auto border-2 border-[#E4E7EC] shadow-none rounded-lg p-6 md:p-8 mt-30 md:mt-60">
+                {/* // className="flex flex-col justify-center h-[calc(70vh-115px)] w-[343px] md:w-full md:overflow-y-auto gap-4 mt-[45px] border border-[#E4E7EC] bg-white"> */}
                     <h1 className="text-3xl font-bold text-start text-[#191818]">Verify Your Email</h1>
                     <p className="text-sm font-normal text-[#212221]">
                         Enter the 6-digit verification code sent to your email
@@ -140,7 +141,7 @@ export default function Verify() {
                         <p className="text-sm font-normal text-[#212221] text-center">
                             Didn't get the code?{' '}
                             <span
-                                className="underline text-[#FF5001] text-sm font-medium cursor-pointer"
+                                className="underline text-[#26735B] text-sm font-bold cursor-pointer"
                                 onClick={handleResendCode}
                             >
                                 send again

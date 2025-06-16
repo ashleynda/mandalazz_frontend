@@ -21,13 +21,7 @@ const tabs = [
             // icon: <Iconify icon="bi:backpack4" height={24} width={24} />,
             exact:true,
         },
-        {
-            id: "Specifications",
-            name: 'Specifications',
-            to: "/products/specifications",
-            // icon: <Iconify icon="material-symbols-light:model-training" height={28} width={28} />,
-            exact:true,
-        },
+       
         {
             id: "Reviews",
             name: 'Reviews',
@@ -37,13 +31,13 @@ const tabs = [
         },
     ];
     const activeTab = tabs.findIndex((tab) => pathname?.startsWith(tab.to));
+      const contentMinHeight = "400px";
     return (
         <div>
             <ProductTabs />
 
-            <div className="mt-4">
+             <div className="mt-4" style={{ minHeight: contentMinHeight }}>
                 {pathname?.startsWith("/products/productDetails") && <ProductDetails />}
-                {pathname?.startsWith("/products/specifications") && <Specifications />}
                 {pathname?.startsWith("/products/reviews") && <Reviews />}
             </div>
         </div>

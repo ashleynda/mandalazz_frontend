@@ -30,6 +30,14 @@ body {
   font-family: Arial, Helvetica, sans-serif, 'Figtree';
 
 }
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-thumb {
+  /* background-color: #0B261F; */
+  background-color: grey;
+  border-radius: 6px;
+}
 
 
 /* background-image: url('../assets/Background\ Doodles.png');

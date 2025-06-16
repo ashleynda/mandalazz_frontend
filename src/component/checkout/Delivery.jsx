@@ -21,6 +21,7 @@ import {
   InputAdornment,
 } from "@mui/material"
 import OrderSummary from "./OrderSummary"
+import PaymentMethod from "../../component/checkout/PaymentMethod";
 
 const countries = [
     { code: "+234", name: "Nigeria", flag: "🇳🇬" },
@@ -205,6 +206,9 @@ export default function Delivery() {
                 </label>
               </div>
             </div>
+          </div>
+          <div className="py-8">
+            <PaymentMethod />
           </div>
         </div>
 

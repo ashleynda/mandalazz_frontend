@@ -1,12 +1,12 @@
 "use client";
 
 import React, { useState } from 'react';
-import { 
-  AppBar, 
-  Toolbar, 
-  Button, 
-  Menu, 
-  MenuItem, 
+import {
+  AppBar,
+  Toolbar,
+  Button,
+  Menu,
+  MenuItem,
   Box,
   Container,
   Typography,
@@ -24,6 +24,10 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import MenuIcon from '@mui/icons-material/Menu';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
+import { useQuery } from '@tanstack/react-query';
+import { getProducts } from "../../lib/hooks/useGetProductsByCategory";
+import { useRouter } from 'next/navigation';
+
 
 
 const Categories = () => {
@@ -37,7 +41,7 @@ const Categories = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [drawerOpen, setDrawerOpen] = useState(false);
-    const [openCategories, setOpenCategories] = useState({
+  const [openCategories, setOpenCategories] = useState({
     foreign: false,
     local: false,
     men: false,
@@ -45,8 +49,21 @@ const Categories = () => {
     unisex: false,
     accessories: false
   });
+  const [selectedBrand, setSelectedBrand] = useState(null);
+  const { data: products, isLoading, error } = useQuery({
+    queryKey: ["products", selectedBrand],
+    queryFn: () => getProducts(selectedBrand),
+    enabled: !!selectedBrand, // Only run when brand is selected
+  });
+  const router = useRouter();
 
-   const toggleDrawer = (open) => (event) => {
+const handleCategoryClick = (category) => {
+  router.push(`/viewProductByCategory?category=${encodeURIComponent(category)}`);
+};
+
+
+
+  const toggleDrawer = (open) => (event) => {
     if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
       return;
     }
@@ -114,27 +131,27 @@ const Categories = () => {
   const localBrands = ['Veekee James', 'Mai Atafo', 'Balenciaga', 'Fenty', 'Botega Venetta']; // Replace with actual local brands
   const menBrands = ['Prada', 'Gucci', 'Balenciaga', 'Fenty', 'Botega Venetta'];
   const womenBrands = ['Prada', 'Gucci', 'Balenciaga', 'Fenty', 'Botega Venetta'];
-  const unisexBrands = 
-  ['Prada', 'Gucci', 'Balenciaga', 'Fenty', 'Botega Venetta'];
+  const unisexBrands =
+    ['Prada', 'Gucci', 'Balenciaga', 'Fenty', 'Botega Venetta'];
   const accessoriesBrands = ['Shoes', 'Bags', 'Jewelries', 'Pouches', 'Ring Lights', 'wefgyu', 'ewfgfg', 'tdfeyfy'];
 
 
- 
-    if (isMobile) {
+
+  if (isMobile) {
     return null; // Hide AppBar and dropdowns on mobile
   }
 
   return (
     // <div className=''>
-      <AppBar position="fixed" sx={{ backgroundColor: '#0B261F', color: 'white', top: 60, zIndex: 999, height: 50, overflowX: 'none', whiteSpace: 'nowrap' }}>
-        <Container maxWidth="xl">
-          <Toolbar disableGutters sx={{ justifyContent: 'center', gap: 4 }}>
-            <>
+    <AppBar position="fixed" sx={{ backgroundColor: '#0B261F', color: 'white', top: 50, zIndex: 999, height: 50, overflowX: 'none', whiteSpace: 'nowrap' }}>
+      <Container maxWidth="xl">
+        <Toolbar disableGutters sx={{ justifyContent: 'center', gap: 4 }}>
+          <>
             <Box sx={{ position: 'relative' }}>
               <Button
                 onClick={handleForeignClick}
-                sx={{ 
-                  color: foreignAnchorEl ? '#0B261F' : 'white', 
+                sx={{
+                  color: foreignAnchorEl ? '#0B261F' : 'white',
                   backgroundColor: foreignAnchorEl ? '#f0f0f0' : 'transparent',
                   // borderRight: '1px solid #e0e0e0'
                 }}
@@ -143,49 +160,49 @@ const Categories = () => {
                 Foreign Brands
               </Button>
               <Menu
-              anchorEl={foreignAnchorEl}
-              open={Boolean(foreignAnchorEl)}
-              onClose={handleForeignClose}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'center',
-              }}
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'center',
-              }}
-              sx={{ mt: 1 }}
-              PaperProps={{
-                sx: {
-                  // p: 6,
-                }
-              }}
-            >
-              <Box
-                sx={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(2, max-content)',
-                  columnGap: 3,
-                  rowGap: 1,
+                anchorEl={foreignAnchorEl}
+                open={Boolean(foreignAnchorEl)}
+                onClose={handleForeignClose}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'center',
+                }}
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'center',
+                }}
+                sx={{ mt: 1 }}
+                PaperProps={{
+                  sx: {
+                    // p: 6,
+                  }
                 }}
               >
-                {(() => {
-                  const items = foreignBrands;
-                  const half = Math.ceil(items.length / 2);
-                  const left = items.slice(0, half);
-                  const right = items.slice(half);
+                <Box
+                  sx={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(2, max-content)',
+                    columnGap: 3,
+                    rowGap: 1,
+                  }}
+                >
+                  {(() => {
+                    const items = foreignBrands;
+                    const half = Math.ceil(items.length / 2);
+                    const left = items.slice(0, half);
+                    const right = items.slice(half);
 
-                  return left.map((item, idx) => (
-                    <React.Fragment key={item}>
-                      <MenuItem onClick={handleForeignClose}>{item}</MenuItem>
-                      {right[idx] && (
-                        <MenuItem onClick={handleForeignClose}>{right[idx]}</MenuItem>
-                      )}
-                    </React.Fragment>
-                  ));
-                })()}
-              </Box>
-            </Menu>
+                    return left.map((item, idx) => (
+                      <React.Fragment key={item}>
+                        <MenuItem onClick={handleForeignClose}>{item}</MenuItem>
+                        {right[idx] && (
+                          <MenuItem onClick={handleForeignClose}>{right[idx]}</MenuItem>
+                        )}
+                      </React.Fragment>
+                    ));
+                  })()}
+                </Box>
+              </Menu>
 
             </Box>
 
@@ -193,8 +210,8 @@ const Categories = () => {
             <Box sx={{ position: 'relative' }}>
               <Button
                 onClick={handleLocalClick}
-                sx={{ 
-                  color: localAnchorEl ? '#0B261F' : 'white', 
+                sx={{
+                  color: localAnchorEl ? '#0B261F' : 'white',
                   backgroundColor: localAnchorEl ? '#f0f0f0' : 'transparent',
                   // borderRight: '1px solid #e0e0e0'
                 }}
@@ -217,8 +234,8 @@ const Categories = () => {
                 sx={{ mt: 1 }}
               >
                 {localBrands.map((brand) => (
-                  <MenuItem 
-                    key={brand} 
+                  <MenuItem
+                    key={brand}
                     onClick={handleLocalClose}
                     sx={{ minWidth: '150px' }}
                   >
@@ -231,16 +248,16 @@ const Categories = () => {
             {/* Men */}
             <Box sx={{ position: 'relative' }}>
               <Button
-                onClick={handleMenClick}
-                sx={{ 
-                  color: 'white', 
+                onClick={() => handleCategoryClick('man')}
+                sx={{
+                  color: 'white',
                   backgroundColor: menAnchorEl ? '#f0f0f0' : 'transparent',
                   // borderRight: '1px solid #e0e0e0'
                 }}
               >
                 Men
               </Button>
-              <Menu
+              {/* <Menu
                 anchorEl={menAnchorEl}
                 open={Boolean(menAnchorEl)}
                 onClose={handleMenClose}
@@ -253,101 +270,56 @@ const Categories = () => {
                   horizontal: 'left',
                 }}
                 sx={{ mt: 1 }}
+
               >
                 {menBrands.map((brand) => (
-                  <MenuItem 
-                    key={brand} 
+                  <MenuItem
+                    key={brand}
                     onClick={handleMenClose}
                     sx={{ minWidth: '150px' }}
                   >
                     {brand}
                   </MenuItem>
                 ))}
-              </Menu>
+              </Menu> */}
             </Box>
 
             {/* Women */}
             <Box sx={{ position: 'relative' }}>
               <Button
-                onClick={handleWomenClick}
-                sx={{ 
-                  color: 'white', 
+                onClick={() => handleCategoryClick('woman')}
+                sx={{
+                  color: 'white',
                   backgroundColor: womenAnchorEl ? '#f0f0f0' : 'transparent',
                   // borderRight: '1px solid #e0e0e0'
                 }}
               >
                 Women
               </Button>
-              <Menu
-                anchorEl={womenAnchorEl}
-                open={Boolean(womenAnchorEl)}
-                onClose={handleWomenClose}
-                anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'left',
-                }}
-                transformOrigin={{
-                  vertical: 'top',
-                  horizontal: 'left',
-                }}
-                sx={{ mt: 1 }}
-              >
-                {womenBrands.map((brand) => (
-                  <MenuItem 
-                    key={brand} 
-                    onClick={handleWomenClose}
-                    sx={{ minWidth: '150px' }}
-                  >
-                    {brand}
-                  </MenuItem>
-                ))}
-              </Menu>
+            
             </Box>
 
             {/* Unisex */}
             <Box sx={{ position: 'relative' }}>
               <Button
-                onClick={handleUnisexClick}
-                sx={{ 
-                  color: 'white', 
+                onClick={() => handleCategoryClick('unisex')}
+                sx={{
+                  color: 'white',
                   backgroundColor: unisexAnchorEl ? '#f0f0f0' : 'transparent',
                   // borderRight: '1px solid #e0e0e0'
                 }}
               >
                 Unisex
               </Button>
-              <Menu
-                anchorEl={unisexAnchorEl}
-                open={Boolean(unisexAnchorEl)}
-                onClose={handleUnisexClose}
-                anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'left',
-                }}
-                transformOrigin={{
-                  vertical: 'top',
-                  horizontal: 'left',
-                }}
-                sx={{ mt: 1 }}
-              >
-                {unisexBrands.map((brand) => (
-                  <MenuItem 
-                    key={brand} 
-                    onClick={handleUnisexClose}
-                    sx={{ minWidth: '150px' }}
-                  >
-                    {brand}
-                  </MenuItem>
-                ))}
-              </Menu>
+              
             </Box>
 
             {/* Accessories */}
             <Box sx={{ position: 'relative' }}>
               <Button
-                onClick={handleAccessoriesClick}
-                sx={{ 
-                  color: accessoriesAnchorEl ? '#0B261F' : 'white', 
+                onClick={() => handleCategoryClick('accessories')}
+                sx={{
+                  color: accessoriesAnchorEl ? '#0B261F' : 'white',
                   backgroundColor: accessoriesAnchorEl ? '#f0f0f0' : 'transparent',
                 }}
               >
@@ -368,8 +340,8 @@ const Categories = () => {
                 sx={{ mt: 1 }}
               >
                 {accessoriesBrands.map((brand) => (
-                  <MenuItem 
-                    key={brand} 
+                  <MenuItem
+                    key={brand}
                     onClick={handleAccessoriesClose}
                     sx={{ minWidth: '150px' }}
                   >
@@ -378,11 +350,11 @@ const Categories = () => {
                 ))}
               </Menu>
             </Box>
-            </>
-          
-          </Toolbar>
-        </Container>
-      </AppBar>
+          </>
+
+        </Toolbar>
+      </Container>
+    </AppBar>
     // </div>
   );
 };

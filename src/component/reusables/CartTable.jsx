@@ -207,20 +207,21 @@ const ReusableCartTable = ({
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto px-4">
+    // <div className=" px-4 border border-red-500 w-[748px] h-[497px]">
+    <div className="px-4 w-[748px] h-[497px] overflow-y-auto">
       {/* <div className="border-b pb-3 mb-4">
         <h2 className="text-2xl font-bold text-[#061410]">Cart ({items.length} items)</h2>
       </div> */}
       
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4 ">
         {safeItems.map((item, index) => (
-          <div key={`${item.id}-${index}`} className="flex flex-row items-center py-4 border-b">
+          <div key={`${item.id}-${index}`} className="flex items-start justify-between py-4 border-b gap-4">
             {/* Product Image */}
             <div className="w-20 h-24 mr-4">
               <img
                 src={item.image || '/placeholder.jpg'}
                 alt={item.name || 'Product'}
-                className="w-full h-full object-cover"
+                className="w-[83px] h-[84.35px] object-cover"
               />
             </div>
             
@@ -235,40 +236,40 @@ const ReusableCartTable = ({
             </div>
             
             {/* Quantity Controls */}
-            <div className='flex flex-col gap-4'>
-            <div className="flex items-center text-black">
-              <button 
-                onClick={() => decrementQuantity(item)} 
-                className="w-8 h-8 flex items-center justify-center text-xl font-medium"
-              >
-                −
-              </button>
-              <span className="w-6 text-center">{item.quantity}</span>
-              <button 
-                onClick={() => incrementQuantity(item)} 
-                className="w-8 h-8 flex items-center justify-center text-xl font-medium"
-              >
-                +
-              </button>
-            </div>
+            <div className='flex flex-col gap-2 items-end'>
+              <div className="flex items-center text-black">
+                <button 
+                  onClick={() => decrementQuantity(item)} 
+                  className="w-8 h-8 flex items-center justify-center text-xl font-medium"
+                >
+                  −
+                </button>
+                <span className="w-6 text-center">{item.quantity}</span>
+                <button 
+                  onClick={() => incrementQuantity(item)} 
+                  className="w-8 h-8 flex items-center justify-center text-xl font-medium"
+                >
+                  +
+                </button>
+              </div>
             
-            {/* Action Buttons */}
-            <div className="flex ml-6 ">
-              <button 
-                onClick={() => onRemove(item.id)} 
-                className="p-2 text-[#191818]"
-                aria-label="Remove item"
-              >
-                <FiTrash2 />
-              </button>
-              <button 
-                onClick={() => onSaveForLater(item.id)} 
-                className="p-2 text-[#191818]"
-                aria-label="Save for later"
-              >
-                <FiHeart />
-              </button>
-            </div>
+              {/* Action Buttons */}
+              <div className="flex ml-6 ">
+                <button 
+                  onClick={() => onRemove(item.id)} 
+                  className="p-2 text-[#191818]"
+                  aria-label="Remove item"
+                >
+                  <FiTrash2 />
+                </button>
+                <button 
+                  onClick={() => onSaveForLater(item.id)} 
+                  className="p-2 text-[#191818]"
+                  aria-label="Save for later"
+                >
+                  <FiHeart />
+                </button>
+              </div>
             </div>
           </div>
         ))}

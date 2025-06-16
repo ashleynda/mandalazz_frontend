@@ -18,14 +18,7 @@ export default function ProductTabs() {
         >
           Product Details
         </button>
-        <button
-          className={`px-4 py-2 text-sm font-medium ${
-            activeTab === "specifications" ? "border-b-2 border-[#319B79] text-primary text-[#191818]" : "text-gray-500"
-          }`}
-          onClick={() => setActiveTab("specifications")}
-        >
-          Specifications
-        </button>
+     
         <button
           className={`px-4 py-2 text-sm font-medium ${
             activeTab === "reviews" ? "border-b-2 border-[#319B79] text-primary text-[#191818]" : "text-gray-500"
@@ -39,7 +32,6 @@ export default function ProductTabs() {
       {/* Content */}
       <div className="mt-4 text-sm text-gray-700">
         {activeTab === "details" && <ProductDetails />}
-        {activeTab === "specifications" && <Specifications />}
         {activeTab === "reviews" && <Reviews />}
       </div>
     </div>

@@ -42,7 +42,7 @@ const ResetPassword = () => {
         <div className="mt-44 px-4 sm:px-6 md:px-8">
         <form
           onSubmit={handleSubmit}
-          className="flex flex-col gap-4 max-w-md mx-auto border rounded shadow-none p-4 sm:p-6 md:p-8"
+          className="flex flex-col gap-4 max-w-md bg-white mx-auto border-2 border-[#E4E7EC] shadow-none rounded-lg p-6 md:p-8"
         >
           <div>
             <h1 className="text-lg font-bold text-[#000000]">Reset Password</h1>
