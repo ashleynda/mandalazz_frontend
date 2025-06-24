@@ -168,7 +168,7 @@ export default function ProfileDropdown() {
         <MenuItem onClick={() => {
   handleClose();
   // Navigate to account page - replace with your routing logic
-  router.push('/accountDetails'); 
+  router.push('/dashboard/accountDetails'); 
   // or setCurrentView('account'); // State-based routing
 }}>
           <ListItemIcon>

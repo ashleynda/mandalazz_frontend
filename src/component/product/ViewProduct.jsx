@@ -202,7 +202,7 @@ const ViewProducts = () => {
                   {/* {product.price.$numberDecimal} */}
                    {product.price?.$numberDecimal ?? "N/A"}
                 </p>
-                <span class="text-[11px] font-normal text-[#667085] line-through mt-1">₦150,000</span>
+                <span className="text-[11px] font-normal text-[#667085] line-through mt-1">₦150,000</span>
               </div>
 
               {/* Content (Rating) */}

@@ -33,7 +33,7 @@ import { usePathname, useRouter } from "next/navigation";
 
 // export default OrderSummary;
 
-const OrderSummary = () => {
+const OrderSummary = ({ checkout }) => {
   const router = useRouter();
   const pathname = usePathname();
   const subTotal = 120000;
@@ -43,6 +43,8 @@ const OrderSummary = () => {
 
   const isDelivery = pathname.includes("delivery");
   const isCart = pathname.includes("cart");
+  console.log("checkout prop:", checkout); // should show a function
+
     return (
       <div className="order-summary bg-white rounded-lg flex flex-col justify-center items-start p-6 w-full max-w-md">
         <div className="w-full">
@@ -77,7 +79,13 @@ const OrderSummary = () => {
           </div>
   
           <button className="bg-[#26735B] rounded-lg text-white text-base font-bold py-3 px-4 w-full mb-3" 
-            onClick={() => router.push('/viewProductDetails/checkout/delivery')}
+            onClick={() => {
+              if (isDelivery) {
+                checkout();
+              } else {
+                router.push('/viewProductDetails/checkout/delivery')
+              }
+            }}
           >
             Checkout
           </button>

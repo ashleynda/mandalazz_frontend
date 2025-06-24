@@ -56,6 +56,7 @@ const Categories = () => {
     enabled: !!selectedBrand, // Only run when brand is selected
   });
   const router = useRouter();
+  console.log("Products:", products);
 
 const handleCategoryClick = (category) => {
   router.push(`/viewProductByCategory?category=${encodeURIComponent(category)}`);

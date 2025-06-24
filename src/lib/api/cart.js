@@ -1,5 +1,5 @@
 export const removeFromCart = async (productId) => {
-  const token = localStorage.getItem("token");
+  const token = sessionStorage.getItem("token");
 
   const response = await fetch("https://mandelazz-webapp.azurewebsites.net/api/cart/remove", {
     method: "DELETE",

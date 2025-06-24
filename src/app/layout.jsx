@@ -97,10 +97,10 @@ export default function RootLayout({ children }) {
               <Navbar />
               <div className="pt-18">
                 <Categories />
-                {!isDetailPage && !isDashboardPage && !isViewProductByCategoryPage && !(isProductPage && isMobile) && <HeroSection />}
+                {!isDetailPage && !isDashboardPage && !isViewProductByCategoryPage && <HeroSection />}
                 {children}
                 <GlobalSnackbar />
-                {!isDetailPage && <Footer />}
+                {!isDetailPage && isDashboardPage && <Footer />}
               </div>
             </>
           ) : (

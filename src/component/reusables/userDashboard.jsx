@@ -1,192 +1,107 @@
-// "use client"
+"use client";
 
-// import { useState } from "react"
-// import { User, BookOpen, ShoppingBag, FileText, Heart, Settings } from "lucide-react"
-// import AccountDetails from "../accountDetails";
-// import { cn } from "../../lib/utils";
-
-// export default function UserDashboard() {
-//   const [activeTab, setActiveTab] = useState("Account")
-
-//   const menuItems = [
-//     { name: "Account", icon: User },
-//     { name: "Address Book", icon: BookOpen },
-//     { name: "My Orders", icon: ShoppingBag },
-//     { name: "Reviews", icon: FileText },
-//     { name: "Favourites", icon: Heart },
-//     { name: "Settings", icon: Settings },
-//   ]
-
-//   // Render the appropriate content based on the active tab
-//   const renderContent = () => {
-//     switch (activeTab) {
-//       case "Account":
-//         return <AccountDetails />
-//       case "Address Book":
-//         return <div className="p-8">Address Book content will go here</div>
-//       case "My Orders":
-//         return <div className="p-8">My Orders content will go here</div>
-//       case "Reviews":
-//         return <div className="p-8">Reviews content will go here</div>
-//       case "Favourites":
-//         return <div className="p-8">Favourites content will go here</div>
-//       case "Settings":
-//         return <div className="p-8">Settings content will go here</div>
-//       default:
-//         return <AccountDetails />
-//     }
-//   }
-
-//   return (
-//     <div className="flex min-h-screen bg-gray-50">
-//       {/* Sidebar */}
-//       <div className="w-64 bg-white border-r h-screen">
-//         <nav className="py-4">
-//           <ul className="space-y-1">
-//             {menuItems.map((item) => {
-//               const isActive = activeTab === item.name
-//               return (
-//                 <li key={item.name}>
-//                   <button
-//                     onClick={() => setActiveTab(item.name)}
-//                     className={cn(                        
-//                       "flex items-center w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 relative",
-//                       isActive && "text-emerald-600",
-//                     )}
-//                   >
-//                     <item.icon className={cn("h-5 w-5 mr-3", isActive ? "text-emerald-600" : "text-gray-500")} />
-//                     <span>{item.name}</span>
-//                     {isActive && <div className="absolute right-0 top-0 h-full w-1 bg-emerald-600" />}
-//                   </button>
-//                 </li>
-//               )
-//             })}
-//           </ul>
-//         </nav>
-//       </div>
-
-//       {/* Main Content */}
-//       <div className="flex-1">{renderContent()}</div>
-//     </div>
-//   )
-// }
-"use client"
-
-import React from "react"
-import {
-  MdOutlineSpaceDashboard,
-  MdOutlineAnalytics,
-  MdOutlineIntegrationInstructions,
-  MdOutlineSettings,
-  MdOutlineLogout,
-} from "react-icons/md"
-import { FaUsers } from "react-icons/fa"
-import { BiSupport } from "react-icons/bi"
-import { useRouter } from "next/navigation"
-import { useState, useEffect } from "react"
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import ListAltIcon from '@mui/icons-material/ListAlt';
-import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
-import SettingsIcon from '@mui/icons-material/Settings';
-import LogoutIcon from '@mui/icons-material/Logout';
+import React, { useState } from "react"
+import { User, MapPin, ShoppingBag, FileText, Heart, Settings } from "lucide-react"
+import AccountDetails from "../accountDetails";
 
 const UserDashboard = () => {
-  const router = useRouter()
+  const [activeTab, setActiveTab] = useState("Account")
+
   const menuItems = [
     {
       id: 1,
       label: "Account",
-      icon: <AccountCircleIcon className="h-5 w-5 mr-3" />,
-      path: "/account/accountDetails",
+      icon: User,
+      path: "/accountDetails",
     },
     {
       id: 2,
-      label: "My Orders",
-      icon: <ListAltIcon className="h-5 w-5 mr-3" />,
-      path: "/analytics",
+      label: "Delivery Addresses",
+      icon: MapPin,
+      path: "/delivery-addresses",
     },
     {
       id: 3,
-      label: "Favourites",
-      icon: <FavoriteBorderIcon className="h-5 w-5 mr-3" />,
-      path: "/users",
+      label: "My Orders",
+      icon: ShoppingBag,
+      path: "/my-orders",
     },
     {
       id: 4,
-      label: "Settings",
-      icon: <SettingsIcon className="h-5 w-5 mr-3" />,
-      path: "/integration",
+      label: "Reviews",
+      icon: FileText,
+      path: "/reviews",
     },
     {
       id: 5,
-      label: "Log Out",
-      icon: <LogoutIcon className="h-5 w-5 mr-3" />,
-      path: "/support",
+      label: "Favourites",
+      icon: Heart,
+      path: "/favourites",
     },
     {
       id: 6,
       label: "Settings",
-      icon: <MdOutlineSettings className="h-5 w-5 mr-3" />,
+      icon: Settings,
       path: "/settings",
     },
   ]
 
-  const handleLogout = () => {
-    localStorage.removeItem("token")
-    router.push("/login")
+  const renderContent = () => {
+    switch (activeTab) {
+      case "Account":
+        return <AccountDetails />
+      case "Delivery Addresses":
+        return <div className="p-8 bg-gray-50 min-h-screen"><div className="text-gray-500">Delivery Addresses content will go here</div></div>
+      case "My Orders":
+        return <div className="p-8 bg-gray-50 min-h-screen"><div className="text-gray-500">My Orders content will go here</div></div>
+      case "Reviews":
+        return <div className="p-8 bg-gray-50 min-h-screen"><div className="text-gray-500">Reviews content will go here</div></div>
+      case "Favourites":
+        return <div className="p-8 bg-gray-50 min-h-screen"><div className="text-gray-500">Favourites content will go here</div></div>
+      case "Settings":
+        return <div className="p-8 bg-gray-50 min-h-screen"><div className="text-gray-500">Settings content will go here</div></div>
+      default:
+        return <AccountDetails />
+    }
   }
 
   return (
-    <div className="w-64 h-screen bg-white border-r border-gray-200">
-      {/* <div className="flex items-center justify-center h-16 border-b border-gray-200">
-        <span className="text-lg font-semibold">User Dashboard</span>
-      </div> */}
-      <div className="py-4">
-        <ul>
-          {menuItems.map((item) => (
-            <li key={item.id}>
-              <NavItem item={item} />
-            </li>
-          ))}
-        </ul>
+    <div className="flex bg-gray-50 px-44 ">
+      <div className=" mx-auto bg-white border border-[#F2F4F7] h-[288px] mt-16 " >
+        <div className="">
+          <ul className="space-y-1">
+            {menuItems.map((item) => {
+              const isActive = activeTab === item.label
+              const IconComponent = item.icon
+
+              return (
+                <li key={item.id}>
+                  <button
+                    onClick={() => setActiveTab(item.label)}
+                    className={`flex items-center w-full px-6 py-3 text-sm font-medium transition-colors duration-200 relative group text-nowrap ${isActive
+                        ? "text-[#26735B] bg-[#E0F5EF] w-full"
+                        : "text-gray-700 hover:text-emerald-600 hover:bg-gray-50"
+                      }`}
+                  >
+                    <IconComponent
+                      className={`h-5 w-5 mr-4 transition-colors duration-200 ${isActive ? "text-[#26735B]" : "text-gray-500 group-hover:text-emerald-600"
+                        }`}
+                    />
+                    <span className="font-normal">{item.label}</span>
+                    {isActive && (
+                      <div className="absolute right-0 top-0 h-full w-1 bg-[#26735B] rounded-l-sm" />
+                    )}
+                  </button>
+                </li>
+              )
+            })}
+          </ul>
+        </div>
       </div>
-      <div className="absolute bottom-0 w-full border-t border-gray-200">
-        <button
-          onClick={handleLogout}
-          className="flex items-center w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50"
-        >
-          <MdOutlineLogout className="h-5 w-5 mr-3" />
-          Logout
-        </button>
+      <div className="flex-1 w-full p-8 bg-gray-50 ">
+        {renderContent()}
       </div>
     </div>
-  )
-}
-
-const NavItem = ({ item }) => {
-  const router = useRouter()
-  const [currentPath, setCurrentPath] = useState("")
-
-  // Use useEffect to get current path on client side
-  useEffect(() => {
-    setCurrentPath(window.location.pathname)
-  }, [])
-
-  const isActive = currentPath === item.path
-
-  return (
-    <li
-      onClick={() => router.push(item.path)}
-      className={`flex items-center w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 relative cursor-pointer ${
-        isActive ? "text-emerald-600" : ""
-      }`}
-    >
-      {React.cloneElement(item.icon, {
-        className: `h-5 w-5 mr-3 ${isActive ? "text-emerald-600" : "text-gray-500"}`,
-      })}
-      {item.label}
-      {isActive && <span className="absolute left-0 top-1/2 h-8 w-1 bg-emerald-600 -translate-y-1/2"></span>}
-    </li>
   )
 }
 

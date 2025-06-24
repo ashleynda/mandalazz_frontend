@@ -212,8 +212,8 @@ import visa from "../../assets/visa.png";
 import verve from "../../assets/verve.png";
 import paystack from "../../assets/paystack.png";
 
-export default function PaymentMethod() {
-  const [selectedMethod, setSelectedMethod] = useState("card");
+export default function PaymentMethod({ selectedMethod, setSelectedMethod }) {
+  // const [selectedMethod, setSelectedMethod] = useState("card");
   console.log({ mastercard, visa, verve, paystack });
 
   const handleChange = (event) => {
@@ -257,6 +257,7 @@ export default function PaymentMethod() {
                 title: "Pay on Delivery",
                 description:
                   "Pay when your item gets delivered to you. This option is only available for deliveries within Lagos.",
+                  // logos: [],
               },
             ].map(({ value, title, description, logos }) => {
                 const isSelected = selectedMethod === value;
@@ -288,15 +289,15 @@ export default function PaymentMethod() {
                 </Box>
                 <Box display="flex" flexDirection="column" height="101px" >
 
-                  {logos && (
+                  {/* {logos && (
                     // <Box mt={1} display="flex" gap={1} padding={4}>                    
-                    <>
+                    <> */}
                       <Radio
                         value={value}
                         checked={selectedMethod === value}
                         onChange={handleChange}
                       />
-                      {logos.map((src, index) => (
+                      {(logos || []).map((src, index) => (
                         <img
                           key={index}
                           src={src.src}
@@ -305,8 +306,8 @@ export default function PaymentMethod() {
                         />
                       ))}
                       {/* </Box> */}
-                    </>
-                  )}
+                    {/* </>
+                  )} */}
                 </Box>
 
 
