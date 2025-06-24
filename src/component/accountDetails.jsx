@@ -187,10 +187,10 @@ export default function AccountDetails() {
 
   return (
     <div className="p-8">
-      <div className="max-w-2xl">
-        <h1 className="text-2xl font-semibold text-gray-900 mb-8">Account Details</h1>
+      <div className="w-[748px] bg-white rounded-lg shadow-sm p-8">
+        <h1 className="text-2xl font-semibold text-gray-900 mb-8 border-b border-gray-200">Account Details</h1>
 
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+        <div className="">
           <div className="space-y-6">
             {/* Name Fields */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -262,7 +262,7 @@ export default function AccountDetails() {
                 name="email"
                 value={formData.email}
                 onChange={handleInputChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+                className="w-6/12 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
               />
             </div>
 

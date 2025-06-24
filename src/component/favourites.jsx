@@ -27,42 +27,6 @@ const bull = (
     </Box>
 );
 
-const products = [
-    {
-        id: 1,
-        name: "Golden",
-        description: "File (218.89) × 222.68 dycon...",
-        price: 120000,
-        originalPrice: 150000,
-        rating: 3.5,
-        reviewCount: "400+",
-        image: shirt, // Replace with your actual image path
-        isFavorite: true,
-    },
-    {
-        id: 1,
-        name: "Golden",
-        description: "File (218.89) × 222.68 dycon...",
-        price: 120000,
-        originalPrice: 150000,
-        rating: 3.5,
-        reviewCount: "400+",
-        image: brown, // Replace with your actual image path
-        isFavorite: true,
-    },
-    {
-        id: 1,
-        name: "Golden",
-        description: "File (218.89) × 222.68 dycon...",
-        price: 120000,
-        originalPrice: 150000,
-        rating: 3.5,
-        reviewCount: "400+",
-        image: denim, // Replace with your actual image path
-        isFavorite: true,
-    },
-    // Add more products as needed
-];
 
 export default function Favourites() {
     const [token, setToken] = useState(null);

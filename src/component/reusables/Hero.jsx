@@ -10,12 +10,12 @@ const HeroSection = () => {
         <Image 
           src={cream} 
           alt="hero" 
-          className="w-[1750px] h-[440px] object-cover rounded-3xl mx-auto"
+          className="w-[343px] md:w-[1750px] h-[440px] object-cover rounded-3xl mx-auto"
           width={1750}
           height={440}
         />
         {/* Overlay Text with rectangle image */}
-        <p className="absolute top-1/2 left-1/4 -translate-x-1/2 -translate-y-1/2 text-white text-6xl font-bold text-left">
+        <p className="absolute top-1/2 left-1/4 -translate-x-1/2 -translate-y-1/2 text-white text-[20px] md:text-6xl font-bold text-left">
           All the right <br />
           <span className="relative inline-block">
             fashion accessories

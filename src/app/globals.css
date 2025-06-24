@@ -39,6 +39,18 @@ body {
   border-radius: 6px;
 }
 
+/* Add this to your global CSS or component styles */
+.main-content {
+  padding-top: 100px; /* Adjust based on your navbar height + search bar */
+}
+
+/* Or for mobile specifically */
+@media (max-width: 768px) {
+  .main-content {
+    padding-top: 100px; /* Height of navbar + search section */
+  }
+}
+
 
 /* background-image: url('../assets/Background\ Doodles.png');
 background-size: cover; /* Ensures the image covers the entire background */

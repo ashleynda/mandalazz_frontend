@@ -89,7 +89,7 @@ console.log('Cart items:', cartItems);
         </div>
         
         {/* Order Summary */}
-        <div className="lg:w-80">
+        <div className="hidden lg:block lg:w-80">
           <OrderSummary />
         </div>
       </div>

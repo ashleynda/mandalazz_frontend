@@ -10,10 +10,10 @@ import { Button, InputAdornment, TextField, useMediaQuery, useTheme } from '@mui
 import SearchIcon from "@mui/icons-material/Search";
 import { useState, useEffect } from 'react';
 import CategoriesMobile from '../../component/reusables/CategoriesMobile';
-import { useCartStore } from '../../lib/store/useCart'; 
+import { useCartStore } from '../../lib/store/useCart';
 import UploadAvatars from '../../component/profile';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
-import ProfileDropdown, {AccountDropdownMenu} from '../../component/reusables/AccountDropDownMenu';
+import ProfileDropdown, { AccountDropdownMenu } from '../../component/reusables/AccountDropDownMenu';
 
 
 
@@ -45,35 +45,35 @@ const Navbar = ({ onSearch }) => {
     setAnchorEl(null);
   };
 
-//   useEffect(() => {
-//   const token = localStorage.getItem('authToken');
-//   const isUserLoggedIn = !!token;
-//   setIsLoggedIn(isUserLoggedIn);
+  //   useEffect(() => {
+  //   const token = localStorage.getItem('authToken');
+  //   const isUserLoggedIn = !!token;
+  //   setIsLoggedIn(isUserLoggedIn);
 
-//   const localCartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
+  //   const localCartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
 
-//   // Sync localStorage cart with Zustand store for guests
-//   if (!isUserLoggedIn && localCartItems.length > 0) {
-//     useCartStore.getState().setCartItems(localCartItems);
-//   }
+  //   // Sync localStorage cart with Zustand store for guests
+  //   if (!isUserLoggedIn && localCartItems.length > 0) {
+  //     useCartStore.getState().setCartItems(localCartItems);
+  //   }
 
-//   if (isUserLoggedIn) {
-//     const fetchNotifications = async () => {
-//       try {
-//         const response = await fetch("https://mandelazz-webapp.azurewebsites.net/api/notifications/all", {
-//           headers: { Authorization: `Bearer ${token}` }
-//         });
-//         const result = await response.json();
-//         const unreadCount = result.filter((notif) => !notif.read).length;
-//         setNotificationCount(unreadCount);
-//       } catch (err) {
-//         console.error("Error fetching notifications:", err);
-//       }
-//     };
+  //   if (isUserLoggedIn) {
+  //     const fetchNotifications = async () => {
+  //       try {
+  //         const response = await fetch("https://mandelazz-webapp.azurewebsites.net/api/notifications/all", {
+  //           headers: { Authorization: `Bearer ${token}` }
+  //         });
+  //         const result = await response.json();
+  //         const unreadCount = result.filter((notif) => !notif.read).length;
+  //         setNotificationCount(unreadCount);
+  //       } catch (err) {
+  //         console.error("Error fetching notifications:", err);
+  //       }
+  //     };
 
-//     fetchNotifications();
-//   }
-// }, []);
+  //     fetchNotifications();
+  //   }
+  // }, []);
 
 
 
@@ -108,31 +108,31 @@ const Navbar = ({ onSearch }) => {
   //   }
   // }, []);
   useEffect(() => {
-  if (typeof window !== 'undefined') {
-    const token = sessionStorage.getItem('authToken');
-    setIsLoggedIn(!!token);
+    if (typeof window !== 'undefined') {
+      const token = sessionStorage.getItem('authToken');
+      setIsLoggedIn(!!token);
 
-    const cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
-    setCartCount(cartItems.length);
+      const cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
+      setCartCount(cartItems.length);
 
-    // const fetchNotifications = async () => {
-    //   try {
-    //     const response = await fetch("https://mandelazz-webapp.azurewebsites.net/api/notifications/all", {
-    //       headers: { Authorization: `Bearer ${token}` }
-    //     });
-    //     const result = await response.json();
-    //     const unreadCount = result.filter((notif) => !notif.read).length;
-    //     setNotificationCount(unreadCount);
-    //   } catch (err) {
-    //     console.error("Error fetching notifications:", err);
-    //   }
-    // };
+      // const fetchNotifications = async () => {
+      //   try {
+      //     const response = await fetch("https://mandelazz-webapp.azurewebsites.net/api/notifications/all", {
+      //       headers: { Authorization: `Bearer ${token}` }
+      //     });
+      //     const result = await response.json();
+      //     const unreadCount = result.filter((notif) => !notif.read).length;
+      //     setNotificationCount(unreadCount);
+      //   } catch (err) {
+      //     console.error("Error fetching notifications:", err);
+      //   }
+      // };
 
-    // if (token) {
-    //   fetchNotifications();
-    // }
-  }
-}, []);
+      // if (token) {
+      //   fetchNotifications();
+      // }
+    }
+  }, []);
 
 
   useEffect(() => {
@@ -198,7 +198,7 @@ const Navbar = ({ onSearch }) => {
 
   const renderCartIcon = () => {
     // User is not logged in & cart is empty
-    if (!isLoggedIn ) {
+    if (!isLoggedIn) {
       return (
         <div className="flex gap-2 cursor-pointer" onClick={() => router.push('/viewProductDetails/checkout/cart')}>
           <FiShoppingCart className="w-6 h-6 text-gray-700 hover:text-primary" />
@@ -216,7 +216,7 @@ const Navbar = ({ onSearch }) => {
             {cartItemCount}
           </span>
         )}
-        
+
       </div>
     );
   };
@@ -226,35 +226,76 @@ const Navbar = ({ onSearch }) => {
   //   useCartStore.getState().clearCart(); // clear Zustand cart
   //   router.push('/login');
   // };
- if (isMobile) {
+  if (isMobile) {
     return (
-      <div className="flex items-center justify-between p-4 bg-white fixed top-0 left-0 w-full z-50 h-[60px]">
-        {/* Left: Hamburger Menu and Logo */}
-        <div className="flex items-center gap-0">
-          <CategoriesMobile isMobile={isMobile} />
-          <Image
-            src={logo}
-            alt="logo"
-            width={80}
-            height={32}
-            className="h-8 w-auto cursor-pointer "
-            onClick={() => router.push('/products')}
-          />
-        </div>
+      <div className="bg-white fixed top-0 left-0 w-[100%] z-[9999] overflow-x-hidden">
+        <div className="flex items-center justify-between px-4 h-[60px] min-w-0 w-full">
+          {/* Left: Hamburger Menu and Logo */}
+          <div className="flex items-center gap-1 flex-shrink-0 min-w-0">
+            <div className='flex-shrink-0 '>
+            <CategoriesMobile isMobile={isMobile} />
+            </div>
+            <div className='flex-shrink-0 '>
+            <Image
+              src={logo}
+              alt="logo"
+              width={100}
+              height={40}
+              className="h-8 w-auto cursor-pointer "
+              onClick={() => router.push('/products')}
+            />
+            </div>
+          </div>
 
-        {/* Right: Cart and Profile Icons */}
-        <div className="flex items-center gap-4">
-          {renderCartIcon()}
-          
-          {isLoggedIn ? (
-            <div className="cursor-pointer hover:opacity-80 transition-opacity">
-              <FaUserCircle className="w-6 h-6 text-gray-400" />
-            </div>
-          ) : (
-            <div className="cursor-pointer hover:opacity-80 transition-opacity">
-              <FaUserCircle className="w-6 h-6 text-gray-400" />
-            </div>
-          )}
+          {/* Right: Cart and Profile Icons */}
+          <div className="flex items-center gap-3 flex-shrink-0">
+            {renderCartIcon()}
+            {/* <div className="relative cursor-pointer" onClick={() => router.push('/viewProductDetails/checkout/cart')}>
+              <FiShoppingCart className="w-5 h-5 text-gray-700 hover:text-primary" />
+              {cartItemCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
+                  {cartItemCount}
+                </span>
+              )}
+            </div> */}
+
+            {isLoggedIn ? (
+              <div className="cursor-pointer hover:opacity-80 transition-opacity">
+                <FaUserCircle className="w-6 h-6 text-gray-400" />
+              </div>
+            ) : (
+              <div className="cursor-pointer hover:opacity-80 transition-opacity">
+                <FaUserCircle className="w-6 h-6 text-gray-400" />
+              </div>
+            )}
+          </div>
+        </div>
+        <div className="px-3 pb-3 w-full">
+          <div className='w-full max-w-full'>
+          <TextField
+            variant="outlined"
+            placeholder="Search..."
+            size="small"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            onKeyDown={handleKeyDown}
+            sx={{
+              width: '100%',
+              maxWidth: '100%',
+              '& .MuiOutlinedInput-root': {
+                height: '36px',
+                fontSize: '14px'
+              }
+            }}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon sx={{ fontSize: '18px' }} />
+                </InputAdornment>
+              ),
+            }}
+          />
+          </div>
         </div>
       </div>
     );
@@ -388,77 +429,77 @@ const Navbar = ({ onSearch }) => {
             height={isMobile ? 32 : 40}
             className="h-10 w-auto border-t-2 border-b-1 border-gray-200 z-10"
             onClick={() => router.push('/products')}
-          />         
+          />
         </div>
         {/* <Searchbar onSearch={onSearch} /> */}
-        {!isMobile && (
-          <TextField
-            variant="outlined"
-            placeholder="Search..."
-            size="small"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            onKeyDown={handleKeyDown}
-            // sx={{ width: '500px' }}
-            sx={{ width: { xs: '100%', sm: '300px', md: '400px' } }}
 
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon />
-                </InputAdornment>
-              ),
-            }}
-          />
-        )}
+        <TextField
+          variant="outlined"
+          placeholder="Search..."
+          size="small"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          onKeyDown={handleKeyDown}
+          // sx={{ width: '500px' }}
+          sx={{ width: { xs: '100%', sm: '300px', md: '400px' } }}
+
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon />
+              </InputAdornment>
+            ),
+          }}
+        />
+
         <div className="flex items-center gap-6">
-          
-            {renderCartIcon()}
-          
-          
-        {/* </div> */}
-        {!isLoggedIn && (
-          <div className='flex gap-4'>
-            <Button
-              variant="outlined"
-              sx={{
-                textTransform: 'none',
-                color: '#26735B',
-                borderColor: '#26735B',
-                borderRadius: '8px',
-                padding: '8px 40px',
-                fontWeight: '700',
-                fontSize: '14px',
-                '&:hover': {
-                  backgroundColor: 'rgba(0, 0, 0, 0.04)',
-                  borderColor: 'black',
-                }
-              }}
-              onClick={() => router.push('/signup')}
-            >
-              Sign Up
-            </Button>
 
-            <Button
-              variant="contained"
-              sx={{
-                textTransform: 'none',
-                backgroundColor: '#26735B',
-                color: 'white',
-                borderRadius: '8px',
-                padding: '8px 40px',
-                fontWeight: '700',
-                fontSize: '14px',
-                '&:hover': {
-                  backgroundColor: '#333',
-                }
-              }}
-              onClick={() => router.push('/login')}
-            >
-              Log In
-            </Button>
-          </div>
-        )}
+          {renderCartIcon()}
+
+
+          {/* </div> */}
+          {!isLoggedIn && (
+            <div className='flex gap-4'>
+              <Button
+                variant="outlined"
+                sx={{
+                  textTransform: 'none',
+                  color: '#26735B',
+                  borderColor: '#26735B',
+                  borderRadius: '8px',
+                  padding: '8px 40px',
+                  fontWeight: '700',
+                  fontSize: '14px',
+                  '&:hover': {
+                    backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                    borderColor: 'black',
+                  }
+                }}
+                onClick={() => router.push('/signup')}
+              >
+                Sign Up
+              </Button>
+
+              <Button
+                variant="contained"
+                sx={{
+                  textTransform: 'none',
+                  backgroundColor: '#26735B',
+                  color: 'white',
+                  borderRadius: '8px',
+                  padding: '8px 40px',
+                  fontWeight: '700',
+                  fontSize: '14px',
+                  '&:hover': {
+                    backgroundColor: '#333',
+                  }
+                }}
+                onClick={() => router.push('/login')}
+              >
+                Log In
+              </Button>
+            </div>
+          )}
           {isLoggedIn && (
             // <div className="cursor-pointer hover:opacity-80 transition-opacity flex  items-center gap-2 border border-[#e5e7eb] rounded-md px-2 py-1"
             // //  onClick={() => router.push('/profile')}
@@ -472,7 +513,7 @@ const Navbar = ({ onSearch }) => {
             <ProfileDropdown />
           )}
         </div>
-      </div>    
+      </div>
     </>
   );
 };
@@ -481,14 +522,14 @@ export default Navbar;
 
 
 
- {/* Shopping cart icon with notification badge */}
-          {/* <div className="relative cursor-pointer" onClick={() => router.push('/products/checkout/cart')}>
+{/* Shopping cart icon with notification badge */ }
+{/* <div className="relative cursor-pointer" onClick={() => router.push('/products/checkout/cart')}>
           <FiShoppingCart className="w-6 h-6 text-gray-700 hover:text-primary" />
           <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
             3
           </span>
           </div> */}
-            {/* <div className="flex gap-2 cursor-pointer" onClick={() => router.push('/products/checkout/cart')}>
+{/* <div className="flex gap-2 cursor-pointer" onClick={() => router.push('/products/checkout/cart')}>
             <FiShoppingCart className="w-6 h-6 text-gray-700 hover:text-primary" />
           <p className='text-sm font-normal text-[#191818]'>Cart</p>
           </div> */}
