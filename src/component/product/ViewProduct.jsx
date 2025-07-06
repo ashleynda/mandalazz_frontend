@@ -17,39 +17,11 @@ import useFavoritesQuery from '@/src/lib/hooks/useFavouritesQuery';
 import useSnackbarStore from '@/src/lib/store/useSnackbarStore';
 
 
-// interface Product {
-//   id: number;
-//   title: string;
-//   price: string;
-//   image: string | StaticImageData;
-//   rating?: number;
-// }
-
-// const products = [
-//   { id: 1, title: "Golden Yellow Butterfly Bodycon Dress", price: "120,000", image: yellowWoman },
-//   { id: 2, title: "Elegant Red Maxi Dress", price: "150,000", image: yellowWoman },
-//   { id: 3, title: "Classic Black Evening Gown", price: "200,000", image: yellowWoman },
-//   { id: 4, title: "Golden Yellow Butterfly Bodycon Dress", price: "120,000", image: yellowWoman },
-//   { id: 5, title: "Elegant Red Maxi Dress", price: "150,000", image: yellowWoman },
-//   { id: 6, title: "Classic Black Evening Gown", price: "200,000", image: yellowWoman },
-//   { id: 7, title: "Golden Yellow Butterfly Bodycon Dress", price: "120,000", image: yellowWoman },
-//   { id: 8, title: "Elegant Red Maxi Dress", price: "150,000", image: yellowWoman },
-//   { id: 9, title: "Classic Black Evening Gown", price: "200,000", image: yellowWoman },
-//   { id: 10, title: "Golden Yellow Butterfly Bodycon Dress", price: "120,000", image: yellowWoman },
-//   { id: 11, title: "Elegant Red Maxi Dress", price: "150,000", image: yellowWoman },
-//   { id: 12, title: "Classic Black Evening Gown", price: "200,000", image: yellowWoman },
-//   { id: 13, title: "Golden Yellow Butterfly Bodycon Dress", price: "120,000", image: yellowWoman },
-//   { id: 14, title: "Elegant Red Maxi Dress", price: "150,000", image: yellowWoman },
-//   { id: 15, title: "Classic Black Evening Gown", price: "200,000", image: yellowWoman },
-//   { id: 16, title: "Golden Yellow Butterfly Bodycon Dress", price: "120,000", image: yellowWoman },
- 
-//   // Add more products here...
-// ];
 
 const ViewProducts = () => {
   const [ratingValue, setRatingValue] = useState(3.5);
   const router = useRouter();
-  console.log('Router:', router); // Check if router is defined
+  console.log('Router:', router); 
   const params = useParams();
   const id = params?.id; 
   const [token, setToken] = useState('');
@@ -58,7 +30,6 @@ const ViewProducts = () => {
    let products = [];
   
   if (data) {
-    // Try different possible data structures
     if (Array.isArray(data)) {
       products = data;
       console.log('Using data directly as array');
@@ -146,15 +117,36 @@ const ViewProducts = () => {
   //   //   .then(() => console.log('Navigation successful'))
   //   //   .catch((err) => console.error('Navigation failed:', err));
   // };
-  const handleOptions = (productId) => {
-    if (!productId) {
-      console.error('Error: Product ID is undefined');
-      return;
-    }
-    console.log(`Navigating to ViewDetailsPage for product ID: ${productId}`);
-    router.push(`/viewProductDetails/${productId}`);
-  };
-  
+  // const handleOptions = (productId, color, size) => {
+  //   if (!productId || !color || !size) {
+  //     console.error('Missing Product ID, color, or size:', {productId, color, size});
+  //     return;
+  //   }
+  //   const lowerCasedColor = color?.toLowerCase?.() || "";
+  //    const href = `/viewProductDetails/${productId}?color=${encodeURIComponent(lowerCasedColor)}&size=${encodeURIComponent(size)}`;
+  //   console.log('Navigating to ViewDetailsPage for product ID:', href);
+
+    // router.push({
+    //   pathname:`/viewProductDetails/${productId}`,
+    //   query: { color: lowerCasedColor },
+    // })
+  //   router.push(href);
+  // };
+  const handleOptions = (productId, color, size) => {
+  const queryParams = new URLSearchParams();
+  if (color) queryParams.append('color', color.toLowerCase());
+  if (size) queryParams.append('size', size);
+
+  const href = `/viewProductDetails/${productId}?${queryParams.toString()}`;
+  console.log('Navigating to:', href);
+
+  router.push(href);
+};
+
+  console.log("Product:", products.name, "ColorCode:", products.variations?.[0]?.colorCode);
+
+  console.log("Product variations:", products.variations);
+
 
   return (
     <div className="p-4 md:p-10 ">
@@ -163,8 +155,31 @@ const ViewProducts = () => {
         {products.map((product) => (
           <div key={product._id} className="w-full">
             <div
+            role='button'
+              tabIndex={0}
               style={{ borderRadius: '8px', overflow: 'hidden' }}
               className="card-container"
+                  // onClick={() => handleOptions(product._id, 
+                  //   product.variations?.[0]?.colorCode,
+                  //   product.variations?.[0]?.availableSizes?.[0]
+                  // )}
+  //                 onClick={() => {
+  // const variation = product.variations?.[0];
+  // const color = variation?.colorCode;
+  // const size = Array.isArray(variation?.sizes) ? variation.sizes[0] : undefined;
+onClick={() => {
+  const variation = product.variations?.[0];
+  const color = variation?.color;
+  const size = variation?.sizes?.[0]?.size;
+
+  if (!color || !size) {
+    console.error("Missing color or size", { color, size });
+    return;
+  }
+  handleOptions(product._id, color, size);
+}}
+
+
             >
               {/* Header */}
               <div className="card-header w-full relative h:[200px] md:h-[250px]">
@@ -178,7 +193,12 @@ const ViewProducts = () => {
                   className="w-full rounded-t-lg object-cover h-[166px] md:h-full"
                 />
                 <button
-                  onClick={() => handleAddToFavorites(product._id)}
+                  // onClick={() => handleAddToFavorites(product._id)}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleAddToFavorites(product._id);
+                    }}
                   className={`absolute bottom-2 right-2 p-2 rounded-full shadow-md transition hover:scale-105
                   ${favorites.includes(product._id) ? "bg-[#26735B]" : "bg-white"}`}
                   aria-label="Save for later"
@@ -222,8 +242,16 @@ const ViewProducts = () => {
               <div className="flex gap-4 border border-[#26735B] rounded-lg text-[#26735B] mt-4 w-full">
                 <button
                   type="button"
-                  onClick={() => handleOptions(product._id)}
                   className="w-full h-[48px] text-base font-bold font-manrope cursor-pointer"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const variation = product.variations?.[0];
+                    const color = variation?.colorCode;
+                    const size = Array.isArray(variation?.availableSizes) ? variation.availableSizes[0] : undefined;
+
+                    handleOptions(product._id, color, size);
+                  }}
                 >
                   Choose Options
                 </button>

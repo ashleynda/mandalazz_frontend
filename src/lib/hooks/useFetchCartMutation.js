@@ -68,8 +68,11 @@
 // };
 
 
-import { getAuthHeader } from "../../lib/utils/index"; // Adjust the import path as necessary
-const useFetchCartQuery = async () => {
+import { useQuery } from "@tanstack/react-query";
+import { getAuthHeader } from "../../lib/utils/index";
+
+
+const fetchCart = async () => {
   const headers = {
     ...getAuthHeader(), // will be empty if no token
   };
@@ -87,6 +90,13 @@ const useFetchCartQuery = async () => {
   } catch {
     return text;
   }
+};
+
+const useFetchCartQuery = () => {
+  return useQuery({
+    queryKey: ['cart'],
+    queryFn: fetchCart,
+  });
 };
 
 export default useFetchCartQuery;

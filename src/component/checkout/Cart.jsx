@@ -6,7 +6,7 @@ import { useCartStore } from '../../lib/store/useCart';
 import OrderSummary from '../checkout/OrderSummary';
 import Favourites from '../../component/favourites'; 
 import useFetchCartQuery from "../../lib/hooks/useFetchCartMutation"; // Adjust the import path as necessary
-import { useRemoveFromCart } from "../../lib/hooks/useRemoveFromCart"; 
+import useRemoveFromCart from "../../lib/hooks/useRemoveFromCart"; 
 import RecentlyViewed from '../../component/recentlyViewed'; 
 
 // import Layout from '@/components/Layout';
@@ -19,14 +19,18 @@ const Cart = () => {
   const removeFromCart = useCartStore((state) => state.removeFromCart);
   const updateCartItemQuantity = useCartStore((state) => state.updateCartItemQuantity);
   const { data,  isLoading, error } = useFetchCartQuery();
-  const { mutate: removeItem, isPending, isSuccess } = useRemoveFromCart();
+  const { mutate: removeItem, isPending, isError } = useRemoveFromCart();
   const setCartItems = useCartStore((state) => state.setCartItems); // Zustand setter for syncing
   // const { mutate: addToFav } = useAddToFavorites();
 console.log('Cart items:', cartItems);
+console.log("🧾 Cart from API:", data?.message?.cart);
+console.log("jfn", data)
+
+console.log("📦 FULL data:", data);
 
   useEffect(() => {
-    if (data) {
-      setCartItems(data); // <- A Zustand setter for syncing
+    if (data?.message?.cart) {
+      setCartItems(data.message.cart.items); // <- A Zustand setter for syncing
     }
   }, [data]);
 
@@ -34,10 +38,13 @@ console.log('Cart items:', cartItems);
   if (error) return <div>Error loading cart: {error.message}</div>;
 
   const handleRemove = (productId) => {
-    removeItem(productId, {
+    removeItem({ productId }, {
       onSuccess: () => {
         removeFromCart(productId);
       },
+      onError: (error) => {
+      console.error("❌ Failed to remove from server:", error.message);
+    },
     });
   };
 
@@ -58,9 +65,9 @@ console.log('Cart items:', cartItems);
 
   const headers = ['Item Details', 'Quantity', 'Price', 'Actions'];
 
-  useEffect(() => {
-    console.log('Cart items:', cartItems);
-  }, [cartItems]);
+  // useEffect(() => {
+  //   console.log('Cart items:', cartItems);
+  // }, [cartItems]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 mt-7">
@@ -89,9 +96,11 @@ console.log('Cart items:', cartItems);
         </div>
         
         {/* Order Summary */}
-        <div className="hidden lg:block lg:w-80">
-          <OrderSummary />
-        </div>
+        {data?.message?.cart && (
+          <div className="hidden lg:block lg:w-80">
+            <OrderSummary cart={data.message.cart}/>
+          </div>
+        )}
       </div>
     </div>
   
@@ -101,80 +110,3 @@ console.log('Cart items:', cartItems);
 export default Cart;
 
 
-// 'use client';
-
-// import { useEffect } from 'react';
-// import { useCartStore } from '../../lib/store/useCart'; 
-// import ReusableCartTable from '../reusables/CartTable';
-
-// export default function Cart() {
-//   // Get cart methods from Zustand store
-//   const cartItems = useCartStore((state) => state.cartItems);
-//   const removeFromCart = useCartStore((state) => state.removeFromCart);
-//   const updateCartItemQuantity = useCartStore((state) => state.updateCartItemQuantity);
-  
-//   const handleRemove = (id) => {
-//     removeFromCart(id);
-//   };
-
-//   const handleSaveForLater = (id) => {
-//     console.log('Save for later functionality:', id);
-//     // You can implement this later
-//   };
-
-//   const handleQuantityChange = (id, newQty) => {
-//     updateCartItemQuantity(id, newQty);
-//   };
-
-//   const headers = ['Item Details', 'Quantity', 'Price', 'Actions'];
-  
-//   // Calculate total
-//   const cartTotal = cartItems.reduce((total, item) => 
-//     total + (item.price * item.quantity), 0);
-
-//   // Debugging
-//   useEffect(() => {
-//     console.log('Cart items:', cartItems);
-//   }, [cartItems]);
-
-//   return (
-//     <div className="max-w-7xl mx-auto overflow-hidden mt-16 px-4 sm:px-6 lg:px-8">
-//       <h1 className="text-3xl font-bold mb-6">Your Shopping Cart</h1>
-      
-//       {cartItems.length > 0 ? (
-//         <>
-//           <ReusableCartTable
-//             headers={headers}
-//             items={cartItems}
-//             onRemove={handleRemove}
-//             onSaveForLater={handleSaveForLater}
-//             onQuantityChange={handleQuantityChange}
-//           />
-          
-//           <div className="mt-8 p-4 bg-gray-50 rounded-lg">
-//             <div className="flex justify-between text-lg font-medium">
-//               <span>Total:</span>
-//               <span>${cartTotal.toFixed(2)}</span>
-//             </div>
-//             <div className="mt-4 flex justify-end">
-//               <button 
-//                 className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-//                 onClick={() => window.location.href = '/checkout'}
-//               >
-//                 Proceed to Checkout
-//               </button>
-//             </div>
-//           </div>
-//         </>
-//       ) : (
-//         <div className="text-center py-16 bg-gray-50 rounded-lg">
-//           <h2 className="text-2xl font-semibold mb-4">Your cart is empty</h2>
-//           <p className="mb-6">Add items to your cart to see them here.</p>
-//           <a href="/" className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-//             Continue Shopping
-//           </a>
-//         </div>
-//       )}
-//     </div>
-//   );
-// }

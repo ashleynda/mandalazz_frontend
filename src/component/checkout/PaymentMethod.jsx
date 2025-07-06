@@ -215,6 +215,9 @@ import paystack from "../../assets/paystack.png";
 export default function PaymentMethod({ selectedMethod, setSelectedMethod }) {
   // const [selectedMethod, setSelectedMethod] = useState("card");
   console.log({ mastercard, visa, verve, paystack });
+  console.log(selectedMethod); // this is the prop you received
+
+
 
   const handleChange = (event) => {
     setSelectedMethod(event.target.value);

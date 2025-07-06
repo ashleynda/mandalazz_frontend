@@ -5,8 +5,13 @@ import OrderSummary from "./OrderSummary"
 import PaymentMethod from "../../component/checkout/PaymentMethod";
 import useCreateCheckout from "../../lib/hooks/useCheckout";
 import { useRouter } from "next/navigation";
-import statesWithLGAs from "../../data/statesWithLGAs.json"; 
+import statesWithLGAs from "../../data/statesWithLGAs.json";
 import { useDefaultAddress } from "../../lib/hooks/checkout/useFetchDefaultAddress";
+import { useAddressStore } from "../../lib/store/useAddressStore";
+import { useCreateAddress } from "../../lib/hooks/useCreateAddress";
+import useSnackbarStore from "@/src/lib/store/useSnackbarStore";
+import useFetchCartQuery from "@/src/lib/hooks/useFetchCartMutation";
+
 
 const countries = [
   { code: "+234", name: "Nigeria", flag: "🇳🇬" },
@@ -17,73 +22,223 @@ const countries = [
 ]
 
 export default function Delivery() {
-  const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    phone: '',
-    altPhone: '',
-    address: '',
-    landmark: '',
-    city: '',
-    lga: '',
-    state: '',
-    isDefault: false,
-    countryCode: '+234',
-    altCountryCode: '+234'
-  });
+  const { formData, setFormData } = useAddressStore();
+  // const [formData, setFormData] = useState({
+  //   firstName: '',
+  //   lastName: '',
+  //   phone: '',
+  //   altPhone: '',
+  //   address: '',
+  //   landmark: '',
+  //   city: '',
+  //   lga: '',
+  //   state: '',
+  //   isDefault: false,
+  //   countryCode: '+234',
+  //   altCountryCode: '+234'
+  // });
   const [deliveryMethod, setDeliveryMethod] = useState("pickup")
   const [countryCode, setCountryCode] = useState("+234")
   const [altCountryCode, setAltCountryCode] = useState("+234")
+  const { mutate: createAddress } = useCreateAddress();
   const { mutate: checkout, isPending, isError, error } = useCreateCheckout();
   const router = useRouter();
-  const [paymentType, setPaymentType] = useState("card");
+  const [paymentType, setPaymentType] = useState("online_payment");
+  // const resolvedPaymentType = paymentType === "paystack" ? "online_payment" : paymentType;
+  const resolvedPaymentType =
+    paymentType === "paystack"
+      ? "online_payment"
+      : paymentType === "delivery"
+        ? "payment_on_delivery"
+        : paymentType;
+
   const selectedState = statesWithLGAs.find((s) => s.state === formData.state);
   const lgaOptions = selectedState ? selectedState.lgas : [];
   const { data: defaultAddress, isLoading, refetch: refetchDefaultAddress } = useDefaultAddress();
+  const { showSnackbar } = useSnackbarStore();
+  const { data: cartData, isLoading: cartLoading, error: cartError } = useFetchCartQuery();
+  console.log("📦 Cart data from API:", cartData);
 
 
+  if (resolvedPaymentType === "online_payment") {
+    console.log("🧾 Online payment payload:", resolvedPaymentType);
+  }
 
-  const handleCheckout = () => {
-    const token = typeof window !== "undefined" ? sessionStorage.getItem("authToken") : null;
-    if (!token) {
-      console.error("Token is missing or invalid");
-      return;
-    }
+   const handleCheckout = () => {
+    console.log("🧪 handleCheckout triggered");
+    const token = sessionStorage.getItem("authToken");
+     const email = sessionStorage.getItem("userEmail");
+  if (!token) return showSnackbar({ message: "Not logged in", severity: "error" });
+
+      const {
+    firstName,
+    lastName,
+    address,
+    landmark,
+    phone,
+    altPhone,
+    city,
+    lga,
+    state,
+    isDefault,
+  } = formData;
+
+
     const payload = {
-      token,
       userDetails: {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        phoneNumber: `${countryCode}${formData.phone}`,
-        altPhoneNumber: `${altCountryCode}${formData.altPhone}`,
-        address: formData.address,
-        landmark: formData.landmark,
-        city: formData.city,
-        lga: formData.lga,
-        state: formData.state,
-        isDefault: formData.isDefault,
+        firstName,
+        lastName,
+        address,
+        landmark,
+         phoneNumber: `${countryCode}${phone}`,
+      altPhoneNumber: `${altCountryCode}${altPhone}`,
+        email,
+        city,
+        state,
+        postalCode: "100001",
       },
-      paymentType: paymentType,
+      paymentType: resolvedPaymentType,
     };
 
-    console.log('Submitting Checkout:', payload);
-    console.log("Token:", token);
-    console.log("Full payload:", payload);
-
-    checkout(payload, {
-      onSuccess: (data) => {
-        console.log("Checkout success:", data);
-        router.push("/checkout/success");
-      },
-      onError: (err) => {
-        console.error("Checkout failed:", err);
-        // Optional: show toast/snackbar
-      },
-    });
-
-
+    checkout({ token, payload });
+    console.log("🟢 Submitting checkout with token:", token);
+console.log("🟢 Payload:", JSON.stringify(payload, null, 2));
 
   };
+
+
+
+  // const handleCheckout = () => {
+  //   console.log("Checkout button clicked");
+  //   console.log("handleCheckout triggered ✅");
+  //   const email = typeof window !== "undefined" ? sessionStorage.getItem("userEmail") : null;
+  //   const token = typeof window !== "undefined" ? sessionStorage.getItem("authToken") : null;
+  //   if (!token) {
+  //     showSnackbar({ message: "You're not logged in.", severity: "error" });
+  //     return;
+  //   }
+  //   function parseJwt(token) {
+  //     if (!token) return {};
+  //     try {
+  //       return JSON.parse(atob(token.split('.')[1]));
+  //     } catch (e) {
+  //       return {};
+  //     }
+  //   }
+
+  //   // const token = sessionStorage.getItem("authToken");
+  //   const user = parseJwt(token)?.id;
+  //   console.log("🆔 Token User ID:", user);
+
+
+  //   const addressPayload = {
+  //     firstName: formData.firstName,
+  //     lastName: formData.lastName,
+  //     phoneNumber: `${countryCode}${formData.phone}`,
+  //     altPhoneNumber: `${altCountryCode}${formData.altPhone}`,
+  //     address: formData.address,
+  //     landmark: formData.landmark,
+  //     city: formData.city,
+  //     lga: formData.lga,
+  //     state: formData.state,
+  //     isDefault: formData.isDefault,
+  //   };
+
+  //   createAddress(addressPayload, {
+  //     onSuccess: (addressResponse) => {
+  //       const addressId = addressResponse?.message?.address?._id;
+  //       if (!addressId) {
+  //         showSnackbar({ message: "Address creation failed.", severity: "error" });
+  //         return;
+  //       } console.log("✅ Address created successfully:", addressResponse);
+  //       console.log("New address _id:", addressId);
+
+  //       showSnackbar({ message: "Address saved successfully", severity: "success" });
+  //       const checkoutPayload = {
+  //         userDetails: {
+  //           addressId,
+  //           address: formData.address,
+  //           phoneNumber: `${countryCode}${formData.phone}`,
+  //           ...(email && { email }),// or fetch from user session
+  //         },
+  //         paymentType: resolvedPaymentType,
+  //       };
+
+  //       if (isPending) {
+  //         showSnackbar({ message: "Processing your order...", severity: "info" });
+  //       }
+  //       console.log("Token User ID:", parseJwt(token)?.id);
+  //       console.log("Address ID being used:", addressId);
+
+  //       console.log("✅ Passing addressId:", addressId);
+
+  //       console.log('Submitting Checkout:', checkoutPayload);
+  //       console.log("Token:", token);
+  //       console.log("Full payload:", checkoutPayload);
+  //       console.log("🚀 Submitting Address:", addressPayload);
+  //       console.log("💳 Payment type:", paymentType);
+  //       console.log("📧 Email:", email);
+  //       console.log("🚀 paymentType:", resolvedPaymentType);
+  //       console.log("📦 Checkout Payload:", JSON.stringify(checkoutPayload, null, 2));
+
+
+  //       console.log("calling checkout API...")
+  //       checkout(checkoutPayload, {
+  //         // onSuccess: (data) => {
+  //         //   console.log("✅ Checkout API response:", data);
+  //         //   if (data?.success) { }
+  //         //   // const successMessage = data?.message || "Checkout completed successfully";
+  //         //   showSnackbar({ message: successMessage, severity: "success" });
+
+  //         //   // router.push("/checkout/success");
+  //         // },
+  //         // onError: (err) => {
+  //         //   console.error("Checkout error:", err);
+  //         //   let errorMessage = "Something went wrong during checkout";
+
+  //         //   if (typeof err?.message === "string") {
+  //         //     errorMessage = err.message;
+  //         //   } else if (typeof err?.message === "object") {
+  //         //     errorMessage = err.message?.message || JSON.stringify(err.message);
+  //         //   }
+
+  //         //   showSnackbar({
+  //         //     message: typeof errorMessage === "string" ? errorMessage : JSON.stringify(errorMessage),
+  //         //     severity: "error"
+  //         //   });
+
+  //         // },
+  //         onSuccess: (data) => {
+  //           if (data?.success) {
+  //             showSnackbar({ message: data.message.message, severity: "success" });
+  //             // maybe navigate to order summary or confirmation page
+  //           } else {
+  //             showSnackbar({ message: data?.message || "Unknown error", severity: "error" });
+  //           }
+  //         }
+
+  //       });
+  //     },
+  //     onError: (err) => {
+  //       const errorMessage =
+  //         err?.response?.data?.message ||
+  //         err?.message ||
+  //         "Failed to save address";
+  //       showSnackbar({ message: errorMessage, severity: "error" });
+
+  //     },
+  //   });
+
+
+
+  // };
+  console.log("🛒 Checkout Payload:", JSON.stringify({
+    userDetails: {
+      addressId: "682f8444f11304012f8a9514" // ✅ must match
+    },
+    paymentType: "payment_on_delivery" // or "online_payment"
+  }, null, 2));
+
 
 
 
@@ -132,7 +287,7 @@ export default function Delivery() {
                 <input
                   type="text"
                   placeholder="Enter First Name"
-                  onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                  onChange={(e) => setFormData({ firstName: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md text-[#101828] text-xs font-medium placeholder:text-sm placeholder:font-normal placeholder:text-[#A1A2AE]"
                 />
               </div>
@@ -140,7 +295,7 @@ export default function Delivery() {
                 <input
                   type="text"
                   placeholder="Enter Last Name"
-                  onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                  onChange={(e) => setFormData({ lastName: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md text-[#101828] text-xs font-medium placeholder:text-sm placeholder:font-normal placeholder:text-[#A1A2AE]"
                 />
               </div>
@@ -172,7 +327,7 @@ export default function Delivery() {
                   <input
                     type="number"
                     placeholder="801 234 5678"
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    onChange={(e) => setFormData({ phone: e.target.value })}
                     className="flex-1 px-3 py-2 border-0 focus:outline-none text-sm placeholder:text-sm 
                     placeholder:font-normal placeholder:text-[#A1A2AE] text-black"
                   />
@@ -194,7 +349,7 @@ export default function Delivery() {
                   <input
                     type="number"
                     placeholder="801 234 5678"
-                    onChange={(e) => setFormData({ ...formData, altPhone: e.target.value })}
+                    onChange={(e) => setFormData({ altPhone: e.target.value })}
                     className="flex-1 px-3 py-2 border-0 focus:outline-none text-sm placeholder:text-sm 
                     placeholder:font-normal placeholder:text-[#A1A2AE] text-black"
                   />
@@ -207,7 +362,7 @@ export default function Delivery() {
                 <input
                   type="text"
                   placeholder="Placeholder"
-                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                  onChange={(e) => setFormData({ address: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md text-[#101828] text-xs font-medium placeholder:text-sm placeholder:font-normal placeholder:text-[#A1A2AE]"
                 />
               </div>
@@ -218,7 +373,7 @@ export default function Delivery() {
                 <input
                   type="text"
                   placeholder="Placeholder"
-                  onChange={(e) => setFormData({ ...formData, landmark: e.target.value })}
+                  onChange={(e) => setFormData({ landmark: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md text-[#101828] text-xs font-medium placeholder:text-sm placeholder:font-normal placeholder:text-[#A1A2AE]"
                 />
               </div>
@@ -229,7 +384,7 @@ export default function Delivery() {
                 <input
                   type="text"
                   placeholder="Placeholder"
-                  onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                  onChange={(e) => setFormData({ city: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md text-[#101828] text-xs font-medium placeholder:text-sm placeholder:font-normal placeholder:text-[#A1A2AE]"
                 />
               </div>
@@ -278,7 +433,7 @@ export default function Delivery() {
                 <select
                   value={formData.state}
                   onChange={(e) =>
-                    setFormData({ ...formData, state: e.target.value, lga: '' })
+                    setFormData({ state: e.target.value, lga: '' })
                   }
                   className={`w-full px-3 py-2 border border-gray-300 rounded-md text-sm appearance-none bg-white  ${formData.state ? 'text-[#131735] font-normal text-sm' : 'text-gray-400'}`}
                 >
@@ -287,7 +442,7 @@ export default function Delivery() {
                     <option key={s.state} value={s.state}
                       style={{
                         color: '#101828',
-                         fontWeight: '400',
+                        fontWeight: '400',
                         fontSize: '14px',
                       }}>{s.state}</option>
                   ))}
@@ -302,7 +457,7 @@ export default function Delivery() {
                   <select
                     value={formData.lga}
                     onChange={(e) =>
-                      setFormData({ ...formData, lga: e.target.value })
+                      setFormData({ lga: e.target.value })
                     }
                     className={`w-full px-3 py-2 border border-gray-300 rounded-md text-sm appearance-none bg-white ${formData.state ? 'text-[#131735] font-normal text-sm' : 'text-gray-400'}`}
                   >
@@ -331,51 +486,51 @@ export default function Delivery() {
                 </label>
               </div> */}
               <div className="sm:col-span-2">
-  <label className="flex items-center cursor-pointer">
-    <input
-      type="checkbox"
-      checked={formData.isDefault}
-      onChange={async (e) => {
-        const checked = e.target.checked;
+                <label className="flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.isDefault}
+                    onChange={async (e) => {
+                      const checked = e.target.checked;
 
-        setFormData((prev) => ({
-          ...prev,
-          isDefault: checked,
-        }));
+                      setFormData((prev) => ({
+                        ...prev,
+                        isDefault: checked,
+                      }));
 
-        // If checked, call API to get default address
-        if (checked) {
-          try {
-            const { data } = await refetchDefaultAddress();
-            if (data) {
-              setFormData((prev) => ({
-                ...prev,
-                firstName: data.firstName || "",
-                lastName: data.lastName || "",
-                phone: data.phoneNumber?.slice(-10) || "",
-                altPhone: data.altPhoneNumber?.slice(-10) || "",
-                address: data.address || "",
-                landmark: data.landmark || "",
-                city: data.city || "",
-                lga: data.lga || "",
-                state: data.state || "",
-                isDefault: data.isDefault || true,
-              }));
+                      // If checked, call API to get default address
+                      if (checked) {
+                        try {
+                          const { data } = await refetchDefaultAddress();
+                          if (data) {
+                            setFormData((prev) => ({
+                              ...prev,
+                              firstName: data.firstName || "",
+                              lastName: data.lastName || "",
+                              phone: data.phoneNumber?.slice(-10) || "",
+                              altPhone: data.altPhoneNumber?.slice(-10) || "",
+                              address: data.address || "",
+                              landmark: data.landmark || "",
+                              city: data.city || "",
+                              lga: data.lga || "",
+                              state: data.state || "",
+                              isDefault: data.isDefault || true,
+                            }));
 
-              // Auto-set country codes if needed
-              if (data.phoneNumber?.startsWith("+234")) setCountryCode("+234");
-              if (data.altPhoneNumber?.startsWith("+234")) setAltCountryCode("+234");
-            }
-          } catch (err) {
-            console.error("Failed to fetch default address:", err);
-          }
-        }
-      }}
-      className="mr-2"
-    />
-    <span className="text-[#101828] text-xs font-medium">Set as default address</span>
-  </label>
-</div>
+                            // Auto-set country codes if needed
+                            if (data.phoneNumber?.startsWith("+234")) setCountryCode("+234");
+                            if (data.altPhoneNumber?.startsWith("+234")) setAltCountryCode("+234");
+                          }
+                        } catch (err) {
+                          console.error("Failed to fetch default address:", err);
+                        }
+                      }
+                    }}
+                    className="mr-2"
+                  />
+                  <span className="text-[#101828] text-xs font-medium">Set as default address</span>
+                </label>
+              </div>
 
             </div>
           </div>
@@ -385,9 +540,13 @@ export default function Delivery() {
         </div>
 
         {/* Order Summary Section */}
-        <div className="md:col-span-5">
-          <OrderSummary checkout={handleCheckout} />
-        </div>
+        {cartData?.message?.cart ? (
+          <div className="md:col-span-5">
+            <OrderSummary checkout={handleCheckout} isPending={isPending} cart={cartData?.message?.cart} />
+          </div>
+        ) : (
+          <div className="text-gray-400 text-sm">Loading summary...</div>
+        )}
       </div>
     </div>
   )
