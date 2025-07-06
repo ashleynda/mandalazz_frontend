@@ -87,12 +87,31 @@ export const useCartStore = create(
 
       
       // Remove item from cart
-      removeFromCart: (id) => {
-        const { cartItems } = get();
-        set({
-          cartItems: cartItems.filter(item => item.id !== id)
-        });
-      },
+     removeFromCart: async (id) => {
+  const { cartItems } = get();
+  const token = sessionStorage.getItem("authToken");
+
+  const updatedCart = cartItems.filter(item => item.id !== id);
+  set({ cartItems: updatedCart });
+
+  syncGuestCart(updatedCart); // still useful for guest
+
+  if (token) {
+    try {
+      await fetch(`https://mandelazz-webapp.azurewebsites.net/api/cart/remove`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ productId: id }),
+      });
+    } catch (err) {
+      console.error("❌ Failed to remove item from backend:", err);
+    }
+  }
+},
+
       
       // Update quantity of an item
       updateCartItemQuantity: (id, newQuantity) => {

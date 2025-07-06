@@ -1,7 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 
 const fetchDefaultAddress = async () => {
-     const token = typeof window !== "undefined" ? sessionStorage.getItem("authToken") : null;
+const token = sessionStorage.getItem("authToken");
+
   if (!token) throw new Error("Token missing");
   const response = await fetch("https://mandelazz-webapp.azurewebsites.net/api/address/default", {
     method: "GET",

@@ -4,28 +4,22 @@
 import { Box, Stack, Card, CardContent, Typography, IconButton } from '@mui/material';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import FavoriteIcon from '@mui/icons-material/Favorite';
-import StarIcon from '@mui/icons-material/Star';
-import StarHalfIcon from '@mui/icons-material/StarHalf';
-import shirt from '../assets/shirt.png';
-import brown from '../assets/brown.png';
-import denim from '../assets/denim.png';
 import Image from 'next/image';
 import useFavoritesQuery from '../lib/hooks/useFavouritesQuery';
 import { useEffect, useState } from 'react';
-import { truncateText } from '../lib/utils';
 import { FaArrowRight } from 'react-icons/fa';
 
 
 
 
-const bull = (
-    <Box
-        component="span"
-        sx={{ display: 'inline-block', mx: '2px', transform: 'scale(0.8)' }}
-    >
-        •
-    </Box>
-);
+// const bull = (
+//     <Box
+//         component="span"
+//         sx={{ display: 'inline-block', mx: '2px', transform: 'scale(0.8)' }}
+//     >
+//         •
+//     </Box>
+// );
 
 
 export default function Favourites() {
@@ -41,13 +35,34 @@ export default function Favourites() {
         isLoading,
         isError,
         error,
-    } = useFavoritesQuery(token);
+    } = useFavoritesQuery(token || '');
     //   const favorites = Array.isArray(data?.data) ? data.data.map(item => item.productId) : [];
     const favorites = Array.isArray(data?.data)
         ? data.data.filter(item => item && item.variations?.[0]?.images?.[0])
         : [];
 
     console.log('favorites from query:', favorites);
+
+       const renderStars = (rating) => {
+        const stars = [];
+        const value = Number(rating) || 0;
+        const fullStars = Math.floor(rating);
+        const hasHalfStar = value % 1 !== 0;
+
+        for (let i = 0; i < fullStars; i++) {
+            stars.push(
+                <FaStar key={i} className="text-yellow-500 text-xs sm:text-sm" />
+            );
+        }
+
+        if (hasHalfStar) {
+            stars.push(
+                <FaStarHalfAlt key="half" className="text-yellow-500 text-xs sm:text-sm" />
+            );
+        }
+
+        return stars;
+    };
 
     return (
         <div className="bg-white mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -58,18 +73,21 @@ export default function Favourites() {
                     View All <FaArrowRight className="ml-1" />
                 </p>
             </div>
-            <Stack direction="row" spacing={2}>
+            <div className='flex flex-wrap gap-4'>
                 {favorites.map((product, idx) => {
                     const imageUrl = product?.variations?.[0]?.images?.[0] || '/fallback.png';
                     return (
-                        <Card sx={{
-                            minWidth: 220,
-                            maxWidth: 240, position: 'relative',
+                        <div className='w-[218px]'
+                        sx={{
+                            // minWidth: 220,
+                            // maxWidth: 240, 
+                            position: 'relative',
                             borderRadius: '8px',
                             boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
                         }}
                             key={product._id || idx}>
-                            <Box sx={{ position: 'relative', width: '100%', height: 240 }}>
+                            {/* <Box sx={{ position: 'relative', width: '100%', height: 240 }}> */}
+                            <div className="relative w-full h-32 sm:h-40 md:h-48 lg:h-56">
                                 <Image
                                     // component="img"
                                     src={imageUrl}
@@ -84,43 +102,22 @@ export default function Favourites() {
                                         borderTopRightRadius: 8,
                                     }}
                                 />
-                                <IconButton
-                                    sx={{
-                                        position: 'absolute',
-                                        bottom: 8,
-                                        right: 8,
-                                        background: 'white',
-                                        width: 32,
-                                        height: 32,
-                                        borderRadius: '50%',
-                                        boxShadow: '0 2px 5px rgba(0,0,0,0.15)',
-                                        '&:hover': {
-                                            background: 'white',
-                                        },
-                                        padding: 0,
-                                    }}
-                                    size="small"
-                                >
+                                <button className="absolute bottom-2 right-2 bg-white rounded-full p-1.5 sm:p-2 shadow-md hover:bg-gray-50 transition-colors">
                                     {product.isFavorite ? (
                                         <FavoriteIcon sx={{ color: '#4CAF50', fontSize: 20 }} />
                                     ) : (
                                         <FavoriteBorderIcon sx={{ color: '#4CAF50', fontSize: 20 }} />
                                     )}
-                                </IconButton>
-                            </Box>
-                            <CardContent sx={{ p: 1.5 }}>
-                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', mb: 0.5 }}>
-                                    <Typography
-                                        variant="subtitle2"
-                                        sx={{
-                                            fontWeight: '600',
-                                            fontSize: '14px',
-                                            color: '#1976d2'
-                                        }}
-                                    >
-                                        {product.name}
-                                    </Typography>
-                                    {/* <Typography 
+                                </button>
+                            </div>
+                            <div className="py-2">
+                                {/* <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', mb: 0.5 }}> */}
+                                {/* <div className='mb-1 sm:mb-2'> */}
+                                <h3 className="text-sm md:text-sm font-normal text-[#061410] truncate">
+                                    {product.name}
+                                </h3>
+                                {/* </div> */}
+                                {/* <Typography 
                                     variant="caption" 
                                     sx={{ 
                                         color: 'text.secondary',
@@ -129,31 +126,18 @@ export default function Favourites() {
                                     >
                                     {truncateText(product.description, 30)}
                                     </Typography> */}
-                                </Box>
+                            </div>
 
-                                <Box sx={{ mb: 0.5 }} className="flex items-center gap-2">
-                                    <Typography
-                                        variant="body1"
-                                        sx={{
-                                            fontWeight: 700,
-                                            fontSize: '16px'
-                                        }}
-                                    >
-                                        ₦{Number(product.price?.$numberDecimal || 0).toLocaleString()}
-                                    </Typography>
-                                    <Typography
-                                        variant="caption"
-                                        sx={{
-                                            textDecoration: 'line-through',
-                                            color: 'text.secondary',
-                                            fontSize: '12px'
-                                        }}
-                                    >
-                                        ₦{Number(product.originalPrice?.$numberDecimal || 0).toLocaleString()}
-                                    </Typography>
-                                </Box>
+                            <div className="flex items-center gap-2 md:gap-1 mb-1 sm:mb-2">
+                                <span className="text-sm font-bold text-[#061410]">
+                                    ₦{Number(product.price?.$numberDecimal || 0).toLocaleString()}
+                                </span>
+                                <span className="text-[8px] sm:text-sm text-[#667085] line-through">
+                                    ₦{Number(product.originalPrice?.$numberDecimal || 0).toLocaleString()}
+                                </span>
+                            </div>
 
-                                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            {/* <Box sx={{ display: 'flex', alignItems: 'center' }}>
                                     <Box sx={{ display: 'flex', mr: 0.5 }}>
                                         {[...Array(Math.floor(product.rating))].map((_, i) => (
                                             <StarIcon key={i} sx={{ fontSize: 14, color: '#FFA000' }} />
@@ -171,13 +155,21 @@ export default function Favourites() {
                                     >
                                         {product.rating} ({product.reviewCount} Reviews)
                                     </Typography>
-                                </Box>
-                            </CardContent>
-                        </Card>
+                                </Box> */}
+                            <div className="flex items-center flex-wrap gap-1">
+                                <div className="flex items-center">
+                                    {renderStars(product.rating)}
+                                </div>
+                                <span className="text-[9px] font-medium text-[#061410]">
+                                    {product.rating} ({product.reviewCount} Reviews)
+                                </span>
+                            </div>
+                        </div>
+                        // </div>
                     );
                 })}
-            </Stack>
-        </div>
+            </div>
+        </div >
 
     )
 }

@@ -50,6 +50,7 @@ const Login = () => {
         const token = data?.message?.token;
         if (token) {
           sessionStorage.setItem('authToken', token);
+          sessionStorage.setItem("userEmail", email);
           showSnackbar({ message: 'Login successful', severity: 'success' });
           // router.push('/products')
           setTimeout(() => {

@@ -14,8 +14,7 @@ import { useCartStore } from '../../lib/store/useCart';
 import UploadAvatars from '../../component/profile';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import ProfileDropdown, { AccountDropdownMenu } from '../../component/reusables/AccountDropDownMenu';
-
-
+import useProductSearch from '../../lib/hooks/useSearchMutation'; // Adjust path if needed
 
 
 // interface NavbarProps {
@@ -36,6 +35,9 @@ const Navbar = ({ onSearch }) => {
   const cartItemCount = useCartStore(state => state.getCartItemCount());
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
+  const { data, isLoading, error, refetch } = useProductSearch(searchTerm, false);
+  const [results, setResults] = useState([]);
+
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -148,6 +150,17 @@ const Navbar = ({ onSearch }) => {
       window.removeEventListener('logout', checkAuth);
     };
   }, []);
+  useEffect(() => {
+    const delayDebounce = setTimeout(() => {
+      if (searchTerm.trim()) {
+        handleSearch(searchTerm.trim());
+      } else {
+        setResults([]);
+      }
+    }, 400); // adjust the delay as needed
+
+    return () => clearTimeout(delayDebounce);
+  }, [searchTerm]);
 
 
 
@@ -176,25 +189,22 @@ const Navbar = ({ onSearch }) => {
   // }, []);
 
   const handleSearch = async (query) => {
-    try {
-      const response = await fetch(`http://localhost:3030/api/product/search?query=${query}`, {
-        method: "GET",
-        redirect: "follow"
-      });
-      const result = await response.json(); // <-- assuming your API returns JSON
-      console.log(result);
+    setSearchTerm(query);
+    if (query) {
+      try {
+        const { data } = await refetch();
+        // setResults(data);
+        setResults(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error("Error fetching search results", error);
+        setResults([]);
+      }
+    } else {
+      setResults([]);
 
-      onSearch(query); // <-- you can call the parent function too if you want
-    } catch (error) {
-      console.error("Error searching:", error);
     }
   };
 
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter') {
-      handleSearch(searchTerm);
-    }
-  };
 
   const renderCartIcon = () => {
     // User is not logged in & cart is empty
@@ -233,17 +243,17 @@ const Navbar = ({ onSearch }) => {
           {/* Left: Hamburger Menu and Logo */}
           <div className="flex items-center gap-1 flex-shrink-0 min-w-0">
             <div className='flex-shrink-0 '>
-            <CategoriesMobile isMobile={isMobile} />
+              <CategoriesMobile isMobile={isMobile} />
             </div>
             <div className='flex-shrink-0 '>
-            <Image
-              src={logo}
-              alt="logo"
-              width={100}
-              height={40}
-              className="h-8 w-auto cursor-pointer "
-              onClick={() => router.push('/products')}
-            />
+              <Image
+                src={logo}
+                alt="logo"
+                width={100}
+                height={40}
+                className="h-8 w-auto cursor-pointer "
+                onClick={() => router.push('/products')}
+              />
             </div>
           </div>
 
@@ -272,149 +282,50 @@ const Navbar = ({ onSearch }) => {
         </div>
         <div className="px-3 pb-3 w-full">
           <div className='w-full max-w-full'>
-          <TextField
-            variant="outlined"
-            placeholder="Search..."
-            size="small"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            onKeyDown={handleKeyDown}
-            sx={{
-              width: '100%',
-              maxWidth: '100%',
-              '& .MuiOutlinedInput-root': {
-                height: '36px',
-                fontSize: '14px'
-              }
-            }}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon sx={{ fontSize: '18px' }} />
-                </InputAdornment>
-              ),
-            }}
-          />
+            <TextField
+              variant="outlined"
+              placeholder="Search..."
+              size="small"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              sx={{
+                width: '100%',
+                maxWidth: '100%',
+                '& .MuiOutlinedInput-root': {
+                  height: '36px',
+                  fontSize: '14px'
+                }
+              }}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon sx={{ fontSize: '18px' }} />
+                  </InputAdornment>
+                ),
+              }}
+            />
           </div>
+          {!isLoading && searchTerm && (
+            results.length === 0 ? (
+              <div className="text-center mt-4 text-gray-500 font-medium">
+                No products found for "{searchTerm}"
+              </div>
+            ) : (
+              <div>
+                {results.map(product => (
+                  <div key={product.id}>{product.name}</div>
+                ))}
+              </div>
+            )
+          )}
+
+
         </div>
       </div>
     );
   }
   return (
-
-    // <div className="logo flex items-center justify-between p-4 px-20 bg-white divide-x divide-[#e5e7eb] fixed top-0 left-0 w-full z-50">
     <>
-      {/* <div className={`logo flex items-center justify-between ${isMobile ? 'p-2 px-8' : 'p-4 px-20'} bg-white divide-x divide-[#e5e7eb] fixed top-0 left-0 w-full z-1000 h-[60px]`}>
-        <div className="flex items-center">
-          <Image
-            src={logo}
-            alt="logo"
-            width={isMobile ? 80 : 100}
-            height={isMobile ? 32 : 40}
-            className="h-10 w-auto border-t-2 border-b-1 border-gray-200 z-10"
-            onClick={() => router.push('/products')}
-          />         
-        </div>
-        {!isMobile && (
-          <TextField
-            variant="outlined"
-            placeholder="Search..."
-            size="small"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            onKeyDown={handleKeyDown}
-            // sx={{ width: '500px' }}
-            sx={{ width: { xs: '100%', sm: '300px', md: '400px' } }}
-
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon />
-                </InputAdornment>
-              ),
-            }}
-          />
-        )}
-
-        <div className="flex items-center gap-6">         
-          {!isMobile && isLoggedIn && (
-            <>
-            {renderCartIcon()}
-          </>
-          )}
-          
-           {isMobile && !isLoggedIn (
-            <div className="ml-2 bg-none">
-              <CategoriesMobile isMobile={isMobile} />
-            </div>
-          )}
-
-          {!isMobile && !isLoggedIn && (
-            <div className='flex gap-4'>
-              <Button
-                variant="outlined"
-                sx={{
-                  textTransform: 'none',
-                  color: '#26735B',
-                  borderColor: '#26735B',
-                  borderRadius: '8px',
-                  padding: '8px 40px',
-                  fontWeight: '700',
-                  fontSize: '14px',
-                  '&:hover': {
-                    backgroundColor: 'rgba(0, 0, 0, 0.04)',
-                    borderColor: 'black',
-                  }
-                }}
-                onClick={() => router.push('/signup')}
-              >
-                Sign Up
-              </Button>
-
-              <Button
-                variant="contained"
-                sx={{
-                  textTransform: 'none',
-                  backgroundColor: '#26735B',
-                  color: 'white',
-                  borderRadius: '8px',
-                  padding: '8px 40px',
-                  fontWeight: '700',
-                  fontSize: '14px',
-                  '&:hover': {
-                    backgroundColor: '#333',
-                  }
-                }}
-                onClick={() => router.push('/login')}
-              >
-                Log In
-              </Button>
-            </div>
-          )}
-          {!isMobile && !isOnlyProductsPage && (
-            <>
-
-              <div className="relative cursor-pointer" onClick={() => router.push('/notifications')}>
-                <FiBell className="w-6 h-6 text-gray-700 hover:text-primary" />
-                {notificationCount > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                    {notificationCount}
-                  </span>
-                )}
-              </div>
-            </>
-          )}
-          {!isMobile && isLoggedIn && (
-            <>
-            {renderCartIcon()}
-              <div className="cursor-pointer hover:opacity-80 transition-opacity" onClick={() => router.push('/profile')}>
-                <FaUserCircle className="w-10 h-10 text-gray-400" />
-              </div>
-            </>
-          )}
-        </div>
-      </div> */}
-
       <div className={`logo flex items-center justify-between ${isMobile ? 'p-2 px-8' : 'p-4 px-20'} bg-white divide-x divide-[#e5e7eb] fixed top-0 left-0 w-full z-1000 h-[60px]`}>
         {/* {isMobile && (
             <div className="ml-2 bg-none">
@@ -431,26 +342,46 @@ const Navbar = ({ onSearch }) => {
             onClick={() => router.push('/products')}
           />
         </div>
-        {/* <Searchbar onSearch={onSearch} /> */}
+        <div className="relative w-full max-w-[400px]">
 
-        <TextField
-          variant="outlined"
-          placeholder="Search..."
-          size="small"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          onKeyDown={handleKeyDown}
-          // sx={{ width: '500px' }}
-          sx={{ width: { xs: '100%', sm: '300px', md: '400px' } }}
+          <TextField
+            variant="outlined"
+            placeholder="Search..."
+            size="small"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            // sx={{ width: '500px' }}
+            sx={{ width: { xs: '100%', sm: '300px', md: '400px' } }}
 
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon />
-              </InputAdornment>
-            ),
-          }}
-        />
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon />
+                </InputAdornment>
+              ),
+            }}
+          />
+          {!isLoading && searchTerm && (
+            <div className="absolute mt-1 w-full bg-white border border-gray-200 shadow-lg rounded-md max-h-[300px] overflow-y-auto z-[10000]">
+              {results.length === 0 ? (
+                <div className="p-3 text-sm text-gray-500 text-center">
+                  No products found for "{searchTerm}"
+                </div>
+              ) : (
+                results.map((product) => (
+                  <div
+                    key={product.id}
+                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+                    onClick={() => router.push(`/products/${product.id}`)}
+                  >
+                    {product.name}
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+        </div>
+
 
         <div className="flex items-center gap-6">
 
@@ -522,14 +453,3 @@ export default Navbar;
 
 
 
-{/* Shopping cart icon with notification badge */ }
-{/* <div className="relative cursor-pointer" onClick={() => router.push('/products/checkout/cart')}>
-          <FiShoppingCart className="w-6 h-6 text-gray-700 hover:text-primary" />
-          <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-            3
-          </span>
-          </div> */}
-{/* <div className="flex gap-2 cursor-pointer" onClick={() => router.push('/products/checkout/cart')}>
-            <FiShoppingCart className="w-6 h-6 text-gray-700 hover:text-primary" />
-          <p className='text-sm font-normal text-[#191818]'>Cart</p>
-          </div> */}
