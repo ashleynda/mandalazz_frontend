@@ -1,57 +1,12 @@
-// import { useMutation } from '@tanstack/react-query';
-
-// // Define the mutation function
-// const createCheckout = async ({ userDetails, paymentType }) => {
-//    const token = typeof window !== "undefined" ? sessionStorage.getItem("authToken") : null;
-// console.log("Auth Token:", token);
-//  console.log("userDetails:", userDetails);
-//   console.log("paymentType:", paymentType);
-
-//      if (!token) {
-//     throw new Error("Please login.");
-//   }
-//   if (!userDetails?.addressId) {
-//   throw new Error("Missing address ID");
-// }
-
-//   const response = await fetch('https://mandelazz-webapp.azurewebsites.net/api/checkout/create', {
-//     method: 'POST',
-//     headers: {
-//       Authorization: `Bearer ${token}`,
-//       'Content-Type': 'application/json',
-//     },
-//     body: JSON.stringify({
-//       userDetails,
-//       paymentType,
-//     }),
-//   });
-
-
-//     const responseData = await response.json().catch(() => ({}));
-
- 
-//   if (!response.ok || responseData?.success === false) {
-//     const message =
-//       typeof responseData.message === 'string'
-//         ? responseData.message
-//         : JSON.stringify(responseData.message || 'Something went wrong');
-//     throw new Error(message);
-//   }
-
-//   return responseData;
-// };
-
-// const useCreateCheckout = () => {
-//   return useMutation({
-//     mutationFn: createCheckout,
-//   });
-// };
-// export default useCreateCheckout;
-
 import { useMutation } from '@tanstack/react-query';
 
 const createCheckout = async ({ token, payload }) => {
-    if (!token) throw new Error("Please login.");
+  if (!token) {
+    throw new Error("Authentication token is required");
+  }
+
+  console.log("🚀 Making checkout request with payload:", JSON.stringify(payload, null, 2));
+
   const response = await fetch("https://mandelazz-webapp.azurewebsites.net/api/checkout/create", {
     method: "POST",
     headers: {
@@ -61,16 +16,42 @@ const createCheckout = async ({ token, payload }) => {
     body: JSON.stringify(payload),
   });
 
-  // const data = await response.json();
-   const data = await response.json().catch(() => ({}));
+  const data = await response.json().catch(() => ({ success: false, message: "Failed to parse response" }));
 
+  console.log("📡 Response status:", response.status);
+  console.log("📡 Response data:", JSON.stringify(data, null, 2));
 
-  if (!response.ok || data?.success === false) {
-    const message =
-      typeof data.message === 'string'
-        ? data.message
-        : JSON.stringify(data.message || 'Checkout failed');
-    throw new Error(message);
+  if (!response.ok) {
+    // Handle different response formats
+    let errorMessage = "Checkout failed";
+
+    if (data.message) {
+      if (typeof data.message === 'string') {
+        errorMessage = data.message;
+      } else if (typeof data.message === 'object' && data.message.message) {
+        errorMessage = data.message.message;
+      } else {
+        errorMessage = JSON.stringify(data.message);
+      }
+    }
+
+    throw new Error(errorMessage);
+  }
+
+  if (data.success === false) {
+    let errorMessage = "Checkout failed";
+
+    if (data.message) {
+      if (typeof data.message === 'string') {
+        errorMessage = data.message;
+      } else if (typeof data.message === 'object' && data.message.message) {
+        errorMessage = data.message.message;
+      } else {
+        errorMessage = JSON.stringify(data.message);
+      }
+    }
+
+    throw new Error(errorMessage);
   }
 
   return data;
@@ -80,13 +61,12 @@ const useCreateCheckout = () => {
   return useMutation({
     mutationFn: createCheckout,
     onSuccess: (data) => {
-      console.log("✅ Checkout success:", data);
+      console.log("✅ Checkout mutation success:", JSON.stringify(data, null, 2));
     },
     onError: (error) => {
-      console.error("❌ Checkout failed:", error.message);
+      console.error("❌ Checkout mutation failed:", error.message);
     },
   });
 };
 
 export default useCreateCheckout;
-
