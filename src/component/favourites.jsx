@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Box, Stack, Card, CardContent, Typography, IconButton } from '@mui/material';
@@ -10,8 +9,6 @@ import { useEffect, useState } from 'react';
 import { FaArrowRight } from 'react-icons/fa';
 
 
-
-
 // const bull = (
 //     <Box
 //         component="span"
@@ -20,8 +17,6 @@ import { FaArrowRight } from 'react-icons/fa';
 //         •
 //     </Box>
 // );
-
-
 export default function Favourites() {
     const [token, setToken] = useState(null);
 
@@ -37,13 +32,13 @@ export default function Favourites() {
         error,
     } = useFavoritesQuery(token || '');
     //   const favorites = Array.isArray(data?.data) ? data.data.map(item => item.productId) : [];
-    const favorites = Array.isArray(data?.data)
+    const favoritesIds = Array.isArray(data?.data)
         ? data.data.filter(item => item && item.variations?.[0]?.images?.[0])
         : [];
 
-    console.log('favorites from query:', favorites);
+    console.log('favorites from query:', favoritesIds);
 
-       const renderStars = (rating) => {
+    const renderStars = (rating) => {
         const stars = [];
         const value = Number(rating) || 0;
         const fullStars = Math.floor(rating);
@@ -74,17 +69,17 @@ export default function Favourites() {
                 </p>
             </div>
             <div className='flex flex-wrap gap-4'>
-                {favorites.map((product, idx) => {
+                {favoritesIds.map((product, idx) => {
                     const imageUrl = product?.variations?.[0]?.images?.[0] || '/fallback.png';
                     return (
                         <div className='w-[218px]'
-                        sx={{
-                            // minWidth: 220,
-                            // maxWidth: 240, 
-                            position: 'relative',
-                            borderRadius: '8px',
-                            boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-                        }}
+                            sx={{
+                                // minWidth: 220,
+                                // maxWidth: 240, 
+                                position: 'relative',
+                                borderRadius: '8px',
+                                boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                            }}
                             key={product._id || idx}>
                             {/* <Box sx={{ position: 'relative', width: '100%', height: 240 }}> */}
                             <div className="relative w-full h-32 sm:h-40 md:h-48 lg:h-56">
@@ -102,11 +97,18 @@ export default function Favourites() {
                                         borderTopRightRadius: 8,
                                     }}
                                 />
-                                <button className="absolute bottom-2 right-2 bg-white rounded-full p-1.5 sm:p-2 shadow-md hover:bg-gray-50 transition-colors">
-                                    {product.isFavorite ? (
-                                        <FavoriteIcon sx={{ color: '#4CAF50', fontSize: 20 }} />
+                                <button className="absolute bottom-2 right-2 bg-white rounded-full p-1.5 sm:p-2 shadow-md hover:bg-gray-50 transition-colors"
+                                    onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    handleAddToFavorites(product._id);
+                                }}
+                                aria-label="Save for later"
+                                >
+                                    {favoritesIds.includes(product._id) ? (
+                                        <FavoriteIcon className="text-[#4CAF50]" fontSize="small" />
                                     ) : (
-                                        <FavoriteBorderIcon sx={{ color: '#4CAF50', fontSize: 20 }} />
+                                        <FavoriteBorderIcon className="text-[#4CAF50]" fontSize="small" />
                                     )}
                                 </button>
                             </div>

@@ -15,20 +15,21 @@ import useAddToFavorites from '../../lib/hooks/useAddToFavourites';
 import useRemoveFavoriteMutation from '../../lib/hooks/useRemoveFavourites';
 import useFavoritesQuery from '@/src/lib/hooks/useFavouritesQuery';
 import useSnackbarStore from '@/src/lib/store/useSnackbarStore';
+import { FaHeart } from 'react-icons/fa';
 
 
 
 const ViewProducts = () => {
   const [ratingValue, setRatingValue] = useState(3.5);
   const router = useRouter();
-  console.log('Router:', router); 
+  console.log('Router:', router);
   const params = useParams();
-  const id = params?.id; 
+  const id = params?.id;
   const [token, setToken] = useState('');
   const { data, isLoading, isError, error } = useProductsQuery();
   // const products = data?.data ?? [];
-   let products = [];
-  
+  let products = [];
+
   if (data) {
     if (Array.isArray(data)) {
       products = data;
@@ -47,7 +48,7 @@ const ViewProducts = () => {
       console.log('Available keys in data:', Object.keys(data));
     }
   }
-  
+
   console.log('Final products array:', products);
   console.log('Products length:', products.length);
   console.log('Is products an array?', Array.isArray(products));
@@ -55,23 +56,27 @@ const ViewProducts = () => {
   const { mutate: addToFavorites, isPending } = useAddToFavorites();
   const [favorites, setFavorites] = useState([]);
   const deleteFavorite = useRemoveFavoriteMutation();
-  const { data: favoritesQuery } = useFavoritesQuery(token || null);
+  const { data: favoritesQuery } = useFavoritesQuery(token || undefined, {
+    enabled: !!token,
+  });
   console.log('Favorites Query:', favoritesQuery);
   const { showSnackbar } = useSnackbarStore();
 
-  useEffect(() => {
-  if (typeof window !== 'undefined') {
-    const storedToken = sessionStorage.getItem('authToken');
-    setToken(storedToken || '');
-  }
-}, []);
-
 
   useEffect(() => {
-    if (favoritesQuery && Array.isArray(favoritesQuery.favorites)) {
-      setFavorites(favoritesQuery.favorites);
+    if (typeof window !== 'undefined') {
+      const storedToken = sessionStorage.getItem('authToken');
+      setToken(storedToken || '');
+    }
+  }, []);
+
+  useEffect(() => {
+    if (favoritesQuery?.data && Array.isArray(favoritesQuery.data)) {
+      const favoriteIds = favoritesQuery.data.map((product) => product._id);
+      setFavorites(favoriteIds);
     }
   }, [favoritesQuery]);
+
 
   const handleAddToFavorites = (productId) => {
     if (favorites.includes(productId)) {
@@ -126,22 +131,22 @@ const ViewProducts = () => {
   //    const href = `/viewProductDetails/${productId}?color=${encodeURIComponent(lowerCasedColor)}&size=${encodeURIComponent(size)}`;
   //   console.log('Navigating to ViewDetailsPage for product ID:', href);
 
-    // router.push({
-    //   pathname:`/viewProductDetails/${productId}`,
-    //   query: { color: lowerCasedColor },
-    // })
+  // router.push({
+  //   pathname:`/viewProductDetails/${productId}`,
+  //   query: { color: lowerCasedColor },
+  // })
   //   router.push(href);
   // };
   const handleOptions = (productId, color, size) => {
-  const queryParams = new URLSearchParams();
-  if (color) queryParams.append('color', color.toLowerCase());
-  if (size) queryParams.append('size', size);
+    const queryParams = new URLSearchParams();
+    if (color) queryParams.append('color', color.toLowerCase());
+    if (size) queryParams.append('size', size);
 
-  const href = `/viewProductDetails/${productId}?${queryParams.toString()}`;
-  console.log('Navigating to:', href);
+    const href = `/viewProductDetails/${productId}?${queryParams.toString()}`;
+    console.log('Navigating to:', href);
 
-  router.push(href);
-};
+    router.push(href);
+  };
 
   console.log("Product:", products.name, "ColorCode:", products.variations?.[0]?.colorCode);
 
@@ -155,29 +160,29 @@ const ViewProducts = () => {
         {products.map((product) => (
           <div key={product._id} className="w-full">
             <div
-            role='button'
+              role='button'
               tabIndex={0}
               style={{ borderRadius: '8px', overflow: 'hidden' }}
               className="card-container"
-                  // onClick={() => handleOptions(product._id, 
-                  //   product.variations?.[0]?.colorCode,
-                  //   product.variations?.[0]?.availableSizes?.[0]
-                  // )}
-  //                 onClick={() => {
-  // const variation = product.variations?.[0];
-  // const color = variation?.colorCode;
-  // const size = Array.isArray(variation?.sizes) ? variation.sizes[0] : undefined;
-onClick={() => {
-  const variation = product.variations?.[0];
-  const color = variation?.color;
-  const size = variation?.sizes?.[0]?.size;
+              // onClick={() => handleOptions(product._id, 
+              //   product.variations?.[0]?.colorCode,
+              //   product.variations?.[0]?.availableSizes?.[0]
+              // )}
+              //                 onClick={() => {
+              // const variation = product.variations?.[0];
+              // const color = variation?.colorCode;
+              // const size = Array.isArray(variation?.sizes) ? variation.sizes[0] : undefined;
+              onClick={() => {
+                const variation = product.variations?.[0];
+                const color = variation?.color;
+                const size = variation?.sizes?.[0]?.size;
 
-  if (!color || !size) {
-    console.error("Missing color or size", { color, size });
-    return;
-  }
-  handleOptions(product._id, color, size);
-}}
+                if (!color || !size) {
+                  console.error("Missing color or size", { color, size });
+                  return;
+                }
+                handleOptions(product._id, color, size);
+              }}
 
 
             >
@@ -186,25 +191,31 @@ onClick={() => {
                 {/* <img alt="custom header" src={typeof yellowWoman === 'string' ? yellowWoman : yellowWoman.src} className="w-full rounded-t-lg" /> */}
                 <img
                   alt={product.name}
-                src={
-                  product.variations?.[0]?.images?.[0] ??
-                  yellowWoman.src // fallback image
-                }
+                  src={
+                    product.variations?.[0]?.images?.[0] ??
+                    yellowWoman.src // fallback image
+                  }
                   className="w-full rounded-t-lg object-cover h-[166px] md:h-full"
                 />
                 <button
                   // onClick={() => handleAddToFavorites(product._id)}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      handleAddToFavorites(product._id);
-                    }}
-                  className={`absolute bottom-2 right-2 p-2 rounded-full shadow-md transition hover:scale-105
-                  ${favorites.includes(product._id) ? "bg-[#26735B]" : "bg-white"}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleAddToFavorites(product._id);
+                  }}
+                  className={`absolute bottom-2 right-2 p-2 rounded-full shadow-md transition bg-white hover:scale-105
+                  
+                  `}
                   aria-label="Save for later"
                 >
+                  {favorites.includes(product._id) ? (
+                    <FaHeart className="text-[#26735B]" size={16} />
+                  ) : (
+                    <FiHeart className="text-[#26735B]" size={16} />
+                  )}
                   {/* <FiHeart className="text-[#191818]" /> */}
-                   <FiHeart className={favorites.includes(product._id) ? "bg-[#26735B]" : "text-[#191818]"} />
+                  {/* <FiHeart className={favorites.includes(product._id) ? "bg-[#26735B]" : "text-[#191818]"} /> */}
                 </button>
               </div>
 
@@ -220,7 +231,7 @@ onClick={() => {
                 <p className="text-left text-[#061410] text-base font-bold">
                   {/* {product.price} */}
                   {/* {product.price.$numberDecimal} */}
-                   {product.price?.$numberDecimal ?? "N/A"}
+                  {product.price?.$numberDecimal ?? "N/A"}
                 </p>
                 <span className="text-[11px] font-normal text-[#667085] line-through mt-1">₦150,000</span>
               </div>

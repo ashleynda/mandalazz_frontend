@@ -1,9 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 
-const fetchComments = async () => {
-  const token = sessionStorage.getItem('authToken');
+const fetchComments = async ({ queryKey}) => {
+  // const token = sessionStorage.getItem('authToken');
+   const [, commentId, token] = queryKey;
   const response = await fetch(
-    'https://mandelazz-webapp.azurewebsites.net/api/comment/67fa8eb7eb8d1a357aced4de/comments',
+    `https://mandelazz-webapp.azurewebsites.net/api/comment/${commentId}/comments`,
     {
       method: 'GET',
       headers: {
@@ -22,9 +23,10 @@ const fetchComments = async () => {
   return result;
 };
 
-export const useComments = () => {
+export const useComments = (commentId, token) => {
   return useQuery({
-    queryKey: ['comments', '67fa8eb7eb8d1a357aced4de'],
+    queryKey: ['comments', commentId, token],
     queryFn: fetchComments,
+    enabled: !!commentId && !!token,
   });
 };

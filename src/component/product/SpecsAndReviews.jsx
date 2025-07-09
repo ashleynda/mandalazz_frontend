@@ -34,11 +34,17 @@ const tabs = [
       const contentMinHeight = "400px";
     return (
         <div>
-            <ProductTabs />
+            <ProductTabs
+                tabs={tabs}
+                activeTab={activeTab}
+                onTabChange={(tab) => setActiveTab(tab.id)} 
+            />
 
              <div className="mt-4" style={{ minHeight: contentMinHeight }}>
-                {pathname?.startsWith("/products/productDetails") && <ProductDetails />}
-                {pathname?.startsWith("/products/reviews") && <Reviews />}
+                {/* {pathname?.startsWith("/products/productDetails") && <ProductDetails />}
+                {pathname?.startsWith("/products/reviews") && <Reviews />} */}
+                   {activeTab === "Product Details" && <Specifications />}
+        {activeTab === "Reviews" && <Reviews />}
             </div>
         </div>
     )

@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 
-const useAddToFavorites = () => {
+const useAddToFavorites = (productId) => {
   return useMutation({
     mutationFn: async (productId) => {
       const token = sessionStorage.getItem('authToken'); 

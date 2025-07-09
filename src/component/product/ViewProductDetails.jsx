@@ -16,6 +16,7 @@ import useProductsQuery from '@/src/lib/hooks/useProductMutation';
 import useAddToCartMutation from "../../lib/hooks/useAddToCartMutation";
 import useFavoritesQuery from '@/src/lib/hooks/useFavouritesQuery';
 import useSnackbarStore from '@/src/lib/store/useSnackbarStore';
+import ProductTabs from '../reusables/ApplicationTabSlider';
 
 const sizes = ['L', 10, 12, 14, 16, 18, 20];
 const colors = ["yellow", "blue", "red", "brown suit", "sky-blue", "gray", "cream", "white", "pink", "purple"];
@@ -180,15 +181,6 @@ const ViewProductDetails = () => {
       description: product.description || "No description",
     };
 
-    console.log('Adding to cart:', newItem);
-    console.log("Calling mutation with:", newItem);
-    console.log("Size:", selectedSize);
-    console.log("Color:", selectedColor);
-    console.log("Calling mutation now...");
-    console.log('Product object:', product);
-    console.log('Product ID:', product._id);
-    console.log('Final API payload:', apiPayload);
-
     addToCart(newItem);
     addToCartMutation(apiPayload, {
       onSuccess: (data) => {
@@ -205,7 +197,6 @@ const ViewProductDetails = () => {
         router.push('/viewProductDetails/checkout/cart');
       },
       onError: (err) => {
-        console.error("Mutation error:", err);
          const errorMessage =
     typeof err?.message === 'string'
       ? err.message
@@ -221,7 +212,8 @@ const ViewProductDetails = () => {
 
   };
 
-  const ProductDetails = () => (
+
+  const ProductInfoPanel = () => (
     <div className="px-4 md:px-0">
       <h1 className="text-2xl md:text-3xl font-bold text-[#061410] text-left">{product.name}</h1>
       <p className="text-left text-[#061410] text-lg font-bold">{product.price?.$numberDecimal ?? "N/A"}</p>
@@ -313,7 +305,7 @@ const ViewProductDetails = () => {
         </div>
         <div className="flex items-center justify-center w-12 h-12 border border-[#26735B] rounded-lg hover:bg-gray-50 cursor-pointer">
           {isFavorite ? (
-            <FaHeart className="text-[#191818] w-5 h-5" />
+            <FaHeart className="text-[#26735B] w-5 h-5" />
           ) : (
             <FiHeart className="text-[#26735B] w-5 h-5" />
           )}
@@ -335,7 +327,7 @@ const ViewProductDetails = () => {
             className="w-12 h-12 border border-gray-300 rounded-lg flex items-center justify-center flex-shrink-0"
           >
             {isFavorite ? (
-              <FaHeart className="text-[#191818] w-5 h-5" />
+              <FaHeart className="text-[#26735B] w-5 h-5" />
             ) : (
               <FiHeart className="text-[#26735B] w-5 h-5" />
             )}
@@ -399,15 +391,16 @@ const ViewProductDetails = () => {
           </div>
         </div>
 
-        <ProductDetails />
+        <ProductInfoPanel  />
 
         <div className="px-4">
-          <SpecsAndReviews />
+          {/* <SpecsAndReviews/> */}
+          <ProductTabs />
         </div>
       </div>
 
       <div className="hidden md:block">
-        <div className="flex flex-col md:flex-row md:gap-10 py-8 md:h-[calc(100vh-160px)] mt-[45px]">
+        <div className="flex flex-col md:flex-row md:gap-10 py-8 mt-[45px]">
           <div className='flex flex-col gap-4 flex-1'>
             <div className="flex flex-col gap-4">
               <Image
@@ -431,12 +424,12 @@ const ViewProductDetails = () => {
               </div>
             </div>
             <div className="min-h-[400px] w-full">
-              <SpecsAndReviews />
+              <ProductTabs/>
             </div>
           </div>
 
           <div className="flex-1 flex flex-col">
-            <ProductDetails />
+            <ProductInfoPanel  />
           </div>
         </div>
       </div>

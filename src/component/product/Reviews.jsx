@@ -6,6 +6,7 @@ import StarIcon from '@mui/icons-material/Star';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
 import { useComments } from "../../lib/hooks/useGetReviews";
 import ReviewModal from "../../component/reusables/reviewModal";
+import { useParams } from "next/navigation";
 
 
 const Stars = ({ rating }) => {
@@ -23,8 +24,15 @@ const Stars = ({ rating }) => {
 };
 
 export default function ReviewList() {
-    const { data, isLoading } = useComments();
+    const token = sessionStorage.getItem('authToken');
+    const { id: commentId } = useParams();
+
+    const { data, isLoading } = useComments(commentId, token);
+    console.log("reviews data from hook:", data);
+
     const [open, setOpen] = useState(false);
+    console.log("🚀 Comment ID:", commentId);
+    console.log('data', data)
 //     if (isLoading) {
 //     return (
 //       <Box className="flex justify-center items-center h-32">
@@ -48,7 +56,7 @@ export default function ReviewList() {
             <CardContent className="space-y-6 min-h-[250px] flex flex-col justify-center">
                  {isLoading && (
             <Box className="flex justify-center items-center w-full">
-              <CircularProgress />
+              <CircularProgress sx={{ color: '#26735B' }} />
             </Box>
           )}
 
@@ -77,7 +85,7 @@ export default function ReviewList() {
                         <p variant="body2" className="text-gray-700">
                             {review.content}
                         </p>
-                        {index < reviews.length - 1 && <Divider />}
+                        {index < data.length - 1 && <Divider />}
                     </Box>
                 ))}
                 <Box className="flex justify-center pt-2">
@@ -106,7 +114,7 @@ export default function ReviewList() {
             )}
             </CardContent>
         </Card>
-         <ReviewModal open={open} onClose={() => setOpen(false)} reviews={data} />
+         <ReviewModal open={open} onClose={() => setOpen(false)} reviews={data?.data ?? []} />
          </>
     );
 }

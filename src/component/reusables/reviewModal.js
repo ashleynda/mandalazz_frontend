@@ -23,7 +23,7 @@ export default function ReviewModal({ open, onClose, reviews = [] }) {
                 </IconButton>
             </DialogTitle>
 
-            <DialogContent className="space-y-6">
+            <DialogContent className="space-y-6 max-h-[80vh] overflow-y-auto">
                 {/* Filter Buttons */}
                 <Box className="flex flex-wrap gap-3">
                     {filters.map((filter, idx) => (
@@ -55,28 +55,39 @@ export default function ReviewModal({ open, onClose, reviews = [] }) {
 
                 {/* Reviews List */}
                 <Box className="space-y-6">
-                    {reviews.map((review, index) => (
-                        <Box key={index} className="">
-                            <p className="font-bold text-base text-[#000000]">
-                                {review.name}
-                            </p>
-                            <Box className="flex items-center space-x-2 text-sm text-gray-500">
-                                <Box className="flex space-x-1">
-                                    {[...Array(5)].map((_, i) => (
-                                        <StarIcon
-                                            key={i}
-                                            className={`w-4 h-4 ${i < review.rating ? 'text-yellow-500' : 'text-gray-300'
-                                                }`}
-                                        />
-                                    ))}
+                    {Array.isArray(reviews) && reviews.length > 0 ? (
+                        reviews.map((review, index) => (
+                            <Box key={index} className="">
+                                <p className="font-bold text-base text-[#000000]">
+                                    {review.name}
+                                </p>
+                                <Box className="flex items-center space-x-2 text-sm text-gray-500">
+                                    <Box className="flex space-x-1">
+                                        {[...Array(5)].map((_, i) => (
+                                            <StarIcon
+                                                key={i}
+                                                className={`w-4 h-4 ${i < review.rating ? 'text-yellow-500' : 'text-gray-300'
+                                                    }`}
+                                            />
+                                        ))}
+                                    </Box>
+                                    <span className='text-xs font-medium text-[#8D8C8C]'>{review.date}</span>
                                 </Box>
-                                <span className='text-xs font-medium text-[#8D8C8C]'>{review.date}</span>
+                                <p variant="body2" className="text-[#000000] text-sm font-normal">
+                                    {review.content}
+                                </p>
                             </Box>
-                            <p variant="body2" className="text-[#000000] text-sm font-normal">
-                                {review.content}
-                            </p>
-                        </Box>
-                    ))}
+                        ))
+                    ) : (
+                        <p
+                            variant="body1"
+                            color="textSecondary"
+                            align="center"
+                            sx={{ width: '100%' }}
+                        >
+                            No reviews found.
+                        </p>
+                    )}
                 </Box>
 
                 {/* Pagination */}

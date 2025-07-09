@@ -100,7 +100,7 @@ export default function RootLayout({ children }) {
                 {!isDetailPage && !isDashboardPage && !isViewProductByCategoryPage && <HeroSection />}
                 {children}
                 <GlobalSnackbar />
-                {!isDetailPage && isDashboardPage && <Footer />}
+                {!isDetailPage && !isDashboardPage && <Footer />}
               </div>
             </>
           ) : (
