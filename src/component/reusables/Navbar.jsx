@@ -32,7 +32,7 @@ const Navbar = ({ onSearch }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const cartItemCount = useCartStore(state => state.getCartItemCount());
+  const cartItemCount = useCartStore(state => state.totalItems);
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
   const { data, isLoading, error, refetch } = useProductSearch(searchTerm, false);
@@ -47,68 +47,6 @@ const Navbar = ({ onSearch }) => {
     setAnchorEl(null);
   };
 
-  //   useEffect(() => {
-  //   const token = localStorage.getItem('authToken');
-  //   const isUserLoggedIn = !!token;
-  //   setIsLoggedIn(isUserLoggedIn);
-
-  //   const localCartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
-
-  //   // Sync localStorage cart with Zustand store for guests
-  //   if (!isUserLoggedIn && localCartItems.length > 0) {
-  //     useCartStore.getState().setCartItems(localCartItems);
-  //   }
-
-  //   if (isUserLoggedIn) {
-  //     const fetchNotifications = async () => {
-  //       try {
-  //         const response = await fetch("https://mandelazz-webapp.azurewebsites.net/api/notifications/all", {
-  //           headers: { Authorization: `Bearer ${token}` }
-  //         });
-  //         const result = await response.json();
-  //         const unreadCount = result.filter((notif) => !notif.read).length;
-  //         setNotificationCount(unreadCount);
-  //       } catch (err) {
-  //         console.error("Error fetching notifications:", err);
-  //       }
-  //     };
-
-  //     fetchNotifications();
-  //   }
-  // }, []);
-
-
-
-
-
-  // useEffect(() => {
-  //   // Example check for auth token (customize for your project)
-  //   const token = sessionStorage.getItem('authToken');
-  //   setIsLoggedIn(!!token);
-  //   console.log("Is user logged in:", token);
-
-  //   // Example: fetch cart items from localStorage
-  //   const cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
-  //   setCartCount(cartItems.length);
-
-  //   // Simulate notification API call
-  //   const fetchNotifications = async () => {
-  //     try {
-  //       const response = await fetch("http://localhost:3030/api/notifications/all", {
-  //         headers: { Authorization: `Bearer ${token}` }
-  //       });
-  //       const result = await response.json();
-  //       const unreadCount = result.filter((notif) => !notif.read).length;
-  //       setNotificationCount(unreadCount);
-  //     } catch (err) {
-  //       console.error("Error fetching notifications:", err);
-  //     }
-  //   };
-
-  //   if (token) {
-  //     fetchNotifications();
-  //   }
-  // }, []);
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const token = sessionStorage.getItem('authToken');
@@ -116,23 +54,6 @@ const Navbar = ({ onSearch }) => {
 
       const cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
       setCartCount(cartItems.length);
-
-      // const fetchNotifications = async () => {
-      //   try {
-      //     const response = await fetch("https://mandelazz-webapp.azurewebsites.net/api/notifications/all", {
-      //       headers: { Authorization: `Bearer ${token}` }
-      //     });
-      //     const result = await response.json();
-      //     const unreadCount = result.filter((notif) => !notif.read).length;
-      //     setNotificationCount(unreadCount);
-      //   } catch (err) {
-      //     console.error("Error fetching notifications:", err);
-      //   }
-      // };
-
-      // if (token) {
-      //   fetchNotifications();
-      // }
     }
   }, []);
 
@@ -164,30 +85,6 @@ const Navbar = ({ onSearch }) => {
 
 
 
-  // useEffect(() => {
-  //   const fetchNotifications = async () => {
-  //     const myHeaders = new Headers();
-  //     myHeaders.append("Authorization", "Bearer YOUR_TOKEN_HERE");
-
-  //     const requestOptions = {
-  //       method: "GET",
-  //       headers: myHeaders,
-  //       redirect: "follow"
-  //     };
-
-  //     try {
-  //       const response = await fetch("http://localhost:3030/api/notifications/all", requestOptions);
-  //       const result = await response.json();
-  //       setNotifications(result);
-  //       setNotificationCount(result.filter((notif) => !notif.read).length); // Count unread notifications
-  //     } catch (error) {
-  //       console.error("Error fetching notifications:", error);
-  //     }
-  //   };
-
-  //   fetchNotifications();
-  // }, []);
-
   const handleSearch = async (query) => {
     setSearchTerm(query);
     if (query) {
@@ -207,7 +104,6 @@ const Navbar = ({ onSearch }) => {
 
 
   const renderCartIcon = () => {
-    // User is not logged in & cart is empty
     if (!isLoggedIn) {
       return (
         <div className="flex gap-2 cursor-pointer" onClick={() => router.push('/viewProductDetails/checkout/cart')}>
@@ -217,7 +113,6 @@ const Navbar = ({ onSearch }) => {
       );
     }
 
-    // User is logged in OR has items in cart
     return (
       <div className="relative cursor-pointer" onClick={() => router.push('/viewProductDetails/checkout/cart')}>
         <FiShoppingCart className="w-6 h-6 text-gray-700 hover:text-primary" />
@@ -231,11 +126,7 @@ const Navbar = ({ onSearch }) => {
     );
   };
 
-  //   const logout = () => {
-  //   localStorage.removeItem('authToken');
-  //   useCartStore.getState().clearCart(); // clear Zustand cart
-  //   router.push('/login');
-  // };
+ 
   if (isMobile) {
     return (
       <div className="bg-white fixed top-0 left-0 w-[100%] z-[9999] overflow-x-hidden">
@@ -257,7 +148,6 @@ const Navbar = ({ onSearch }) => {
             </div>
           </div>
 
-          {/* Right: Cart and Profile Icons */}
           <div className="flex items-center gap-3 flex-shrink-0">
             {renderCartIcon()}
             {/* <div className="relative cursor-pointer" onClick={() => router.push('/viewProductDetails/checkout/cart')}>

@@ -1,79 +1,3 @@
-// import { useEffect, useState } from "react";
-// import { ChevronDown } from "lucide-react"; // or any other down arrow icon
-// import { useQuery } from "@tanstack/react-query";
-// import { getSortedProducts } from "../../lib/hooks/sorting/useGetNewest";
-
-// export default function SortDropdown({ onSortChange }) {
-//   const [selected, setSelected] = useState("Newest Arrivals");
-//   const [open, setOpen] = useState(false);
-//   const [sortBy, setSortBy] = useState("newest");
-//   const token = typeof window !== "undefined" ? localStorage.getItem("token") : "";
-
-//   const options = [
-//     { label: "Newest Arrivals", value: "newest" },
-//     { label: "Price: Low to High", value: "priceLow" },
-//     { label: "Price: High to Low", value: "priceHigh" },
-//     { label: "Popularity", value: "popularity" },
-//   ];
-
-//   const {
-//     data: sortedProducts,
-//     isLoading,
-//     isError,
-//     error,
-//   } = useQuery({
-//     queryKey: ["products", { sortBy, page: 1, limit: 10 }],
-//     queryFn: getSortedProducts,
-//     enabled: !!sortBy,
-//   });
-
-//   useEffect(() => {
-//     if (sortedProducts && onSortChange) {
-//       onSortChange(sortedProducts);
-//     }
-//   }, [sortedProducts, onSortChange]);
-
-//   return (
-//     <div className="flex items-center gap-2 text-sm font-medium text-[#344054]">
-//       <span className="text-base font-normal text-[#061410]">Sort by:</span>
-//       <div className="relative inline-block">
-//         <button
-//           onClick={() => setOpen(!open)}
-//           className="flex items-center gap-2 text-[#344054] bg-white border border-gray-300 rounded-md px-5 py-1.5 shadow-sm hover:bg-gray-50"
-//         >
-//           {selected}
-//           <ChevronDown className="w-4 h-4" />
-//         </button>
-//         {open && (
-//           <div className="absolute right-0 mt-1 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
-//             <div className="py-1">
-//               {options.map((option) => (
-//                 <button
-//                   key={option.value}
-//                   onClick={() => {
-//                     setSelected(option.label);
-//                     setSortBy(option.value);
-//                     setOpen(false);
-//                   }}
-//                   className="text-gray-700 block px-4 py-2 text-sm w-full text-left hover:bg-gray-100"
-//                 >
-//                   {option.label}
-//                 </button>
-//               ))}
-//             </div>
-//           </div>
-//         )}
-//       </div>
-//     </div>
-//   );
-// }
-// //             ))}
-// //           </div>
-// //         )}
-// //       </div>
-// //     </div>
-// //   );
-// // }
 import { useState, useEffect } from "react";
 import { ChevronDown } from "lucide-react";
 // import { getSortedProducts } from "@/api/getSortedProducts"; // Adjust import path
@@ -81,8 +5,6 @@ import { ChevronDown } from "lucide-react";
 export default function SortDropdown({ onSortChange }) {
   const [selected, setSelected] = useState("Newest Arrivals");
   const [open, setOpen] = useState(false);
-//   const [products, setProducts] = useState([]);
-//   const token = typeof window !== "undefined" ? localStorage.getItem("token") : "";
 
   const options = [
     { label: "Newest Arrivals", value: "newest" },

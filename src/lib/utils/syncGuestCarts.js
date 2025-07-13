@@ -1,7 +1,7 @@
 // utils/syncGuestCart.js
 
 export const syncGuestCart = async (cartItems) => {
-  const token = localStorage.getItem('authToken');
+  const token = sessionStorage.getItem('authToken');
   if (token) return; // Don't sync if user is logged in
 
   try {

@@ -8,6 +8,8 @@ import Favourites from '../../component/favourites';
 import useFetchCartQuery from "../../lib/hooks/useFetchCartMutation"; // Adjust the import path as necessary
 import useRemoveFromCart from "../../lib/hooks/useRemoveFromCart"; 
 import RecentlyViewed from '../../component/recentlyViewed'; 
+import useSnackbarStore from '@/src/lib/store/useSnackbarStore';
+import useGuestCart from './../../lib/hooks/guestCart/useGuestCart'; // Adjust the import path as necessary
 
 // import Layout from '@/components/Layout';
 // import ReusableCartTable from '../../../component/reusables/CartTable';
@@ -20,8 +22,9 @@ const Cart = () => {
   const updateCartItemQuantity = useCartStore((state) => state.updateCartItemQuantity);
   const { data,  isLoading, error } = useFetchCartQuery();
   const { mutate: removeItem, isPending, isError } = useRemoveFromCart();
-  const setCartItems = useCartStore((state) => state.setCartItems); // Zustand setter for syncing
+  const setCartItems = useCartStore((state) => state.setCartItems); 
   // const { mutate: addToFav } = useAddToFavorites();
+  const { showSnackbar } = useSnackbarStore();
 console.log('Cart items:', cartItems);
 console.log("🧾 Cart from API:", data?.message?.cart);
 console.log("jfn", data)
@@ -39,11 +42,12 @@ console.log("📦 FULL data:", data);
 
   const handleRemove = (productId) => {
     removeItem({ productId }, {
-      onSuccess: () => {
+      onSuccess: (res) => {
         removeFromCart(productId);
+        showSnackbar({ message: res?.message || "Item removed from cart", severity: "success" });
       },
       onError: (error) => {
-      console.error("❌ Failed to remove from server:", error.message);
+        showSnackbar({ message: error?.message || "Failed to remove item from cart", severity: "error" });
     },
     });
   };

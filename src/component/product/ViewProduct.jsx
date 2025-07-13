@@ -29,6 +29,14 @@ const ViewProducts = () => {
   const { data, isLoading, isError, error } = useProductsQuery();
   // const products = data?.data ?? [];
   let products = [];
+  useEffect(() => {
+  console.log('URL Param ID:', id);
+}, [id]);
+useEffect(() => {
+  const found = products.find(p => p._id === '687392714d98fe23ca44ad62');
+  console.log('Test Product Found:', found);
+}, [products]);
+
 
   if (data) {
     if (Array.isArray(data)) {
@@ -70,12 +78,22 @@ const ViewProducts = () => {
     }
   }, []);
 
+  // useEffect(() => {
+  //   if (favoritesQuery?.data && Array.isArray(favoritesQuery.data)) {
+  //     const favoriteIds = favoritesQuery.data.map((product) => product._id);
+  //     setFavorites(favoriteIds);
+  //   }
+  // }, [favoritesQuery]);
   useEffect(() => {
-    if (favoritesQuery?.data && Array.isArray(favoritesQuery.data)) {
-      const favoriteIds = favoritesQuery.data.map((product) => product._id);
-      setFavorites(favoriteIds);
-    }
-  }, [favoritesQuery]);
+  if (Array.isArray(favoritesQuery?.data)) {
+    const favoriteIds = favoritesQuery.data
+      .filter((product) => product && product._id) // exclude null/undefined or missing _id
+      .map((product) => product._id);
+
+    setFavorites(favoriteIds);
+  }
+}, [favoritesQuery]);
+
 
 
   const handleAddToFavorites = (productId) => {
@@ -93,12 +111,13 @@ const ViewProducts = () => {
       addToFavorites(productId, {
         onSuccess: (response) => {
           setFavorites((prevFavorites) => [...prevFavorites, productId]);
-          console.log('Product added to favorites:', response.data);
           showSnackbar({ message: 'Product added to favorites', severity: 'success' });
         },
         onError: (error) => {
-          alert('User is not logged in. Please log in to add favorites.');
-          console.error('Error adding product to favorites:', error);
+          const message = error?.message;
+           if (message?.includes("not logged in")) {
+      return; // Do nothing, already handled in useAddToFavorites
+    }
           showSnackbar({ message: 'Product is already in favorites', severity: 'error' });
         },
       });
@@ -137,13 +156,18 @@ const ViewProducts = () => {
   // })
   //   router.push(href);
   // };
-  const handleOptions = (productId, color, size) => {
+  const handleOptions = (id, color, size) => {
     const queryParams = new URLSearchParams();
     if (color) queryParams.append('color', color.toLowerCase());
     if (size) queryParams.append('size', size);
 
-    const href = `/viewProductDetails/${productId}?${queryParams.toString()}`;
+    const href = `/viewProductDetails/${id}?${queryParams.toString()}`;
     console.log('Navigating to:', href);
+    console.log('Product ID:', id, 'Color:', color, 'Size:', size);
+    console.log("Product ID:", id._id);
+
+
+
 
     router.push(href);
   };

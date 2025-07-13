@@ -9,19 +9,13 @@ import { useEffect, useState } from 'react';
 import { FaArrowRight } from 'react-icons/fa';
 
 
-// const bull = (
-//     <Box
-//         component="span"
-//         sx={{ display: 'inline-block', mx: '2px', transform: 'scale(0.8)' }}
-//     >
-//         •
-//     </Box>
-// );
 export default function Favourites() {
     const [token, setToken] = useState(null);
+    const [showAll, setShowAll] = useState(false);
+
 
     useEffect(() => {
-        const storedToken = sessionStorage.getItem('authToken'); // or localStorage
+        const storedToken = sessionStorage.getItem('authToken'); 
         if (storedToken) setToken(storedToken);
     }, []);
 
@@ -31,10 +25,12 @@ export default function Favourites() {
         isError,
         error,
     } = useFavoritesQuery(token || '');
-    //   const favorites = Array.isArray(data?.data) ? data.data.map(item => item.productId) : [];
     const favoritesIds = Array.isArray(data?.data)
         ? data.data.filter(item => item && item.variations?.[0]?.images?.[0])
         : [];
+
+    // const visibleFavorites = showAll ? favoritesIds : favoritesIds.slice(0, 4);
+
 
     console.log('favorites from query:', favoritesIds);
 
@@ -58,13 +54,21 @@ export default function Favourites() {
 
         return stars;
     };
+//     <p
+//   onClick={() => setShowAll(prev => !prev)}
+//   className="flex items-center text-sm font-semibold text-[#174F41] mb-4 cursor-pointer"
+// >
+//   {showAll ? 'Show Less' : 'View All'}
+//   <FaArrowRight className="ml-1" />
+// </p>
 
     return (
         <div className="bg-white mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <div className='flex justify-between items-center mb-4'>
                 <p className='text-[#061410] text-xl font-bold mb-2'>Favourites</p>
                 {/* <p className='text-sm font-semibold text-[#174F41]'>View more <FaArrowRight/></p> */}
-                <p className="flex items-center text-sm font-semibold text-[#174F41] mb-4">
+                <p className="flex items-center text-sm font-semibold text-[#174F41] mb-4"
+                    onClick={() => setShowAll(true)}>
                     View All <FaArrowRight className="ml-1" />
                 </p>
             </div>

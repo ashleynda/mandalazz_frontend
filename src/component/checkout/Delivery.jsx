@@ -34,11 +34,11 @@ export default function Delivery() {
   const [paymentType, setPaymentType] = useState("online_payment");
 
   const resolvedPaymentType =
-      paymentType === "paystack"
-          ? "online_payment"
-          : paymentType === "delivery"
-              ? "payment_on_delivery"
-              : paymentType;
+    paymentType === "paystack"
+      ? "online_payment"
+      : paymentType === "delivery"
+      ? "payment_on_delivery"
+      : paymentType;
 
   const selectedState = statesWithLGAs.find((s) => s.state === formData.state);
   const lgaOptions = selectedState ? selectedState.lgas : [];
@@ -47,7 +47,6 @@ export default function Delivery() {
   const { data: cartData, isLoading: cartLoading, error: cartError } = useFetchCartQuery();
 
   const handleCheckout = () => {
-    console.log("🧪 handleCheckout triggered");
     const token = sessionStorage.getItem("authToken");
     const email = sessionStorage.getItem("userEmail");
 
@@ -55,7 +54,6 @@ export default function Delivery() {
       return showSnackbar({ message: "Not logged in", severity: "error" });
     }
 
-    // Validate required fields
     const { firstName, lastName, address, phone, city, state } = formData;
     if (!firstName || !lastName || !address || !phone || !city || !state) {
       return showSnackbar({
@@ -63,8 +61,6 @@ export default function Delivery() {
         severity: "error"
       });
     }
-
-    // Create the payload matching the backend expectations
     const payload = {
       userDetails: {
         firstName,
@@ -82,17 +78,10 @@ export default function Delivery() {
       paymentType: resolvedPaymentType,
     };
 
-    console.log("🟢 Submitting checkout with payload:", JSON.stringify(payload, null, 2));
-    console.log("🔍 Payment type resolved to:", resolvedPaymentType);
-
     checkout({ token, payload }, {
       onSuccess: (data) => {
-        console.log("✅ Checkout success:", data);
-        console.log("🔍 Full response structure:", JSON.stringify(data, null, 2));
-
-        // Handle payment methods response
+       
         if (data && typeof data === 'object') {
-          // Check if response contains payment methods
           if (data.paymentMethods || data.message?.paymentMethods) {
             const methods = data.paymentMethods || data.message?.paymentMethods;
             console.log("💳 Payment methods received:", methods);
@@ -102,14 +91,11 @@ export default function Delivery() {
           }
         }
 
-        // Check if this is an online payment
         if (resolvedPaymentType === "online_payment") {
           console.log("💳 Processing online payment...");
 
-          // Try different possible response structures for payment URL
           let paymentUrl = null;
 
-          // Check various possible paths for payment URL
           if (data?.message?.checkout?.paymentUrl) {
             paymentUrl = data.message.checkout.paymentUrl;
             console.log("🔗 Found payment URL in data.message.checkout.paymentUrl:", paymentUrl);
@@ -134,9 +120,17 @@ export default function Delivery() {
               severity: "success"
             });
 
+            sessionStorage.setItem("paymentReturnUrl", window.location.origin + "/order-success");
+          
+            // Append return URL to payment URL if needed
+            const separator = paymentUrl.includes('?') ? '&' : '?';
+            const returnUrl = encodeURIComponent(window.location.origin + "/order-success");
+            const finalPaymentUrl = `${paymentUrl}${separator}callback_url=${returnUrl}`;
+
             // Small delay to show the message before redirect
             setTimeout(() => {
-              window.location.href = paymentUrl;
+              // window.location.href = paymentUrl;
+              window.location.href = finalPaymentUrl;
             }, 1500);
           } else {
             console.warn("⚠️ Payment URL not found in response for online payment");
@@ -155,7 +149,7 @@ export default function Delivery() {
 
           // Optionally redirect to order confirmation page after a delay
           setTimeout(() => {
-            // router.push('/order-confirmation');
+            router.push('/order-success');
             console.log("📦 Order placed successfully with payment on delivery");
           }, 2000);
         }
@@ -173,7 +167,6 @@ export default function Delivery() {
   const handlePaymentMethodSelect = (method) => {
     console.log("🎯 Payment method selected:", method);
     setPaymentType(method);
-
     // If it's an online payment method, proceed with the payment
     if (method === "paystack" || method === "online_payment") {
       // You might want to trigger a different flow here
@@ -187,14 +180,11 @@ export default function Delivery() {
         <h1 className="text-xl font-bold mb-6 text-[#061410]">Cart (4 items)</h1>
 
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-          {/* Delivery Details Section */}
           <div className="md:col-span-7">
             <div className="bg-white p-6 rounded-md shadow-sm border border-gray-100">
               <h2 className="text-lg font-bold mb-4 text-[#061410]">Delivery Details</h2>
 
-              {/* Form Fields */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {/* First Name & Last Name */}
                 <div>
                   <input
                       type="text"
@@ -214,7 +204,6 @@ export default function Delivery() {
                   />
                 </div>
 
-                {/* Phone Number */}
                 <div>
                   <p className="mb-1 text-[#101828] text-xs font-medium">Phone Number</p>
                   <div className="flex items-center border border-gray-300 rounded-md overflow-hidden">
@@ -269,7 +258,6 @@ export default function Delivery() {
                   </div>
                 </div>
 
-                {/* Street Address */}
                 <div className="sm:col-span-2">
                   <p className="mb-1 text-[#101828] text-xs font-medium">Select Address</p>
                   <input
@@ -281,7 +269,6 @@ export default function Delivery() {
                   />
                 </div>
 
-                {/* Landmark */}
                 <div className="">
                   <p className="mb-1 text-[#101828] text-xs font-medium">Landmark (Optional)</p>
                   <input
@@ -293,7 +280,6 @@ export default function Delivery() {
                   />
                 </div>
 
-                {/* City */}
                 <div>
                   <p className="mb-1 text-[#101828] text-xs font-medium">City</p>
                   <input
@@ -305,7 +291,6 @@ export default function Delivery() {
                   />
                 </div>
 
-                {/* State */}
                 <div className="mb-4">
                   <label htmlFor="state" className="block text-xs font-medium text-[#101828] mb-1">
                     State
@@ -329,7 +314,6 @@ export default function Delivery() {
                   </select>
                 </div>
 
-                {/* LGA */}
                 {lgaOptions.length > 0 && (
                     <div className="mb-4">
                       <label htmlFor="lga" className="block text-xs font-medium text-[#101828] mb-1">
@@ -354,7 +338,6 @@ export default function Delivery() {
                     </div>
                 )}
 
-                {/* Default Address */}
                 <div className="sm:col-span-2">
                   <label className="flex items-center cursor-pointer">
                     <input
@@ -368,7 +351,6 @@ export default function Delivery() {
                             isDefault: checked,
                           }));
 
-                          // If checked, call API to get default address
                           if (checked) {
                             try {
                               const { data } = await refetchDefaultAddress();

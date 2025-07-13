@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
-// import Breadcrumbs from '@/components/Breadcrumbs'; // Import Breadcrumbs component
+// import Breadcrumbs from '@/components/Breadcrumbs';
 // import { useCartStore } from '@/store/cart'; 
 import yellowWoman from '../../assets/yellowWoman.png';
 import { FaHeart } from 'react-icons/fa';
@@ -11,14 +11,15 @@ import SpecsAndReviews from './SpecsAndReviews';
 import { FiShoppingCart } from 'react-icons/fi';
 import { FiHeart } from 'react-icons/fi';
 import { useCartStore } from '@/src/lib/store/useCart';
-import { Rating } from '@mui/material';
+import { Breadcrumbs, Rating } from '@mui/material';
 import useProductsQuery from '@/src/lib/hooks/useProductMutation';
 import useAddToCartMutation from "../../lib/hooks/useAddToCartMutation";
 import useFavoritesQuery from '@/src/lib/hooks/useFavouritesQuery';
 import useSnackbarStore from '@/src/lib/store/useSnackbarStore';
 import ProductTabs from '../reusables/ApplicationTabSlider';
+import useAddToCartGuest from '../../lib/hooks/guestCart/useAddToCartGuestMutation';
 
-const sizes = ['L', 10, 12, 14, 16, 18, 20];
+const sizes = [8, 10, 12, 14, 16, 18, 20];
 const colors = ["yellow", "blue", "red", "brown suit", "sky-blue", "gray", "cream", "white", "pink", "purple"];
 
 const ViewProductDetails = () => {
@@ -35,29 +36,62 @@ const ViewProductDetails = () => {
   const router = useRouter();
   const params = useParams();
   const id = params?.id;
+  console.log("id", id)
   const [ratingValue, setRatingValue] = useState(3.5);
 
-  const { addToCart } = useCartStore();
+  // const { addToCart } = useCartStore();
+  const addToCartLocally = useCartStore((state) => state.addToCartLocally);
+  const { showSnackbar } = useSnackbarStore();
+
+  const [token, setToken] = useState('');
   const { data, isLoading } = useProductsQuery();
   const { mutate: addToCartMutation } = useAddToCartMutation();
+  const { mutate: addToCartGuestMutation } = useAddToCartGuest();
+  const { data: favoritesData, isLoading: favoritesLoading } = useFavoritesQuery(token);
   const products = data?.data?.products ?? [];
 
-  const product = products.find(p => p._id === id);
-  const [token, setToken] = useState('');
-  const { showSnackbar } = useSnackbarStore();
+  // const product = products.find(p => p._id === id);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  // Add these navigation functions
-  const nextImage = () => {
-    const images = product?.variations?.[0]?.images ?? [yellowWoman.src];
-    setCurrentImageIndex((prev) => (prev + 1) % images.length);
-  };
+  const product = useMemo(() => {
+    if (!data?.data?.products || !id) {
+      return null;
+    }
 
-  const prevImage = () => {
-    const images = product?.variations?.[0]?.images ?? [yellowWoman.src];
-    setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
-  };
+    const products = data.data.products;
+    
+    // Try multiple matching strategies
+    let foundProduct = products.find(p => p._id === id);
+    
+    if (!foundProduct) {
+      foundProduct = products.find(p => String(p._id) === String(id));
+    }
+    
+    if (!foundProduct) {
+      foundProduct = products.find(p => p._id?.trim() === id?.trim());
+    }
 
+    return foundProduct || null;
+  }, [data, id]);
+
+  // Debug logging
+  useEffect(() => {
+    if (!isLoading && data?.data?.products) {
+      console.log('Product search details:');
+      console.log('- Target ID:', id);
+      console.log('- Products count:', data.data.products.length);
+      console.log('- Product found:', !!product);
+      
+      if (!product) {
+        console.log('Available IDs:', data.data.products.map(p => p._id));
+        console.log('ID comparison details:');
+        data.data.products.forEach((p, index) => {
+          console.log(`  Product ${index}: "${p._id}" (${typeof p._id}) vs "${id}" (${typeof id})`);
+        });
+      }
+    }
+  }, [isLoading, data, id, product]);
+  
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const storedToken = sessionStorage.getItem('authToken');
@@ -66,6 +100,7 @@ const ViewProductDetails = () => {
   }, []);
 
   useEffect(() => {
+    if (!product) return;
     const queryColor = searchParams.get('color');
     const variationColor = product?.variations?.[0]?.color;
     const size = searchParams.get('size');
@@ -81,29 +116,21 @@ const ViewProductDetails = () => {
       setSelectedSize(Number(size));
     }
   }, [product, searchParams]);
-  // useEffect(() => {
-  //   const queryColor = searchParams.get('color');
 
-  //   if (queryColor) {
-  //     setSelectedColor(queryColor.toLowerCase());
-  //     return;
-  //   }
+   const nextImage = () => {
+    const images = product?.variations?.[0]?.images ?? [yellowWoman.src];
+    setCurrentImageIndex((prev) => (prev + 1) % images.length);
+  };
 
-  //   if (
-  //     product &&
-  //     Array.isArray(product.variations) &&
-  //     product.variations.length > 0 &&
-  //     typeof product.variations[0].color === 'string'
-  //   ) {
-  //     setSelectedColor(product.variations[0].color.toLowerCase());
-  //   }
-  // }, [product, searchParams]);
+  const prevImage = () => {
+    const images = product?.variations?.[0]?.images ?? [yellowWoman.src];
+    setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
+  };
 
-
-
-  const { data: favoritesData, isLoading: favoritesLoading } = useFavoritesQuery(token, {
-    enabled: !!token
-  });
+    const increaseQuantity = () => setQuantity((prev) => prev + 1);
+  const decreaseQuantity = () => setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
+ 
+ 
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -111,24 +138,25 @@ const ViewProductDetails = () => {
   if (!product) {
     return <div>Product not found</div>;
   }
-  //   useEffect(() => {
-  //   const newColor = searchParams.get("color")?.toLowerCase() || null;
-  //   setSelectedColor(newColor);
-  // }, [searchParams]);
-  // useEffect(() => {
-  //   if (product && product.variations?.[0]?.color) {
-  //     setSelectedColor(product.variations[0].color.toLowerCase());
-  //   }
-  // }, [product]);
 
 
+  const isFavorite = product?._id && Array.isArray(favoritesData?.data) &&
+  favoritesData?.data?.some(fav => fav?._id && fav._id === product._id);
 
 
-
-  const isFavorite = product && favoritesData?.data?.some(fav => fav._id === product._id);
-
-  const increaseQuantity = () => setQuantity((prev) => prev + 1);
-  const decreaseQuantity = () => setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
+//   useEffect(() => {
+//   if (!isLoading && data?.data?.products) {
+//     console.log('Product search details:');
+//     console.log('- Target ID:', id);
+//     console.log('- Products count:', data.data.products.length);
+//     console.log('- First product sample:', data.data.products[0]);
+//     console.log('- Product found:', !!product);
+    
+//     if (!product) {
+//       console.log('Available IDs:', data.data.products.map(p => p._id));
+//     }
+//   }
+// }, [isLoading, data, id, product]);
 
   const handleAddToCart = () => {
     if (!selectedSize) {
@@ -152,24 +180,24 @@ const ViewProductDetails = () => {
 
 
     const apiPayload = {
-      productId: product._id,
+      productId: "687392714d98fe23ca44ad62",
       quantity: finalQuantity,
-      size: selectedSize,
+      size: String(selectedSize),
       color: selectedVariation?.color ?? selectedColor,
       // color: selectedColor && typeof selectedColor === 'string' ? selectedColor.toLowerCase() : selectedColor,
     };
 
-    // Debug: Check if product._id exists
-    if (!product._id) {
-      console.error('Product ID is missing:', product);
-      showSnackbar({
-        message: "Product ID is missing",
-        severity: "error",
-      });
-      return;
-    }
+    console.log('=== DEBUGGING CART MUTATION ===');
+  console.log('Frontend Product ID:', product._id);
+  console.log('Product ID type:', typeof product._id);
+  console.log('Full product object:', product);
+  console.log('API Payload being sent:', apiPayload);
+  console.log('Payload productId:', apiPayload.productId);
+  console.log('Payload productId type:', typeof apiPayload.productId);
+  console.log('Token exists:', !!token);
+  console.log('================================');
 
-
+   
     const newItem = {
       id: product._id,
       quantity: finalQuantity,
@@ -181,36 +209,62 @@ const ViewProductDetails = () => {
       description: product.description || "No description",
     };
 
-    addToCart(newItem);
-    addToCartMutation(apiPayload, {
-      onSuccess: (data) => {
-        console.log('Mutation succeeded, navigating to cart...');
-        const safeMessage =
-          typeof data?.message === 'string'
-            ? data.message
-            : 'Item added to cart';
-
-        showSnackbar({
-          message: safeMessage,
-          severity: "success",
-        });
-        router.push('/viewProductDetails/checkout/cart');
-      },
-      onError: (err) => {
-         const errorMessage =
-    typeof err?.message === 'string'
-      ? err.message
-      : 'Something went wrong';
-
-  showSnackbar({
-    message: errorMessage,
-    severity: "error",
-  });
-
-      },
+    // addToCartLocally(newItem);
+    const onSuccess = (data) => {
+    showSnackbar({
+      message: typeof data?.message === 'string' ? data.message : 'Item added to cart',
+      severity: "success",
     });
-
+    router.push('/viewProductDetails/checkout/cart');
   };
+
+  const onError = (err) => {
+    const errorMessage = typeof err?.message === 'string' ? err.message : 'Something went wrong';
+    showSnackbar({ message: errorMessage, severity: "error" });
+  };
+ console.log("=== Final Payload ===", apiPayload);
+
+
+  if (token) {
+    console.log("Using authenticated cart mutation");
+    addToCartMutation(apiPayload, { onSuccess, onError });
+  } else {
+    console.log("Using guest cart mutation");
+
+    addToCartGuestMutation(apiPayload, { onSuccess, onError });
+  }
+};
+  //   addToCartMutation(apiPayload, {
+  //     onSuccess: (data) => {
+  //       console.log('Mutation succeeded, navigating to cart...');
+  //       const safeMessage =
+  //         typeof data?.message === 'string'
+  //           ? data.message
+  //           : 'Item added to cart';
+
+  //       showSnackbar({
+  //         message: safeMessage,
+  //         severity: "success",
+  //       });
+  //       console.log("Navigating to:", '/viewProductDetails/checkout/cart');
+
+  //       router.push('/viewProductDetails/checkout/cart');
+  //     },
+  //     onError: (err) => {
+  //       const errorMessage =
+  //         typeof err?.message === 'string'
+  //           ? err.message
+  //           : 'Something went wrong';
+
+  //       showSnackbar({
+  //         message: errorMessage,
+  //         severity: "error",
+  //       });
+
+  //     },
+  //   });
+
+  // };
 
 
   const ProductInfoPanel = () => (
@@ -278,14 +332,14 @@ const ViewProductDetails = () => {
           <div className="flex items-center border border-gray-200 rounded-lg w-32">
             <button
               onClick={decreaseQuantity}
-              className="px-4 py-2 border-r border-gray-200 text-black hover:bg-gray-50"
+              className="px-4 py-2 border-r border-gray-200 text-black cursor-pointer"
             >
               −
             </button>
             <span className="px-4 py-2 text-black flex-1 text-center">{quantity}</span>
             <button
               onClick={increaseQuantity}
-              className="px-4 py-2 border-l border-gray-200 text-black hover:bg-gray-50"
+              className="px-4 py-2 border-l border-gray-200 text-black cursor-pointer"
             >
               +
             </button>
@@ -331,7 +385,6 @@ const ViewProductDetails = () => {
             ) : (
               <FiHeart className="text-[#26735B] w-5 h-5" />
             )}
-            {/* <FaHeart className={`w-5 h-5 ${isWishlisted ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} /> */}
           </button>
         </div>
       </div>
@@ -340,9 +393,9 @@ const ViewProductDetails = () => {
 
   return (
     <div className="max-w-7xl mx-auto py-12 md:py-4">
-      {/* <div className=""> */}
-      {/* <Breadcrumbs breadcrumbs={breadcrumbs} /> */}
-      {/* </div> */}
+      <div className=""> 
+      <Breadcrumbs breadcrumbs={breadcrumbs} />
+       </div>
       {/* Mobile Layout */}
       <div className="block md:hidden">
         {/* Product Images */}
@@ -391,7 +444,7 @@ const ViewProductDetails = () => {
           </div>
         </div>
 
-        <ProductInfoPanel  />
+        <ProductInfoPanel />
 
         <div className="px-4">
           {/* <SpecsAndReviews/> */}
@@ -424,12 +477,12 @@ const ViewProductDetails = () => {
               </div>
             </div>
             <div className="min-h-[400px] w-full">
-              <ProductTabs/>
+              <ProductTabs />
             </div>
           </div>
 
           <div className="flex-1 flex flex-col">
-            <ProductInfoPanel  />
+            <ProductInfoPanel />
           </div>
         </div>
       </div>

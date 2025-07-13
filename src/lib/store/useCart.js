@@ -1,184 +1,159 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { syncGuestCart } from '../../lib/utils/syncGuestCarts';
 
-export const useCartStore = create(
+const useCartStore = create(
   persist(
     (set, get) => ({
-      cartItems: [],
-      savedForLater: [],
-      setCartItems: (items) => set({ cartItems: items }),
+      items: [],
+      totalItems: 0,
+      totalPrice: 0,
+
+      // Method 1: Separate local and API methods (RECOMMENDED)
       
-      // Add item to cart
-      // addToCart: (item) => {
-      //   let { cartItems } = get();
-      //   if (!Array.isArray(cartItems)) {
-      //     cartItems = [];
-      //   };
-      //   const existingItem = cartItems.find(cartItem => cartItem.id === item.id);
+      // For local state updates only (no API calls)
+      addToCartLocally: (item) => {
+        set((state) => {
+          const existingItemIndex = state.items.findIndex(
+            (cartItem) => 
+              cartItem.id === item.id && 
+              cartItem.size === item.size && 
+              cartItem.color === item.color
+          );
+
+          let newItems;
+          if (existingItemIndex >= 0) {
+            // Update existing item quantity
+            newItems = state.items.map((cartItem, index) => 
+              index === existingItemIndex 
+                ? { ...cartItem, quantity: cartItem.quantity + item.quantity }
+                : cartItem
+            );
+          } else {
+            // Add new item
+            newItems = [...state.items, item];
+          }
+
+          const newTotalItems = newItems.reduce((sum, item) => sum + item.quantity, 0);
+          const newTotalPrice = newItems.reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0);
+
+          return {
+            items: newItems,
+            totalItems: newTotalItems,
+            totalPrice: newTotalPrice,
+          };
+        });
+      },
+
+      // Your existing addToCart method for API calls (keep for backward compatibility)
+      addToCart: async (item, options = {}) => {
+        const { skipAPI = false } = options;
         
-      //   if (existingItem) {
-      //     // If item exists, update quantity
-      //     set({
-      //       cartItems: cartItems.map(cartItem => 
-      //         cartItem.id === item.id 
-      //           ? { ...cartItem, quantity: cartItem.quantity + (item.quantity || 1) }
-      //           : cartItem
-      //       )
-      //     });
-      //   } else {
-      //     // If new item, add to cart
-      //     set({ 
-      //       cartItems: [...cartItems, { ...item, quantity: item.quantity || 1 }] 
-      //     });
-      //   }
-      // },
-      addToCart: async (item) => {
-  let { cartItems } = get();
-  if (!Array.isArray(cartItems)) cartItems = [];
+        // If skipAPI is true, only update local state
+        if (skipAPI) {
+          get().addToCartLocally(item);
+          return;
+        }
 
-  const existingItem = cartItems.find(cartItem => cartItem.id === item.id);
-  const token = sessionStorage.getItem('authToken');
+        // Your existing API logic here
+        try {
+          // Make API call
+          const response = await fetch('/api/cart/add', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              // Add auth headers if needed
+            },
+            body: JSON.stringify({
+              productId: item.id,
+              quantity: item.quantity,
+              size: item.size,
+              color: item.color,
+            }),
+          });
 
-  if (existingItem) {
-    const updatedCart = cartItems.map(cartItem =>
-      cartItem.id === item.id
-        ? { ...cartItem, quantity: cartItem.quantity + (item.quantity || 1) }
-        : cartItem
-    );
+          if (!response.ok) {
+            throw new Error('Failed to add item to cart');
+          }
 
-    set({ cartItems: updatedCart });
-    syncGuestCart(updatedCart);
+          const data = await response.json();
+          
+          // Update local state after successful API call
+          get().addToCartLocally(item);
+          
+          return data;
+        } catch (error) {
+          console.error('Error adding to cart:', error);
+          throw error;
+        }
+      },
 
-    if (token) {
-      try {
-        await fetch(`https://mandelazz-webapp.azurewebsites.net/api/cart/update/${item.id}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ quantity: existingItem.quantity + (item.quantity || 1) })
-        });
-      } catch (err) {
-        console.error('Failed to update cart item on backend:', err);
-      }
-    }
-  } else {
-    const newCart = [...cartItems, { ...item, quantity: item.quantity || 1 }];
-    set({ cartItems: newCart });
-
-    if (token) {
-      try {
-        await fetch('https://mandelazz-webapp.azurewebsites.net/api/cart/add', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ productId: item.id, qty: item.quantity || 1 }),
-        });
-      } catch (err) {
-        console.error('Failed to add item to cart on backend:', err);
-      }
-    }
-  }
-},
-
-      
       // Remove item from cart
-     removeFromCart: async (id) => {
-  const { cartItems } = get();
-  const token = sessionStorage.getItem("authToken");
+      removeFromCart: (itemId, size, color) => {
+        set((state) => {
+          const newItems = state.items.filter(
+            (item) => !(item.id === itemId && item.size === size && item.color === color)
+          );
+          
+          const newTotalItems = newItems.reduce((sum, item) => sum + item.quantity, 0);
+          const newTotalPrice = newItems.reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0);
 
-  const updatedCart = cartItems.filter(item => item.id !== id);
-  set({ cartItems: updatedCart });
-
-  syncGuestCart(updatedCart); // still useful for guest
-
-  if (token) {
-    try {
-      await fetch(`https://mandelazz-webapp.azurewebsites.net/api/cart/remove`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ productId: id }),
-      });
-    } catch (err) {
-      console.error("❌ Failed to remove item from backend:", err);
-    }
-  }
-},
-
-      
-      // Update quantity of an item
-      updateCartItemQuantity: (id, newQuantity) => {
-        const { cartItems } = get();
-        
-        // Ensure quantity is valid
-        const quantity = parseInt(newQuantity);
-        if (isNaN(quantity) || quantity < 1) return;
-        
-        set({
-          cartItems: cartItems.map(item => 
-            item.id === id ? { ...item, quantity } : item
-          )
+          return {
+            items: newItems,
+            totalItems: newTotalItems,
+            totalPrice: newTotalPrice,
+          };
         });
       },
-      
+
+      // Update item quantity
+      updateQuantity: (itemId, size, color, newQuantity) => {
+        if (newQuantity <= 0) {
+          get().removeFromCart(itemId, size, color);
+          return;
+        }
+
+        set((state) => {
+          const newItems = state.items.map((item) =>
+            item.id === itemId && item.size === size && item.color === color
+              ? { ...item, quantity: newQuantity }
+              : item
+          );
+
+          const newTotalItems = newItems.reduce((sum, item) => sum + item.quantity, 0);
+          const newTotalPrice = newItems.reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0);
+
+          return {
+            items: newItems,
+            totalItems: newTotalItems,
+            totalPrice: newTotalPrice,
+          };
+        });
+      },
+
       // Clear cart
-      clearCart: () => set({ cartItems: [] }),
-      
-      // Save item for later
-      saveForLater: (id) => {
-        const { cartItems, savedForLater } = get();
-        const itemToSave = cartItems.find(item => item.id === id);
-        
-        if (itemToSave) {
-          set({
-            cartItems: cartItems.filter(item => item.id !== id),
-            savedForLater: [...savedForLater, itemToSave]
-          });
-        }
+      clearCart: () => {
+        set({
+          items: [],
+          totalItems: 0,
+          totalPrice: 0,
+        });
       },
-      
-      // Move saved item back to cart
-      moveToCart: (id) => {
-        const { cartItems, savedForLater } = get();
-        const itemToMove = savedForLater.find(item => item.id === id);
-        
-        if (itemToMove) {
-          set({
-            savedForLater: savedForLater.filter(item => item.id !== id),
-            cartItems: [...cartItems, itemToMove]
-          });
-        }
+
+      // Get cart item count
+      getItemCount: () => {
+        return get().totalItems;
       },
-      
+
       // Get cart total
       getCartTotal: () => {
-        const { cartItems } = get();
-        return cartItems.reduce((total, item) => 
-          total + (item.price * item.quantity), 0);
+        return get().totalPrice;
       },
-      
-      // Get cart item count
-      getCartItemCount: () => {
-        const { cartItems } = get();
-        return cartItems.reduce((count, item) => count + item.quantity, 0);
-      }
     }),
     {
       name: 'cart-storage', // unique name for localStorage
-      getStorage: () => localStorage,
-      partialize: (state) => ({
-        ...state,
-        cartItems: Array.isArray(state.cartItems) ? state.cartItems : [],
-        savedForLater: Array.isArray(state.savedForLater) ? state.savedForLater : [],
-      }),
-
+      getStorage: () => sessionStorage, // or sessionStorage
     }
   )
 );
+
+export { useCartStore };
