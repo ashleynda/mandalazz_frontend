@@ -12,6 +12,8 @@ import { useCartStore } from '@/src/lib/store/useCart';
 import { Rating } from '@mui/material';
 import useProductsQuery from '@/src/lib/hooks/favourites/useProductMutation';
 import useAddToCartMutation from "../../lib/hooks/cart/useAddToCartMutation";
+import useUpdateCartMutation from "../../lib/hooks/cart/useUpdateToCartMutation";
+import useFetchCartQuery from "../../lib/hooks/cart/useFetchCartMutation";
 import useFavoritesQuery from '@/src/lib/hooks/useFavouritesQuery';
 import useSnackbarStore from '@/src/lib/store/useSnackbarStore';
 
@@ -31,9 +33,11 @@ const ViewProductDetails = () => {
   const id = params?.id;
   const [ratingValue, setRatingValue] = useState(3.5);
 
-  const { addToCart } = useCartStore();
+  const { addToCart, findCartItem } = useCartStore();
   const { data, isLoading } = useProductsQuery();
-  const { mutate: addToCartMutation } = useAddToCartMutation();
+  const { mutate: addToCartMutation, isPending: isAddingToCart } = useAddToCartMutation();
+  const { mutate: updateCartMutation, isPending: isUpdatingCart } = useUpdateCartMutation();
+  const { data: cartData, refetch: refetchCart } = useFetchCartQuery();
   const products = data?.data?.products ?? [];
 
   const product = products.find(p => p._id === id);
@@ -47,7 +51,6 @@ const ViewProductDetails = () => {
 
     if (selectedVariation) {
       const images = selectedVariation.images || [];
-      // Filter out any null, undefined, or empty string images
       const validImages = images.filter(img => img && typeof img === 'string' && img.trim() !== '');
       return validImages.length > 0 ? validImages : [yellowWoman.src];
     }
@@ -63,7 +66,7 @@ const ViewProductDetails = () => {
     return selectedVariation.sizes || [];
   };
 
-  // Get unique sizes (remove duplicates like L and L)
+  // Get unique sizes
   const getUniqueSizes = (sizes) => {
     const seen = new Set();
     return sizes.filter(sizeObj => {
@@ -163,13 +166,6 @@ const ViewProductDetails = () => {
       return;
     }
 
-    const apiPayload = {
-      productId: product._id,
-      quantity: finalQuantity,
-      size: selectedSize,
-      color: selectedVariation.color,
-    };
-
     if (!product._id) {
       showSnackbar({
         message: "Product ID is missing",
@@ -178,8 +174,20 @@ const ViewProductDetails = () => {
       return;
     }
 
+    // Check if item already exists in cart
+    const existingCartItem = findCartItem(product._id, selectedSize, selectedColor);
+
+    const apiPayload = {
+      productId: product._id,
+      quantity: finalQuantity,
+      size: selectedSize,
+      color: selectedVariation.color,
+    };
+
+    // Local state item for immediate UI feedback
     const newItem = {
       id: product._id,
+      productId: product._id,
       quantity: finalQuantity,
       size: selectedSize,
       color: selectedColor,
@@ -189,32 +197,75 @@ const ViewProductDetails = () => {
       description: product.description || "No description",
     };
 
-    addToCart(newItem);
-    addToCartMutation(apiPayload, {
-      onSuccess: (data) => {
-        const safeMessage =
-            typeof data?.message === 'string'
-                ? data.message
-                : 'Item added to cart';
+    if (existingCartItem) {
+      // Update existing item
+      const newQuantity = existingCartItem.quantity + finalQuantity;
+      updateCartMutation(
+          { productId: product._id, quantity: newQuantity },
+          {
+            onSuccess: (data) => {
+              // Update local state
+              addToCart(newItem);
 
-        showSnackbar({
-          message: safeMessage,
-          severity: "success",
-        });
-        router.push('/viewProductDetails/checkout/cart');
-      },
-      onError: (err) => {
-        const errorMessage =
-            typeof err?.message === 'string'
-                ? err.message
-                : 'Something went wrong';
+              // Refetch cart to sync with server
+              refetchCart();
 
-        showSnackbar({
-          message: errorMessage,
-          severity: "error",
-        });
-      },
-    });
+              const safeMessage = typeof data?.message === 'string'
+                  ? data.message
+                  : 'Item updated in cart';
+
+              showSnackbar({
+                message: safeMessage,
+                severity: "success",
+              });
+
+              router.push('/viewProductDetails/checkout/cart');
+            },
+            onError: (err) => {
+              const errorMessage = typeof err?.response?.data?.message === 'string'
+                  ? err.response.data.message
+                  : 'Something went wrong';
+
+              showSnackbar({
+                message: errorMessage,
+                severity: "error",
+              });
+            },
+          }
+      );
+    } else {
+      // Add new item
+      addToCartMutation(apiPayload, {
+        onSuccess: (data) => {
+          // Update local state
+          addToCart(newItem);
+
+          // Refetch cart to sync with server
+          refetchCart();
+
+          const safeMessage = typeof data?.message === 'string'
+              ? data.message
+              : 'Item added to cart';
+
+          showSnackbar({
+            message: safeMessage,
+            severity: "success",
+          });
+
+          router.push('/viewProductDetails/checkout/cart');
+        },
+        onError: (err) => {
+          const errorMessage = typeof err?.response?.data?.message === 'string'
+              ? err.response.data.message
+              : 'Something went wrong';
+
+          showSnackbar({
+            message: errorMessage,
+            severity: "error",
+          });
+        },
+      });
+    }
   };
 
   const ProductDetails = () => (
@@ -286,6 +337,7 @@ const ViewProductDetails = () => {
               <button
                   onClick={decreaseQuantity}
                   className="px-4 py-2 border-r border-gray-200 text-black hover:bg-gray-50"
+                  disabled={isAddingToCart || isUpdatingCart}
               >
                 −
               </button>
@@ -293,6 +345,7 @@ const ViewProductDetails = () => {
               <button
                   onClick={increaseQuantity}
                   className="px-4 py-2 border-l border-gray-200 text-black hover:bg-gray-50"
+                  disabled={isAddingToCart || isUpdatingCart}
               >
                 +
               </button>
@@ -303,11 +356,12 @@ const ViewProductDetails = () => {
         <div className="hidden md:flex flex-row gap-4 mb-6">
           <div className="flex-1">
             <button
-                className="bg-[#26735B] text-white px-4 py-3 rounded-lg w-full flex items-center justify-center gap-2 cursor-pointer hover:bg-[#1f5a47] transition-colors"
+                className="bg-[#26735B] text-white px-4 py-3 rounded-lg w-full flex items-center justify-center gap-2 cursor-pointer hover:bg-[#1f5a47] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 onClick={handleAddToCart}
+                disabled={isAddingToCart || isUpdatingCart}
             >
               <FiShoppingCart className="w-5 h-5 text-white" />
-              Add to Cart
+              {isAddingToCart || isUpdatingCart ? 'Adding...' : 'Add to Cart'}
             </button>
           </div>
           <div className="flex items-center justify-center w-12 h-12 border border-[#26735B] rounded-lg hover:bg-gray-50 cursor-pointer">
@@ -322,11 +376,12 @@ const ViewProductDetails = () => {
         <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-[#E5E5E5] p-4 z-50">
           <div className="flex gap-3">
             <button
-                className="bg-[#26735B] text-white px-4 py-3 rounded-lg w-full flex items-center justify-center gap-2 cursor-pointer hover:bg-[#1f5a47] transition-colors"
+                className="bg-[#26735B] text-white px-4 py-3 rounded-lg w-full flex items-center justify-center gap-2 cursor-pointer hover:bg-[#1f5a47] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 onClick={handleAddToCart}
+                disabled={isAddingToCart || isUpdatingCart}
             >
               <FiShoppingCart className="w-5 h-5 text-white" />
-              Add to Cart
+              {isAddingToCart || isUpdatingCart ? 'Adding...' : 'Add to Cart'}
             </button>
             <button
                 className="w-12 h-12 border border-gray-300 rounded-lg flex items-center justify-center flex-shrink-0"
@@ -348,7 +403,6 @@ const ViewProductDetails = () => {
       <div className="max-w-7xl mx-auto py-12 md:py-4">
         {/* Mobile Layout */}
         <div className="block md:hidden">
-          {/* Product Images */}
           <div className="px-4 py-4">
             <div className="relative">
               <Image
@@ -406,9 +460,7 @@ const ViewProductDetails = () => {
         {/* Desktop Layout */}
         <div className="hidden md:block">
           <div className="flex flex-col md:flex-row md:gap-10 py-8 md:h-[calc(100vh-160px)] mt-[45px]">
-            {/* Left side - Images */}
             <div className='flex flex-row gap-4 flex-1'>
-              {/* Thumbnail column */}
               <div className="flex flex-col gap-2 w-20">
                 {currentImages.map((img, idx) => (
                     <Image
@@ -426,28 +478,26 @@ const ViewProductDetails = () => {
                 ))}
               </div>
 
-              {/* Main image */}
               <div className="flex-1 flex flex-col gap-4">
                 <div className="relative">
                   <Image
                       alt="Main product"
                       src={currentImages[currentImageIndex] || yellowWoman.src}
                       width={550}
-                      height={550}
-                      className="rounded-lg w-full h-auto"
+                      height={500}
+                      style={{ height: 'auto', width: '100%' }}
+                      className="rounded-lg w-full h-auto mb-4"
                       onError={handleImageError}
                   />
-                </div>
-
-                <div className="min-h-[400px] w-full">
-                  <SpecsAndReviews />
                 </div>
               </div>
             </div>
 
-            {/* Right side - Product details */}
-            <div className="flex-1 flex flex-col">
+            <div className="flex-1">
               <ProductDetails />
+              <div className="mt-8">
+                <SpecsAndReviews />
+              </div>
             </div>
           </div>
         </div>

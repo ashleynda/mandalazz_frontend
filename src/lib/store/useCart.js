@@ -1,153 +1,196 @@
+// store/useCart.js
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-export const useCartStore = create(
+const useCartStore = create(
     persist(
         (set, get) => ({
             cartItems: [],
-            savedForLater: [],
+            totalAmount: 0,
 
-            // Sync cart items from API response
+            // Set cart items from API response
             setCartItems: (items) => {
-                console.log('🔄 Setting cart items:', items);
-                set({ cartItems: Array.isArray(items) ? items : [] });
+                const processedItems = items.map(item => ({
+                    id: item.product._id || item.product,
+                    productId: item.product._id || item.product,
+                    quantity: item.quantity,
+                    size: item.size,
+                    color: item.color,
+                    name: item.product.name || 'Unknown Product',
+                    image: item.product.images?.[0] || item.product.variations?.[0]?.images?.[0] || '',
+                    price: item.product.price?.$numberDecimal || item.product.price || "0.00",
+                    description: item.product.description || "No description",
+                    stock: item.product.stock || 0,
+                }));
+
+                set({ cartItems: processedItems });
+                get().calculateTotal();
             },
 
-            // Add to cart (optimistic update)
+            // Add item to cart (local state)
             addToCart: (item) => {
                 const { cartItems } = get();
-                const existingItemIndex = cartItems.findIndex(
-                    cartItem => cartItem.id === item.id &&
+                const existingItem = cartItems.find(
+                    (cartItem) =>
+                        cartItem.id === item.id &&
                         cartItem.size === item.size &&
                         cartItem.color === item.color
                 );
 
-                if (existingItemIndex >= 0) {
-                    const updatedItems = [...cartItems];
-                    updatedItems[existingItemIndex].quantity += item.quantity || 1;
-                    set({ cartItems: updatedItems });
+                let newCartItems;
+                if (existingItem) {
+                    newCartItems = cartItems.map((cartItem) =>
+                        cartItem.id === item.id &&
+                        cartItem.size === item.size &&
+                        cartItem.color === item.color
+                            ? { ...cartItem, quantity: cartItem.quantity + item.quantity }
+                            : cartItem
+                    );
                 } else {
-                    set({ cartItems: [...cartItems, { ...item, quantity: item.quantity || 1 }] });
+                    newCartItems = [...cartItems, item];
+                }
+
+                set({ cartItems: newCartItems });
+                get().calculateTotal();
+
+                // For guests, also save to localStorage
+                if (typeof window !== 'undefined') {
+                    const token = sessionStorage.getItem('authToken');
+                    if (!token) {
+                        localStorage.setItem('cartItems', JSON.stringify(newCartItems));
+                    }
                 }
             },
 
-            // Remove from cart (optimistic update)
+            // Remove item from cart (local state)
             removeFromCart: (productId) => {
-                const { cartItems } = get();
-                const updatedItems = cartItems.filter(item => {
-                    const itemId = item.product?._id || item.id;
-                    return itemId !== productId;
-                });
-                set({ cartItems: updatedItems });
+                const newCartItems = get().cartItems.filter((item) => item.id !== productId);
+                set({ cartItems: newCartItems });
+                get().calculateTotal();
+
+                // For guests, also update localStorage
+                if (typeof window !== 'undefined') {
+                    const token = sessionStorage.getItem('authToken');
+                    if (!token) {
+                        if (newCartItems.length === 0) {
+                            localStorage.removeItem('cartItems');
+                        } else {
+                            localStorage.setItem('cartItems', JSON.stringify(newCartItems));
+                        }
+                    }
+                }
             },
 
-            // Update quantity (optimistic update)
+
+            // Update item quantity (local state)
             updateCartItemQuantity: (productId, newQuantity) => {
-                const { cartItems } = get();
-                const quantity = parseInt(newQuantity);
+                if (newQuantity <= 0) {
+                    get().removeFromCart(productId);
+                    return;
+                }
 
-                if (isNaN(quantity) || quantity < 1) return;
+                const newCartItems = get().cartItems.map((item) =>
+                    item.id === productId ? { ...item, quantity: newQuantity } : item
+                );
 
-                const updatedItems = cartItems.map(item => {
-                    const itemId = item.product?._id || item.id;
-                    return itemId === productId ? { ...item, quantity } : item;
-                });
-                set({ cartItems: updatedItems });
+                set({ cartItems: newCartItems });
+                get().calculateTotal();
+
+                // For guests, also update localStorage
+                if (typeof window !== 'undefined') {
+                    const token = sessionStorage.getItem('authToken');
+                    if (!token) {
+                        localStorage.setItem('cartItems', JSON.stringify(newCartItems));
+                    }
+                }
             },
 
+            // Clear entire cart
             clearCart: () => {
-                console.log('🧹 Clearing cart');
-                set({ cartItems: [], savedForLater: [] });
-            },
+                set({ cartItems: [], totalAmount: 0 });
 
-            saveForLater: (productId) => {
-                const { cartItems, savedForLater } = get();
-                const itemToSave = cartItems.find(item => {
-                    const itemId = item.product?._id || item.id;
-                    return itemId === productId;
-                });
-
-                if (itemToSave) {
-                    const updatedCart = cartItems.filter(item => {
-                        const itemId = item.product?._id || item.id;
-                        return itemId !== productId;
-                    });
-
-                    set({
-                        cartItems: updatedCart,
-                        savedForLater: [...savedForLater, itemToSave]
-                    });
+                // Also clear localStorage for guests
+                if (typeof window !== 'undefined') {
+                    const token = sessionStorage.getItem('authToken');
+                    if (!token) {
+                        localStorage.removeItem('cartItems');
+                    }
                 }
             },
 
-            moveToCart: (productId) => {
-                const { cartItems, savedForLater } = get();
-                const itemToMove = savedForLater.find(item => {
-                    const itemId = item.product?._id || item.id;
-                    return itemId === productId;
-                });
-
-                if (itemToMove) {
-                    const updatedSaved = savedForLater.filter(item => {
-                        const itemId = item.product?._id || item.id;
-                        return itemId !== productId;
-                    });
-                    const updatedCart = [...cartItems, itemToMove];
-
-                    set({
-                        savedForLater: updatedSaved,
-                        cartItems: updatedCart
-                    });
-                }
-            },
-
-            getCartTotal: () => {
+            // Calculate total amount
+            calculateTotal: () => {
                 const { cartItems } = get();
-                return cartItems.reduce((total, item) => {
-                    let itemPrice = 0;
+                const total = cartItems.reduce((sum, item) => {
+                    const price = parseFloat(item.price) || 0;
+                    return sum + (price * item.quantity);
+                }, 0);
+                set({ totalAmount: total });
+            },
 
-                    if (item.product?.price?.$numberDecimal) {
-                        itemPrice = parseFloat(item.product.price.$numberDecimal);
-                    } else if (item.price) {
-                        itemPrice = parseFloat(item.price);
+            // Get cart count - FIXED VERSION
+            getCartCount: () => {
+                if (typeof window === 'undefined') return 0;
+
+                const token = sessionStorage.getItem('authToken');
+
+                if (token) {
+                    // Logged in — use Zustand state
+                    return get().cartItems.reduce((count, item) => count + (item.quantity || 0), 0);
+                } else {
+                    // Guest — use both Zustand state AND localStorage as fallback
+                    const zustandCount = get().cartItems.reduce((count, item) => count + (item.quantity || 0), 0);
+
+                    // If Zustand has items, use that
+                    if (zustandCount > 0) {
+                        return zustandCount;
                     }
 
-                    return total + (itemPrice * item.quantity);
-                }, 0);
+                    // Otherwise, fallback to localStorage
+                    try {
+                        const localCart = JSON.parse(localStorage.getItem('cartItems')) || [];
+                        return localCart.reduce((count, item) => count + (item.quantity || 0), 0);
+                    } catch (error) {
+                        console.error('Error reading cart from localStorage:', error);
+                        return 0;
+                    }
+                }
             },
 
-            getTotalQuantity: () => {
-                const { cartItems } = get();
-                return cartItems.reduce((total, item) => total + item.quantity, 0);
+            // Load cart from localStorage for guests
+            loadGuestCart: () => {
+                if (typeof window === 'undefined') return;
+
+                const token = sessionStorage.getItem('authToken');
+                if (!token) {
+                    try {
+                        const localCart = JSON.parse(localStorage.getItem('cartItems')) || [];
+                        if (localCart.length > 0) {
+                            set({ cartItems: localCart });
+                            get().calculateTotal();
+                        }
+                    } catch (error) {
+                        console.error('Error loading guest cart:', error);
+                    }
+                }
             },
 
-            isItemInCart: (productId) => {
-                const { cartItems } = get();
-                return cartItems.some((item) => {
-                    const itemId = item.product?._id || item.id;
-                    return itemId === productId;
-                });
+            // Find item in cart
+            findCartItem: (productId, size, color) => {
+                return get().cartItems.find(
+                    item => item.id === productId && item.size === size && item.color === color
+                );
             },
-
-            getCartItem: (productId) => {
-                const { cartItems } = get();
-                return cartItems.find((item) => {
-                    const itemId = item.product?._id || item.id;
-                    return itemId === productId;
-                });
-            },
-
-            getCartItemCount: () => {
-                const { cartItems } = get();
-                return cartItems.reduce((count, item) => count + item.quantity, 0);
-            }
         }),
         {
             name: 'cart-storage',
+            // Store full cart data for guests
             partialize: (state) => ({
-                cartItems: Array.isArray(state.cartItems) ? state.cartItems : [],
-                savedForLater: Array.isArray(state.savedForLater) ? state.savedForLater : [],
+                cartItems: state.cartItems,
+                totalAmount: state.totalAmount
             }),
         }
     )
 );
+
+export { useCartStore };
