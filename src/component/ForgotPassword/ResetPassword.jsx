@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import RegNavbar from "../reusables/RegNavBar";
 import { useState } from "react";
-import useForgotPasswordMutation from "../../lib/hooks/useForgotPassword";
+import useForgotPasswordMutation from "../../lib/hooks/Auth/useForgotPassword";
 
 
 const ResetPassword = () => {

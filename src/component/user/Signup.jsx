@@ -6,7 +6,7 @@ import RegNavbar from '../reusables/RegNavBar';
 import { LoadingButton } from '@mui/lab';
 import { CircularProgress } from '@mui/material';
 import useSignupStore from '../../lib/store/useSignupStore';
-import useSignupMutation from '../../lib/hooks/useSignupMutation';
+import useSignupMutation from '../../lib/hooks/Auth/useSignupMutation';
 // import RegNavbar from '@/components/reusables/RegNavbar'; // adjust the path to your project structure
 
 

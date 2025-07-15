@@ -1,184 +1,153 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { syncGuestCart } from '../../lib/utils/syncGuestCarts';
 
 export const useCartStore = create(
-  persist(
-    (set, get) => ({
-      cartItems: [],
-      savedForLater: [],
-      setCartItems: (items) => set({ cartItems: items }),
-      
-      // Add item to cart
-      // addToCart: (item) => {
-      //   let { cartItems } = get();
-      //   if (!Array.isArray(cartItems)) {
-      //     cartItems = [];
-      //   };
-      //   const existingItem = cartItems.find(cartItem => cartItem.id === item.id);
-        
-      //   if (existingItem) {
-      //     // If item exists, update quantity
-      //     set({
-      //       cartItems: cartItems.map(cartItem => 
-      //         cartItem.id === item.id 
-      //           ? { ...cartItem, quantity: cartItem.quantity + (item.quantity || 1) }
-      //           : cartItem
-      //       )
-      //     });
-      //   } else {
-      //     // If new item, add to cart
-      //     set({ 
-      //       cartItems: [...cartItems, { ...item, quantity: item.quantity || 1 }] 
-      //     });
-      //   }
-      // },
-      addToCart: async (item) => {
-  let { cartItems } = get();
-  if (!Array.isArray(cartItems)) cartItems = [];
+    persist(
+        (set, get) => ({
+            cartItems: [],
+            savedForLater: [],
 
-  const existingItem = cartItems.find(cartItem => cartItem.id === item.id);
-  const token = sessionStorage.getItem('authToken');
+            // Sync cart items from API response
+            setCartItems: (items) => {
+                console.log('🔄 Setting cart items:', items);
+                set({ cartItems: Array.isArray(items) ? items : [] });
+            },
 
-  if (existingItem) {
-    const updatedCart = cartItems.map(cartItem =>
-      cartItem.id === item.id
-        ? { ...cartItem, quantity: cartItem.quantity + (item.quantity || 1) }
-        : cartItem
-    );
+            // Add to cart (optimistic update)
+            addToCart: (item) => {
+                const { cartItems } = get();
+                const existingItemIndex = cartItems.findIndex(
+                    cartItem => cartItem.id === item.id &&
+                        cartItem.size === item.size &&
+                        cartItem.color === item.color
+                );
 
-    set({ cartItems: updatedCart });
-    syncGuestCart(updatedCart);
+                if (existingItemIndex >= 0) {
+                    const updatedItems = [...cartItems];
+                    updatedItems[existingItemIndex].quantity += item.quantity || 1;
+                    set({ cartItems: updatedItems });
+                } else {
+                    set({ cartItems: [...cartItems, { ...item, quantity: item.quantity || 1 }] });
+                }
+            },
 
-    if (token) {
-      try {
-        await fetch(`https://mandelazz-webapp.azurewebsites.net/api/cart/update/${item.id}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ quantity: existingItem.quantity + (item.quantity || 1) })
-        });
-      } catch (err) {
-        console.error('Failed to update cart item on backend:', err);
-      }
-    }
-  } else {
-    const newCart = [...cartItems, { ...item, quantity: item.quantity || 1 }];
-    set({ cartItems: newCart });
+            // Remove from cart (optimistic update)
+            removeFromCart: (productId) => {
+                const { cartItems } = get();
+                const updatedItems = cartItems.filter(item => {
+                    const itemId = item.product?._id || item.id;
+                    return itemId !== productId;
+                });
+                set({ cartItems: updatedItems });
+            },
 
-    if (token) {
-      try {
-        await fetch('https://mandelazz-webapp.azurewebsites.net/api/cart/add', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ productId: item.id, qty: item.quantity || 1 }),
-        });
-      } catch (err) {
-        console.error('Failed to add item to cart on backend:', err);
-      }
-    }
-  }
-},
+            // Update quantity (optimistic update)
+            updateCartItemQuantity: (productId, newQuantity) => {
+                const { cartItems } = get();
+                const quantity = parseInt(newQuantity);
 
-      
-      // Remove item from cart
-     removeFromCart: async (id) => {
-  const { cartItems } = get();
-  const token = sessionStorage.getItem("authToken");
+                if (isNaN(quantity) || quantity < 1) return;
 
-  const updatedCart = cartItems.filter(item => item.id !== id);
-  set({ cartItems: updatedCart });
+                const updatedItems = cartItems.map(item => {
+                    const itemId = item.product?._id || item.id;
+                    return itemId === productId ? { ...item, quantity } : item;
+                });
+                set({ cartItems: updatedItems });
+            },
 
-  syncGuestCart(updatedCart); // still useful for guest
+            clearCart: () => {
+                console.log('🧹 Clearing cart');
+                set({ cartItems: [], savedForLater: [] });
+            },
 
-  if (token) {
-    try {
-      await fetch(`https://mandelazz-webapp.azurewebsites.net/api/cart/remove`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ productId: id }),
-      });
-    } catch (err) {
-      console.error("❌ Failed to remove item from backend:", err);
-    }
-  }
-},
+            saveForLater: (productId) => {
+                const { cartItems, savedForLater } = get();
+                const itemToSave = cartItems.find(item => {
+                    const itemId = item.product?._id || item.id;
+                    return itemId === productId;
+                });
 
-      
-      // Update quantity of an item
-      updateCartItemQuantity: (id, newQuantity) => {
-        const { cartItems } = get();
-        
-        // Ensure quantity is valid
-        const quantity = parseInt(newQuantity);
-        if (isNaN(quantity) || quantity < 1) return;
-        
-        set({
-          cartItems: cartItems.map(item => 
-            item.id === id ? { ...item, quantity } : item
-          )
-        });
-      },
-      
-      // Clear cart
-      clearCart: () => set({ cartItems: [] }),
-      
-      // Save item for later
-      saveForLater: (id) => {
-        const { cartItems, savedForLater } = get();
-        const itemToSave = cartItems.find(item => item.id === id);
-        
-        if (itemToSave) {
-          set({
-            cartItems: cartItems.filter(item => item.id !== id),
-            savedForLater: [...savedForLater, itemToSave]
-          });
+                if (itemToSave) {
+                    const updatedCart = cartItems.filter(item => {
+                        const itemId = item.product?._id || item.id;
+                        return itemId !== productId;
+                    });
+
+                    set({
+                        cartItems: updatedCart,
+                        savedForLater: [...savedForLater, itemToSave]
+                    });
+                }
+            },
+
+            moveToCart: (productId) => {
+                const { cartItems, savedForLater } = get();
+                const itemToMove = savedForLater.find(item => {
+                    const itemId = item.product?._id || item.id;
+                    return itemId === productId;
+                });
+
+                if (itemToMove) {
+                    const updatedSaved = savedForLater.filter(item => {
+                        const itemId = item.product?._id || item.id;
+                        return itemId !== productId;
+                    });
+                    const updatedCart = [...cartItems, itemToMove];
+
+                    set({
+                        savedForLater: updatedSaved,
+                        cartItems: updatedCart
+                    });
+                }
+            },
+
+            getCartTotal: () => {
+                const { cartItems } = get();
+                return cartItems.reduce((total, item) => {
+                    let itemPrice = 0;
+
+                    if (item.product?.price?.$numberDecimal) {
+                        itemPrice = parseFloat(item.product.price.$numberDecimal);
+                    } else if (item.price) {
+                        itemPrice = parseFloat(item.price);
+                    }
+
+                    return total + (itemPrice * item.quantity);
+                }, 0);
+            },
+
+            getTotalQuantity: () => {
+                const { cartItems } = get();
+                return cartItems.reduce((total, item) => total + item.quantity, 0);
+            },
+
+            isItemInCart: (productId) => {
+                const { cartItems } = get();
+                return cartItems.some((item) => {
+                    const itemId = item.product?._id || item.id;
+                    return itemId === productId;
+                });
+            },
+
+            getCartItem: (productId) => {
+                const { cartItems } = get();
+                return cartItems.find((item) => {
+                    const itemId = item.product?._id || item.id;
+                    return itemId === productId;
+                });
+            },
+
+            getCartItemCount: () => {
+                const { cartItems } = get();
+                return cartItems.reduce((count, item) => count + item.quantity, 0);
+            }
+        }),
+        {
+            name: 'cart-storage',
+            partialize: (state) => ({
+                cartItems: Array.isArray(state.cartItems) ? state.cartItems : [],
+                savedForLater: Array.isArray(state.savedForLater) ? state.savedForLater : [],
+            }),
         }
-      },
-      
-      // Move saved item back to cart
-      moveToCart: (id) => {
-        const { cartItems, savedForLater } = get();
-        const itemToMove = savedForLater.find(item => item.id === id);
-        
-        if (itemToMove) {
-          set({
-            savedForLater: savedForLater.filter(item => item.id !== id),
-            cartItems: [...cartItems, itemToMove]
-          });
-        }
-      },
-      
-      // Get cart total
-      getCartTotal: () => {
-        const { cartItems } = get();
-        return cartItems.reduce((total, item) => 
-          total + (item.price * item.quantity), 0);
-      },
-      
-      // Get cart item count
-      getCartItemCount: () => {
-        const { cartItems } = get();
-        return cartItems.reduce((count, item) => count + item.quantity, 0);
-      }
-    }),
-    {
-      name: 'cart-storage', // unique name for localStorage
-      getStorage: () => localStorage,
-      partialize: (state) => ({
-        ...state,
-        cartItems: Array.isArray(state.cartItems) ? state.cartItems : [],
-        savedForLater: Array.isArray(state.savedForLater) ? state.savedForLater : [],
-      }),
-
-    }
-  )
+    )
 );

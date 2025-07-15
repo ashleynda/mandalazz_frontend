@@ -10,7 +10,7 @@ import { useDefaultAddress } from "../../lib/hooks/checkout/useFetchDefaultAddre
 import { useAddressStore } from "../../lib/store/useAddressStore";
 import { useCreateAddress } from "../../lib/hooks/useCreateAddress";
 import useSnackbarStore from "@/src/lib/store/useSnackbarStore";
-import useFetchCartQuery from "@/src/lib/hooks/useFetchCartMutation";
+import useFetchCartQuery from "@/src/lib/hooks/cart/useFetchCartMutation";
 
 const countries = [
   { code: "+234", name: "Nigeria", flag: "🇳🇬" },

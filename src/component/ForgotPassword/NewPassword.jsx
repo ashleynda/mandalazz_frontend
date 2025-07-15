@@ -3,11 +3,11 @@
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import RegNavbar from '../reusables/RegNavBar'
-import useLoginMutation from '../../lib/hooks/useLoginMutation'
+import useLoginMutation from '../../lib/hooks/Auth/useLoginMutation'
 import useLoginStore from '../../lib/store/useLoginStore'
 import { LoadingButton } from '@mui/lab';
 import { CircularProgress } from '@mui/material';
-import useResetPasswordMutation from '../../lib/hooks/useRestPassword'
+import useResetPasswordMutation from '../../lib/hooks/Auth/useRestPassword'
 
 
 const NewPassword= () => {
