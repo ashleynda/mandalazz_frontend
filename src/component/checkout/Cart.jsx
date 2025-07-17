@@ -17,7 +17,7 @@ const Cart = () => {
     const updateCartItemQuantity = useCartStore(state => state.updateCartItemQuantity);
     const setCartItems = useCartStore(state => state.setCartItems);
 
-    const { data, isLoading, error } = useFetchCartQuery();
+    const { data, isLoading, error, refetch } = useFetchCartQuery();
     const { mutate: removeItem } = useRemoveFromCart();
 
     useEffect(() => {
@@ -31,8 +31,16 @@ const Cart = () => {
     if (!Array.isArray(cartItems)) return <div>Cart items not loaded properly</div>;
 
     const handleRemove = (productId) => {
+        console.log("Removing product with ID:", productId);
         removeItem({ productId }, {
-            onSuccess: () => removeFromCart(productId),
+            onSuccess: () => {
+                 console.log("Successfully removed from server, updating local state");
+                 removeFromCart(productId);
+
+            },
+             onError: (err) => {
+                console.error("Remove from cart failed:", err);
+            }
         });
     };
 
@@ -71,11 +79,11 @@ const Cart = () => {
                 </div>
 
                 {/* Right Side - Order Summary */}
-                {data?.cart && (
+                {/* {data?.cart && ( */}
                     <div className="hidden lg:block lg:w-80">
                         <OrderSummary cart={data.cart} />
                     </div>
-                )}
+                {/* )} */}
             </div>
         </div>
     );

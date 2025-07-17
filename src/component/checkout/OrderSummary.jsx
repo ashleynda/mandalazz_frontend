@@ -10,28 +10,41 @@ const OrderSummary = ({ cart, checkout, isLoading = false }) => {
     const isCart = pathname.includes("cart");
     const items = cart?.items ?? [];
     const isMobile = useMediaQuery({ query: '(max-width: 768px)' });
-     const { showSnackbar } = useSnackbarStore();
+    const { showSnackbar } = useSnackbarStore();
+    console.log("cart data:", items);
+
 
     // Extract subtotal from backend totalAmount (MongoDB Decimal128 format)
+    // const getSubTotal = () => {
+    //     if (!cart?.totalAmount) return 0;
+
+    //     // Handle MongoDB Decimal128 format from backend
+    //     if (cart.totalAmount.$numberDecimal) {
+    //         return parseFloat(cart.totalAmount.$numberDecimal);
+    //     }
+
+    //     // Fallback for other formats
+    //     if (typeof cart.totalAmount === 'number') {
+    //         return cart.totalAmount;
+    //     }
+
+    //     if (typeof cart.totalAmount === 'string') {
+    //         return parseFloat(cart.totalAmount);
+    //     }
+
+    //     return 0;
+    // };
+
     const getSubTotal = () => {
-        if (!cart?.totalAmount) return 0;
+        if (!Array.isArray(items) || items.length === 0) return 0;
 
-        // Handle MongoDB Decimal128 format from backend
-        if (cart.totalAmount.$numberDecimal) {
-            return parseFloat(cart.totalAmount.$numberDecimal);
-        }
-
-        // Fallback for other formats
-        if (typeof cart.totalAmount === 'number') {
-            return cart.totalAmount;
-        }
-
-        if (typeof cart.totalAmount === 'string') {
-            return parseFloat(cart.totalAmount);
-        }
-
-        return 0;
+        return items.reduce((acc, item) => {
+            const price = Number(item?.product?.price?.$numberDecimal || 0);
+            const quantity = item?.quantity ?? 1;
+            return acc + price * quantity;
+        }, 0);
     };
+
 
     // Memoize calculations to prevent unnecessary re-renders
     const { subTotal, vat, delivery, total } = useMemo(() => {
@@ -41,28 +54,29 @@ const OrderSummary = ({ cart, checkout, isLoading = false }) => {
         const total = subTotal + vat + delivery;
 
         return { subTotal, vat, delivery, total };
-    }, [cart?.totalAmount]);
+    }, [items]);
+
+
 
     const handleCheckout = () => {
         const token = sessionStorage.getItem('authToken');
-         if (isDelivery && typeof checkout === 'function') {
-    // 🚀 Trigger the actual checkout passed in props
-    checkout();
-    return;
-  }
-        
+        if (isDelivery && typeof checkout === 'function') {
+            checkout();
+            return;
+        }
+
         if (!token) {
             showSnackbar({ open: true, message: 'Please login before checkout', severity: 'info' });
-        // } else {
-            
+            // } else {
+
             setTimeout(() => {
-                const isReturningUser = sessionStorage.getItem('hasAccount') === 'true'; // Optional check
+                const isReturningUser = sessionStorage.getItem('hasAccount') === 'true';
                 if (isReturningUser) {
                     router.push('/login');
                 } else {
                     router.push('/signup');
                 }
-            }, 1000); 
+            }, 1000);
         }
         router.push('/viewProductDetails/checkout/delivery');
     };
@@ -90,65 +104,76 @@ const OrderSummary = ({ cart, checkout, isLoading = false }) => {
                         </p>
                     </div>
 
-                    {isDelivery && (
+                    {(isCart || isDelivery) && (
                         <>
                             <div className="flex justify-between">
-                                <p className="text-sm font-normal text-[#061410]">Delivery</p>
-                                <p className="text-sm font-normal text-[#061410]">₦{delivery.toLocaleString()}</p>
+                                <p className="text-sm font-normal text-[#061410]">Sub Total</p>
+                                <p className={`text-sm font-normal text-[#061410] ${isLoading ? 'opacity-50' : ''}`}>
+                                    ₦{subTotal.toLocaleString()}
+                                </p>
                             </div>
-                            <div className="flex justify-between">
-                                <p className="text-sm font-normal text-[#061410]">VAT</p>
-                                <p className="text-sm font-normal text-[#061410]">₦{vat.toLocaleString()}</p>
+
+                            {isDelivery && (
+                                <>
+                                    <div className="flex justify-between">
+                                        <p className="text-sm font-normal text-[#061410]">Delivery</p>
+                                        <p className="text-sm font-normal text-[#061410]">₦{delivery.toLocaleString()}</p>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <p className="text-sm font-normal text-[#061410]">VAT</p>
+                                        <p className="text-sm font-normal text-[#061410]">₦{vat.toLocaleString()}</p>
+                                    </div>
+                                </>
+                            )}
+
+                            <div className="flex justify-between border-t border-[#F7F7F7] pt-4">
+                                <p className="text-base font-bold text-[#061410]">Total</p>
+                                <p className={`text-base font-bold text-[#061410]`}>
+                                    ₦{isDelivery ? total.toLocaleString() : subTotal.toLocaleString()}
+                                </p>
                             </div>
                         </>
                     )}
-
-                    <div className="flex justify-between border-t border-[#F7F7F7] pt-4">
-                        <p className="text-base font-bold text-[#061410]">Total</p>
-                        <p className={`text-base font-bold text-[#061410]`}>
-                            ₦{isDelivery ? total.toLocaleString() : subTotal.toLocaleString()}
-                        </p>
-                    </div>
                 </div>
                 {isMobile ? (
                     <div className="fixed bottom-0 left-0 right-0 z-50 bg-white px-4 py-2 border-t md:hidden">
-                <button
-                    className='bg-[#26735B] rounded-lg text-white text-base font-bold py-3 px-4 w-full'                  
-                    // onClick={() => {
-                    //     if (isLoading) return;
+                        <button
+                            className='bg-[#26735B] rounded-lg text-white text-base font-bold py-3 px-4 w-full'
+                            // onClick={() => {
+                            //     if (isLoading) return;
 
-                    //     if (isDelivery) {
-                    //         checkout();
-                    //     } else {
-                    //         router.push('/viewProductDetails/checkout/delivery');
-                    //     }
-                    // }}
-                    // disabled={isLoading}
-                    onClick={handleCheckout}
-                >
-                    {isDelivery ? "Confirm Order" : "Checkout"}
-                </button>
-                </div>
+                            //     if (isDelivery) {
+                            //         checkout();
+                            //     } else {
+                            //         router.push('/viewProductDetails/checkout/delivery');
+                            //     }
+                            // }}
+                            // disabled={isLoading}
+                            onClick={handleCheckout}
+                        >
+                            {isDelivery ? "Confirm Order" : "Checkout"}
+                        </button>
+                    </div>
                 ) : (
-                <button
-                    className='bg-[#26735B] rounded-lg text-white text-base font-bold py-3 px-4 w-full'                  
-                    // onClick={() => {
-                    //     if (isLoading) return;
+                    <button
+                        className='bg-[#26735B] rounded-lg text-white text-base font-bold py-3 px-4 w-full'
+                        // onClick={() => {
+                        //     if (isLoading) return;
 
-                    //     if (isDelivery) {
-                    //         checkout();
-                    //     } else {
-                    //         router.push('/viewProductDetails/checkout/delivery');
-                    //     }
-                    // }}
-                    // disabled={isLoading}
-                    onClick={handleCheckout}
-                >
-                    {isDelivery ? "Confirm Order" : "Checkout"}
-                </button>
+                        //     if (isDelivery) {
+                        //         checkout();
+                        //     } else {
+                        //         router.push('/viewProductDetails/checkout/delivery');
+                        //     }
+                        // }}
+                        // disabled={isLoading}
+                        onClick={handleCheckout}
+                    >
+                        {isDelivery ? "Confirm Order" : "Checkout"}
+                    </button>
                 )}
 
-            
+
 
                 <p className="text-[#8D8C8C] text-xs font-medium text-center w-full mt-3">
                     Taxes and delivery calculated at checkout
