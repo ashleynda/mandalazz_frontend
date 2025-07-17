@@ -35,6 +35,7 @@ const ViewProductDetails = () => {
   const { data, isLoading } = useProductsQuery();
   const { mutate: addToCartMutation } = useAddToCartMutation();
   const products = data?.data?.products ?? [];
+  
 
   const product = products.find(p => p._id === id);
   const [token, setToken] = useState('');
@@ -140,7 +141,8 @@ const ViewProductDetails = () => {
     return <div>Product not found</div>;
   }
 
-  const isFavorite = product && favoritesData?.data?.some(fav => fav._id === product._id);
+  // const isFavorite = product && favoritesData?.data?.some(fav => fav._id === product._id);
+const isFavorite = !!(product?._id && favoritesData?.data?.some(fav => fav?._id === product._id));
 
   const increaseQuantity = () => setQuantity((prev) => prev + 1);
   const decreaseQuantity = () => setQuantity((prev) => (prev > 1 ? prev - 1 : 1));

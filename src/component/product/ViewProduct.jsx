@@ -51,11 +51,28 @@ const ViewProducts = () => {
     }
   }, []);
 
-  useEffect(() => {
-    if (favoritesQuery && Array.isArray(favoritesQuery.favorites)) {
-      setFavorites(favoritesQuery.favorites);
-    }
-  }, [favoritesQuery]);
+  // useEffect(() => {
+  //   if (favoritesQuery && Array.isArray(favoritesQuery.favorites)) {
+  //     setFavorites(favoritesQuery.favorites);
+  //   }
+  // }, [favoritesQuery]);
+//   useEffect(() => {
+//   if (favoritesQuery?.data && Array.isArray(favoritesQuery.data)) {
+//     const productIds = favoritesQuery.data.map((fav) => fav.productId);
+//     setFavorites(productIds);
+//   }
+// }, [favoritesQuery]);
+useEffect(() => {
+  if (favoritesQuery?.data && Array.isArray(favoritesQuery.data)) {
+    const validFavorites = favoritesQuery.data.filter(
+      (fav) => fav && fav.productId // ensures fav is not null and has a productId
+    );
+    const productIds = validFavorites.map((fav) => fav.productId);
+    setFavorites(productIds);
+  }
+}, [favoritesQuery]);
+
+
 
   const handleAddToFavorites = (productId) => {
     if (favorites.includes(productId)) {

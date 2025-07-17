@@ -8,6 +8,8 @@ import Image from 'next/image';
 import useFavoritesQuery from '../lib/hooks/useFavouritesQuery';
 import { useEffect, useState } from 'react';
 import { FaArrowRight } from 'react-icons/fa';
+import { FiHeart } from 'react-icons/fi';
+import { Rating } from '@mui/material';
 
 
 
@@ -24,6 +26,7 @@ import { FaArrowRight } from 'react-icons/fa';
 
 export default function Favourites() {
     const [token, setToken] = useState(null);
+    const [ratingValue, setRatingValue] = useState(3.5);
 
     useEffect(() => {
         const storedToken = sessionStorage.getItem('authToken'); // or localStorage
@@ -43,7 +46,7 @@ export default function Favourites() {
 
     console.log('favorites from query:', favorites);
 
-       const renderStars = (rating) => {
+    const renderStars = (rating) => {
         const stars = [];
         const value = Number(rating) || 0;
         const fullStars = Math.floor(rating);
@@ -78,13 +81,13 @@ export default function Favourites() {
                     const imageUrl = product?.variations?.[0]?.images?.[0] || '/fallback.png';
                     return (
                         <div className='w-[218px]'
-                        sx={{
-                            // minWidth: 220,
-                            // maxWidth: 240, 
-                            position: 'relative',
-                            borderRadius: '8px',
-                            boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-                        }}
+                            sx={{
+                                // minWidth: 220,
+                                // maxWidth: 240, 
+                                position: 'relative',
+                                borderRadius: '8px',
+                                boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                            }}
                             key={product._id || idx}>
                             {/* <Box sx={{ position: 'relative', width: '100%', height: 240 }}> */}
                             <div className="relative w-full h-32 sm:h-40 md:h-48 lg:h-56">
@@ -102,13 +105,27 @@ export default function Favourites() {
                                         borderTopRightRadius: 8,
                                     }}
                                 />
-                                <button className="absolute bottom-2 right-2 bg-white rounded-full p-1.5 sm:p-2 shadow-md hover:bg-gray-50 transition-colors">
+                                {/* <button className="absolute bottom-2 right-2 bg-white rounded-full p-1.5 sm:p-2 shadow-md hover:bg-gray-50 transition-colors">
                                     {product.isFavorite ? (
                                         <FavoriteIcon sx={{ color: '#4CAF50', fontSize: 20 }} />
                                     ) : (
                                         <FavoriteBorderIcon sx={{ color: '#4CAF50', fontSize: 20 }} />
                                     )}
+                                </button> */}
+                                {/* <button
+                                    className="absolute bottom-2 right-2 p-2 rounded-full shadow-md transition hover:scale-105 bg-[#26735B]"
+                                    aria-label="Remove from favorites"
+                                    >
+                                    <FiHeart className="text-[#26735B]" />
+                                </button> */}
+                                <button
+                                    className="absolute bottom-2 right-2 p-2 rounded-full shadow-md transition hover:scale-105 bg-white"
+                                    aria-label="Remove from favorites"
+                                >
+                                    <FavoriteIcon sx={{ color: '#26735B', fontSize: 20 }} />
                                 </button>
+
+
                             </div>
                             <div className="py-2">
                                 {/* <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', mb: 0.5 }}> */}
@@ -156,14 +173,29 @@ export default function Favourites() {
                                         {product.rating} ({product.reviewCount} Reviews)
                                     </Typography>
                                 </Box> */}
-                            <div className="flex items-center flex-wrap gap-1">
+                                  <div className="card-content flex justify-center sm:justify-start w-full mt-2 text-nowrap">
+                                        <Rating
+                                            value={ratingValue}
+                                            onChange={(event, newValue) => setRatingValue(newValue ?? 0)}
+                                            precision={0.5}
+                                            size="small"
+                                            className='w-[63px]'
+                                        />
+                                        <p className='text-[#061410] text-xs font-medium'>
+                                        {ratingValue ? Math.round(ratingValue).toFixed(1) : 'N/A'}
+                                        </p>
+                                        <p className='text-[#061410] text-xs font-medium tracking-tighter'>
+                                        (400 + Reviews)
+                                        </p>
+                                    </div>
+                            {/* <div className="flex items-center flex-wrap gap-1">
                                 <div className="flex items-center">
                                     {renderStars(product.rating)}
                                 </div>
                                 <span className="text-[9px] font-medium text-[#061410]">
                                     {product.rating} ({product.reviewCount} Reviews)
                                 </span>
-                            </div>
+                            </div> */}
                         </div>
                         // </div>
                     );

@@ -256,7 +256,7 @@ const ReusableCartTable = ({
               {/* Action Buttons */}
               <div className="flex ml-6 ">
                 <button 
-                  onClick={() => onRemove(item.id)} 
+                  onClick={() => onRemove({ productId: item.id}) }
                   className="p-2 text-[#191818]"
                   aria-label="Remove item"
                 >

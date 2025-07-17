@@ -1,45 +1,49 @@
-"use client"
+'use client'
 
-import { useState } from "react"
-import { User, BookOpen, ShoppingBag, FileText, Heart, Settings } from "lucide-react"
-import { cn } from "@/lib/utils"
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { LogOut } from 'lucide-react';
+import SideNavItem from './SideNavItem';
+// import { sidebarItems } from '../reusables/Sidenav'; 
 
-export default function SidebarNavigation() {
-  const [activeItem, setActiveItem] = useState("Account")
+import { User, BookOpen, ShoppingBag, FileText, Heart, Settings } from "lucide-react";
 
-  const menuItems = [
-    { name: "Account", icon: User },
-    { name: "Address Book", icon: BookOpen },
-    { name: "My Orders", icon: ShoppingBag },
-    { name: "Reviews", icon: FileText },
-    { name: "Favourites", icon: Heart },
-    { name: "Settings", icon: Settings },
-  ]
-
+export const sidebarItems = [
+  { name: "Account", icon: User, route: "/dashboard/accountDetails" },
+  { name: "Address Book", icon: BookOpen, route: "/dashboard/address-book" },
+  { name: "My Orders", icon: ShoppingBag, route: "/dashboard/orders" },
+  { name: "Reviews", icon: FileText, route: "/dashboard/reviews" },
+  { name: "Favourites", icon: Heart, route: "/favourites" },
+  { name: "Settings", icon: Settings, route: "/dashboard/settings" },
+];
+const SideBar = ({ menuItems }) => {
   return (
-    <div className="w-64 bg-white border-r h-screen">
-      <nav className="py-4">
-        <ul className="space-y-1">
-          {menuItems.map((item) => {
-            const isActive = activeItem === item.name
-            return (
-              <li key={item.name}>
-                <button
-                  onClick={() => setActiveItem(item.name)}
-                  className={cn(
-                    "flex items-center w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 relative",
-                    isActive && "text-emerald-600",
-                  )}
-                >
-                  <item.icon className={cn("h-5 w-5 mr-3", isActive ? "text-emerald-600" : "text-gray-500")} />
-                  <span>{item.name}</span>
-                  {isActive && <div className="absolute right-0 top-0 h-full w-1 bg-emerald-600" />}
-                </button>
-              </li>
-            )
-          })}
-        </ul>
+    <div className="w-64 bg-white text-[#3E3C3C] flex flex-col h-[300px] right-50 ml-20 mt-20">
+      {/* Logo/Brand */}
+      {/* <div className="p-6 border-b border-emerald-800">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
+            <span className="text-emerald-900 font-bold text-sm">E</span>
+          </div>
+          <span className="font-semibold">Everything Marketplace</span>
+        </div>
+      </div> */}
+
+      <nav className="flex-1 p-4 h-[60px] ">
+        <SideNavItem menuItems={sidebarItems} />
       </nav>
+
+      {/* <div className="p-4">
+        <Link 
+          to="/logout" 
+          className="w-full flex items-center gap-3 px-3 py-2 text-white text-sm font-semibold rounded-lg transition-colors cursor-pointer hover:bg-white hover:text-[#26735B]"
+        >
+          <LogOut size={20} />
+          <span>Log Out</span>
+        </Link>
+      </div> */}
     </div>
-  )
-}
+  );
+};
+
+export default SideBar;

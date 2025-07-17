@@ -1,8 +1,8 @@
-import AccountDetails from "../../component/accountDetails"
+import AccountDetails from "../../../component/account/accountDetails"
 
 const page=()=>{
     return(
-        <div>      
+        <div className="">      
             <AccountDetails />  
           
         </div>

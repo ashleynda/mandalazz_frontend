@@ -64,33 +64,65 @@ const Cart = () => {
 
     if (isLoading) return <div>Loading...</div>;
     if (error) return <div>Error loading cart: {error.message}</div>;
+    const handleRemove = async (item) => {
+  const productId = item?.product?._id || item?.id;
+  if (!productId) {
+    console.warn("❌ Product ID not found for removal");
+    return;
+  }
 
-    const handleRemove = async (productId) => {
-        console.log('🗑️ Attempting to remove item:', productId);
-        setIsRemovingItem(true);
+  console.log('🗑️ Attempting to remove item:', productId);
+  setIsRemovingItem(true);
 
-        // Optimistic update
-        removeFromCart(productId);
+  // Optimistic local state update
+  removeFromCart(productId);
 
-        removeFromCartMutation(
-            { productId },
-            {
-                onSuccess: () => {
-                    console.log("✅ Item removed from cart:", productId);
-                    refetch();
-                },
-                onError: (error) => {
-                    console.error("❌ Failed to remove from cart:", error.message);
-                    alert(`Failed to remove item: ${error.message}`);
-                    // Revert optimistic update by refetching
-                    refetch();
-                },
-                onSettled: () => {
-                    setIsRemovingItem(false);
-                }
-            }
-        );
-    };
+  removeFromCartMutation(
+    { productId },
+    {
+      onSuccess: () => {
+        console.log("✅ Item removed from cart:", productId);
+        refetch();
+      },
+      onError: (error) => {
+        console.error("❌ Failed to remove from cart:", error.message);
+        alert(`Failed to remove item: ${error.message}`);
+        refetch(); // Revert optimistic update
+      },
+      onSettled: () => {
+        setIsRemovingItem(false);
+      }
+    }
+  );
+};
+
+
+    // const handleRemove = async () => {
+    //     console.log('🗑️ Attempting to remove item:', productId);
+    //     setIsRemovingItem(true);
+
+    //     // Optimistic update
+    //     removeFromCart(productId);
+
+    //     removeFromCartMutation(
+    //         { productId },
+    //         {
+    //             onSuccess: () => {
+    //                 console.log("✅ Item removed from cart:", productId);
+    //                 refetch();
+    //             },
+    //             onError: (error) => {
+    //                 console.error("❌ Failed to remove from cart:", error.message);
+    //                 alert(`Failed to remove item: ${error.message}`);
+    //                 // Revert optimistic update by refetching
+    //                 refetch();
+    //             },
+    //             onSettled: () => {
+    //                 setIsRemovingItem(false);
+    //             }
+    //         }
+    //     );
+    // };
 
     const handleSaveForLater = (id) => {
         console.log('Saving for later:', id);

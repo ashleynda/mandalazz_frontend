@@ -66,6 +66,6 @@
     "src/app/user/page",
     "src/app/newPassword/page.jsx",
     "src/app/newPassword/layout.jsx"
-  ],
+, "src/app/dashboard/layout.jsx"  ],
   "exclude": ["node_modules"]
 }
