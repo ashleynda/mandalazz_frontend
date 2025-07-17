@@ -14,7 +14,7 @@ const useUpdateCartMutation = () => {
             queryClient.invalidateQueries(['cart']);
         },
         onError: (error) => {
-            console.error('❌ Update cart error:', error.message);
+            console.error('Update cart error:', error.message);
         },
     });
 };
