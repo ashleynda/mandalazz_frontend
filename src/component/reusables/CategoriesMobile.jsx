@@ -48,7 +48,7 @@ export default function MobileAccountPage({ onClose }) {
     { icon: MapPin, label: 'Delivery Addresses', route: "/dashboard/address-book" },
     { icon: ShoppingBag, label: 'My Orders', route: "/dashboard/orders" },
     { icon: MessageSquare, label: 'Reviews', route: "/dashboard/reviews" },
-    { icon: Heart, label: 'Favourites', route: "/favourites" },
+    { icon: Heart, label: 'Favourites', route: "/dashboard/favourites" },
     { icon: Settings, label: 'Settings', route: "/dashboard/settings" }
   ];
 
@@ -105,7 +105,7 @@ export default function MobileAccountPage({ onClose }) {
 
 
   return (
-    <div className="bg-white min-h-screen w-full">
+    <div className="bg-white min-h-screen w-full pb-38">
       {/* Header */}
       <div className="p-4 border-b border-gray-200">
         {isLoading ? (
@@ -224,10 +224,18 @@ export default function MobileAccountPage({ onClose }) {
       </div>
 
       {/* Log Out Button */}
-      <div className="p-4 pt-8">
+      {/* <div className="p-4 pt-8">
         <button className="w-full flex items-center justify-center space-x-2 p-3 rounded-lg border border-green-300 text-green-600 hover:bg-green-50 transition-colors">
           <LogOut className="w-5 h-5" />
           <span>Log Out</span>
+        </button>
+      </div> */}
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t sm:hidden">
+        <button
+          className="w-full bg-[#26735B] flex items-center justify-center gap-2 hover:bg-emerald-700 text-white font-bold text-base px-8 py-3 rounded-lg cursor-pointer transition-colors"
+        >
+          <LogOut className="w-5 h-5" />
+          Log Out
         </button>
       </div>
     </div>

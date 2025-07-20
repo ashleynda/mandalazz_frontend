@@ -4,18 +4,19 @@ import React from 'react';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { FiShoppingCart, FiBell, FiMenu } from 'react-icons/fi';
-import logo from '../../assets/EM.png'; 
+import logo from '../../assets/EM.png';
 import { Button, InputAdornment, TextField, useMediaQuery, useTheme } from '@mui/material';
 import SearchIcon from "@mui/icons-material/Search";
 import { useState, useEffect } from 'react';
 import { useCartStore } from '../../lib/store/useCart';
 import ProfileDropdown from '../../component/reusables/AccountDropDownMenu';
-import useProductSearch from '../../lib/hooks/useSearchMutation'; 
+import useProductSearch from '../../lib/hooks/useSearchMutation';
 import MobileAccountPage from '../../component/reusables/CategoriesMobile';
 import NavbarSkeleton from '../skeletons/NavbarSkeleton';
 import SearchResultsSkeleton from '../skeletons/SearchResultsSkeleton';
+import SearchDropdown from '../../component/reusables/SearchDropdown';
 
-const Navbar = ({ onSearch }) => {
+const Navbar = () => {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
   const [notifications, setNotifications] = useState([]);
@@ -34,14 +35,27 @@ const Navbar = ({ onSearch }) => {
   const open = Boolean(anchorEl);
   const { data, isLoading, error, refetch } = useProductSearch(searchTerm, false);
   const [results, setResults] = useState([]);
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    const timeout = setTimeout(() => setLoading(false), 1000); // Simulate loading
+    const timeout = setTimeout(() => setLoading(false), 1000);
     return () => clearTimeout(timeout);
   }, []);
 
-  return loading ? <NavbarSkeleton /> : <Navbar onSearch={onSearch} />;
+  if (loading) {
+    return <NavbarSkeleton />;
+  }
+
+  useEffect(() => {
+  const handleClickOutside = (event) => {
+    if (!event.target.closest('.search-container')) {
+      setResults([]);
+    }
+  };
+  document.addEventListener('click', handleClickOutside);
+  return () => document.removeEventListener('click', handleClickOutside);
+}, []);
+
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -76,7 +90,7 @@ const Navbar = ({ onSearch }) => {
       }
     };
 
-    checkAuth(); 
+    checkAuth();
     window.addEventListener('logout', checkAuth);
     window.addEventListener('storage', checkAuth);
 
@@ -118,15 +132,48 @@ const Navbar = ({ onSearch }) => {
     setSearchTerm(query);
     if (query) {
       try {
-        const { data } = await refetch();
-        setResults(Array.isArray(data) ? data : []);
+        // const { data } = await refetch();
+        const response = await refetch();
+        const fetchedProducts = response?.data?.data?.products;
+        // setResults(data);
+        // setResults(Array.isArray(data) ? data : []);
+        console.log("Search reasults:", fetchedProducts);
+        setResults(Array.isArray(fetchedProducts) ? fetchedProducts : []);
       } catch (error) {
         console.error("Error fetching search results", error);
         setResults([]);
       }
     } else {
       setResults([]);
+
     }
+  };
+
+  const handleOptions = (productId, color, size) => {
+    const queryParams = new URLSearchParams();
+    if (color) queryParams.append('color', color.toLowerCase());
+    if (size) queryParams.append('size', size);
+
+    const href = `/viewProductDetails/${productId}?${queryParams.toString()}`;
+    console.log('Navigating to:', href);
+    router.push(href);
+  };
+
+  const getFirstAvailableSize = (product) => {
+    if (!product.variations || product.variations.length === 0) return null;
+
+    const firstVariation = product.variations[0];
+    if (!firstVariation.sizes || firstVariation.sizes.length === 0) return null;
+
+    // Find first size with stock > 0
+    const availableSize = firstVariation.sizes.find(size => size.stock > 0);
+    return availableSize ? availableSize.size : firstVariation.sizes[0].size;
+  };
+
+  // Helper function to get first available color
+  const getFirstAvailableColor = (product) => {
+    if (!product.variations || product.variations.length === 0) return null;
+    return product.variations[0].color;
   };
 
   const renderCartIcon = () => {
@@ -207,7 +254,7 @@ const Navbar = ({ onSearch }) => {
             </div>
           </div>
           <div className="px-3 pb-3 w-full">
-            <div className='w-full max-w-full'>
+            <div className='relative w-full max-w-[400px] search-container'>
               <TextField
                 variant="outlined"
                 placeholder="Search..."
@@ -220,7 +267,19 @@ const Navbar = ({ onSearch }) => {
                   '& .MuiOutlinedInput-root': {
                     height: '36px',
                     fontSize: '14px'
-                  }
+                  },
+                    '& .MuiOutlinedInput-root': {
+      '& fieldset': {
+        borderColor: '#ccc', // default border color
+      },
+      '&:hover fieldset': {
+        borderColor: '#26735B', // border color on hover (greenish tone)
+      },
+      '&.Mui-focused fieldset': {
+        borderColor: '#26735B', // border color on focus
+        borderWidth: '2px', // optional: make the border thicker when focused
+      },
+    },
                 }}
                 InputProps={{
                   endAdornment: (
@@ -231,23 +290,19 @@ const Navbar = ({ onSearch }) => {
                 }}
               />
             </div>
-            {isLoading && searchTerm ? (
-            <SearchResultsSkeleton count={5} />
-            ) : 
-            !isLoading && searchTerm ? (
-              results.length === 0 ? (
-                <div className="text-center mt-4 text-gray-500 font-medium">
-                  No products found for "{searchTerm}"
-                </div>
-              ) : (
-                <div>
-                  {results.map(product => (
-                    <div key={product.id}>{product.name}</div>
-                  ))}
-                </div>
-              )
-            ) : null}
-            
+   <SearchDropdown
+  searchTerm={searchTerm}
+  isLoading={isLoading}
+  results={results}
+  getFirstAvailableColor={getFirstAvailableColor}
+  getFirstAvailableSize={getFirstAvailableSize}
+  handleOptions={handleOptions}
+  setSearchTerm={setSearchTerm}
+  setResults={setResults}
+  variant="mobile"
+/>
+
+
           </div>
         </div>
 
@@ -295,14 +350,26 @@ const Navbar = ({ onSearch }) => {
             onClick={() => router.push('/products')}
           />
         </div>
-        <div className="relative w-full max-w-[400px]">
+        <div className="relative w-full max-w-[400px] search-container">
           <TextField
             variant="outlined"
             placeholder="Search..."
             size="small"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            sx={{ width: { xs: '100%', sm: '300px', md: '400px' }, borderRadius: '6px' }}
+            sx={{ width: { xs: '100%', sm: '300px', md: '500px' }, borderRadius: '6px',
+                '& .MuiOutlinedInput-root': {
+      '& fieldset': {
+        borderColor: '#ccc', // default border color
+      },
+      '&:hover fieldset': {
+        borderColor: '#26735B', // border color on hover (greenish tone)
+      },
+      '&.Mui-focused fieldset': {
+        borderColor: '#26735B', // border color on focus
+        borderWidth: '2px', // optional: make the border thicker when focused
+      },
+    }, }}
             InputProps={{
               endAdornment: (
                 <InputAdornment position="start">
@@ -311,28 +378,18 @@ const Navbar = ({ onSearch }) => {
               ),
             }}
           />
-          {isLoading && searchTerm ? (
-            <SearchResultsSkeleton count={5} />
-          ) : 
-          !isLoading && searchTerm ? (
-            <div className="absolute mt-1 w-full bg-white border border-gray-200 shadow-lg rounded-md max-h-[300px] overflow-y-auto z-[10000]">
-              {results.length === 0 ? (
-                <div className="p-3 text-sm text-gray-500 text-center">
-                  No products found for "{searchTerm}"
-                </div>
-              ) : (
-                results.map((product) => (
-                  <div
-                    key={product.id}
-                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
-                    onClick={() => router.push(`/products/${product.id}`)}
-                  >
-                    {product.name}
-                  </div>
-                ))
-              )}
-            </div>
-          ) : null}
+          <SearchDropdown
+            searchTerm={searchTerm}
+            isLoading={isLoading}
+            results={results}
+            getFirstAvailableColor={getFirstAvailableColor}
+            getFirstAvailableSize={getFirstAvailableSize}
+            handleOptions={handleOptions}
+            setSearchTerm={setSearchTerm}
+            setResults={setResults}
+            variant="desktop"
+          />
+
         </div>
 
         <div className="flex items-center gap-6">

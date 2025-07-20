@@ -29,7 +29,7 @@ const SideBar = ({ menuItems }) => {
         </div>
       </div> */}
 
-      <nav className="flex-1 p-4 h-[60px] ">
+      <nav className="flex-1 p-2 h-[60px] ">
         <SideNavItem menuItems={sidebarItems} />
       </nav>
 
