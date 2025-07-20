@@ -5,15 +5,20 @@ import { ArrowLeft, ChevronDown } from 'lucide-react';
 import { useAddressById, useUpdateAddress } from '../../lib/hooks/account/useEditAddress';
 import useSnackbarStore from '../../lib/store/useSnackbarStore';
 import { useParams, useRouter } from 'next/navigation';
+import { Divider } from '@mui/material';
+import { useCreateAddress } from '@/src/lib/hooks/useCreateAddress';
 
 export default function EditAddressForm() {
-    const { id } = useParams();
-    const { data, isLoading, isError } = useAddressById(id);
-    const {mutate: updateAddress, isPeding} = useUpdateAddress()
-    const { showSnackbar } = useSnackbarStore();
-    const router = useRouter();
+  const { id } = useParams();
+  const isEditMode = Boolean(id)
+  const { data, isLoading, isError } = useAddressById(id);
+  const { mutate: updateAddress, isPending } = useUpdateAddress()
+  const { showSnackbar } = useSnackbarStore();
+  const router = useRouter();
+  const { mutate: createAddress, isPending: isCreating } = useCreateAddress();
 
- const [formData, setFormData] = useState({
+
+  const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
     phoneNumber: '',
@@ -58,15 +63,15 @@ export default function EditAddressForm() {
     }));
   };
 
-    useEffect(() => {
-    if (data?.message.address) {
-        const address = data.message.address;
+  useEffect(() => {
+    if (isEditMode && data?.message.address) {
+      const address = data.message.address;
       setFormData({
         firstName: address.firstName || '',
         lastName: address.lastName || '',
         phoneNumber: address.phoneNumber || '',
         alternatePhoneNumber: address.alternatePhoneNumber || '',
-        streetAddress: address.address || '', 
+        streetAddress: address.address || '',
         landmark: address.landmark || '',
         city: address.city || '',
         lga: address.lga || '',
@@ -74,10 +79,28 @@ export default function EditAddressForm() {
         isDefault: address.isDefault || false,
       });
     }
-  }, [data]);
+  }, [data, isEditMode]);
+
+  useEffect(() => {
+  if (!isEditMode) {
+    setFormData({
+      firstName: '',
+      lastName: '',
+      phoneNumber: '',
+      alternatePhoneNumber: '',
+      streetAddress: '',
+      landmark: '',
+      city: '',
+      lga: '',
+      state: '',
+      isDefault: false,
+    });
+  }
+}, [isEditMode]);
 
 
-   const handleSubmit = () => {
+
+  const handleSubmit = () => {
     const payload = {
       firstName: formData.firstName,
       lastName: formData.lastName,
@@ -91,40 +114,53 @@ export default function EditAddressForm() {
       isDefault: formData.isDefault,
     };
 
+    if(isEditMode) {
     updateAddress({ id, payload }, {
       onSuccess: (res) => {
         showSnackbar({ message: 'Edit saved successfully', severity: 'success' });
-        // You can navigate or show a toast here
         router.push('/dashboard/address-book');
-    },
+      },
       onError: (err) => {
         showSnackbar({ message: 'Failed to update address', severity: 'error' });
       }
     });
+      } else {
+    // Create a new address
+    createAddress(payload, {
+      onSuccess: () => {
+        showSnackbar({ message: 'Address created successfully', severity: 'success' });
+        router.push('/dashboard/address-book');
+      },
+      onError: (err) => {
+        showSnackbar({ message: err.message || 'Failed to create address', severity: 'error' });
+      }
+    });
+  }
+
   };
 
   return (
     <>
       {/* <div className="bg-white border-b border-gray-200 px-6 py-4"> */}
-        <div className="flex items-center gap-3 sm:hidden mt-6" onClick={() => router.back('/dashboard/address-book')}>
-          <button className="p-1 hover:bg-gray-100 rounded">
-            <ArrowLeft className="w-5 h-5 text-gray-600" />
-          </button>
-          <h1 className="text-center text-[#3E3C3C] text-sm font-normal">Delivery Addresses</h1>
-        </div>
-      {/* </div> */}
-    <div className="max-h-screen bg-gray-50 mt-4">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4">
-        <div className="flex items-center gap-3">
-          <h1 className="text-lg font-semibold text-gray-900">Address</h1>
-        </div>
+      <div className="flex items-center gap-3 sm:hidden mt-6" onClick={() => router.back('/dashboard/address-book')}>
+        <button className="p-1 hover:bg-gray-100 rounded">
+          <ArrowLeft className="w-5 h-5 text-gray-600" />
+        </button>
+        <h1 className="text-center text-[#3E3C3C] text-sm font-normal">Delivery Addresses</h1>
       </div>
+      {/* </div> */}
+      <div className="h-[calc(100vh-110px)] md:h-[calc(100vh-320px)] w-full bg-gray-50 md:mt-14 mt-4 rounded-lg">
+        {/* Header */}
+        <div className="bg-white border-b border-gray-200 px-6 py-4">
+          <div className="flex items-center gap-3">
+            <h1 className="text-lg font-semibold text-gray-900">Address</h1>
+          </div>
+        </div>
 
-      {/* Form */}
-      <div className="px-6 py-6 ">
-        <div className="max-w-2xl space-y-6">
-          {/* <div className="space-y-6"> */}
+        {/* Form */}
+        <div className="px-6 py-4 ">
+          <div className="w-full max-w-screen-xl mx-auto space-y-4 pb-24">
+            {/* <div className="space-y-6"> */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-medium text-[#101828] mb-2">
@@ -135,8 +171,8 @@ export default function EditAddressForm() {
                   name="firstName"
                   value={formData.firstName}
                   onChange={handleInputChange}
-                  disabled
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-[#131735] text-sm font-normal transition-colors bg-gray-200"
+                  disabled={isEditMode}
+                  className={`w-full px-3 py-2 border border-gray-300 rounded-lg text-[#131735] text-sm font-normal transition-colors ${isEditMode ? "bg-gray-200" : ""}`}
                 />
               </div>
               <div>
@@ -148,8 +184,8 @@ export default function EditAddressForm() {
                   name="lastName"
                   value={formData.lastName}
                   onChange={handleInputChange}
-                  disabled
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-[#131735] text-sm font-normal transition-colors bg-gray-200"
+                  disabled={isEditMode}
+                  className={`w-full px-3 py-2 border border-gray-300 rounded-lg text-[#131735] text-sm font-normal transition-colors ${isEditMode ? "bg-gray-200" : ""}`}
                 />
               </div>
             </div>
@@ -310,21 +346,49 @@ export default function EditAddressForm() {
                 Set as default address
               </label>
             </div>
+            {/* <Divider className='w-full mb-6' /> */}
+            <div className="-mx-6 md:-mx-30 hidden md:block">
+              <Divider className="border-gray-200" />
+            </div>
+
+
+
 
             {/* Submit Button */}
-            <div className="pt-4">
+            <div className=" hidden sm:block ">
               <button
                 type="button"
                 onClick={handleSubmit}
-                className="bg-[#26735B] hover:bg-emerald-800 text-white font-medium px-8 py-3 rounded-lg transition-colors "
+                disabled={isCreating || isPending}
+                className=" bg-[#26735B] hover:bg-emerald-800 text-white font-medium px-8 py-3 rounded-lg transition-colors "
               >
-                Save Changes
+               {/* {isEditMode ? 'Save Changes' : "Add"} */}
+                {isCreating || isPending
+    ? 'Saving...'
+    : isEditMode
+      ? 'Save Changes'
+      : "+ Add"}
+              </button>
+            </div>
+
+            <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t sm:hidden">
+              <button
+                onClick={handleSubmit}
+                className="w-full bg-[#26735B] hover:bg-emerald-700 text-white font-bold text-base px-8 py-3 rounded-lg transition-colors"
+                disabled={isCreating || isPending}
+              >
+                {/* {isEditMode ? 'Save Changes' : "Add"} */}
+                 {isCreating || isPending
+                ? 'Saving...'
+                : isEditMode
+                  ? 'Save Changes'
+                  : "+ Add"}
               </button>
             </div>
           </div>
         </div>
       </div>
-    {/* </div> */}
+      {/* </div> */}
     </>
   );
 }

@@ -17,7 +17,9 @@ export default function dashboardLayout({ children }) {
         {children}
       </main>
       </div>
-      <Footer />
+      <div className="hidden md:block">
+        <Footer />
+      </div>
     </>
   );
 }

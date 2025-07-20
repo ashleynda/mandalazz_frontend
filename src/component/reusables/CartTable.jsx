@@ -145,9 +145,10 @@
 'use client';
 
 import Image from 'next/image';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { FiTrash2, FiHeart } from 'react-icons/fi';
 import { Figtree } from 'next/font/google';
+import { Divider } from '@mui/material';
 
 const figtree = Figtree({
   subsets: ['latin'],
@@ -196,6 +197,19 @@ const ReusableCartTable = ({
   onQuantityChange = () => {},
 }) => {
   const safeItems = Array.isArray(items) ? items : [];
+  const [isMobile, setIsMobile] = useState(false);
+
+    useEffect(() => {
+    const checkScreenSize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
+
   const incrementQuantity = (item) => {
     onQuantityChange(item.id, item.quantity + 1);
   };
@@ -205,6 +219,89 @@ const ReusableCartTable = ({
       onQuantityChange(item.id, item.quantity - 1);
     }
   };
+ if (isMobile) {
+    return (
+      <div className="w-full max-w-md mx-auto">
+        <div className="flex flex-col gap-0">
+          {safeItems.map((item, index) => (
+            <div 
+              key={`${item.id}-${index}`} 
+              className="flex flex-col bg-white border border-gray-200 rounded-lg mb-2"
+            >
+              {/* Product Image */}
+              <div className="flex items-start gap-3 py-4 px-4">
+                <div className="w-16 h-16 shrink-0 rounded-lg overflow-hidden">
+                  <img
+                    src={item.image || '/placeholder.jpg'}
+                    alt={item.name || 'Product'}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              
+                {/* Product Details */}
+                <div className="flex-grow">
+                  <h3 className={`font-medium text-sm text-[#061410] leading-tight ${figtree.className}`}>
+                    {item.name || 'Golden Yellow Butterfly Bodycon Dress'}
+                  </h3>
+                  
+                  <div className="flex gap-4 text-xs text-gray-600 mt-1">
+                    <span className='text-[#667085] font-normal text-[13px]'>Colour • <span className="text-[#061410] font-normal text-sm">{getColorName(item.color) || 'Black'}</span></span>
+                    <span className='text-[#667085] font-normal text-[13px]'>Size • <span className="text-[#061410] font-normal text-sm">{item.size || '12'}</span></span>
+                  </div>
+                  
+                  <p className="font-bold text-base text-black mt-2">
+                    {formatPrice(item.price || 240000)}
+                  </p>
+                </div>
+              </div>
+                
+                {/* Quantity and Actions Row */}
+                <Divider className="w-full" />
+                <div className="flex items-center justify-between px-4 py-3">
+                  {/* Quantity Controls */}
+                  <div className="flex items-center border rounded-md text-[#F2F4F7]">
+                    <button 
+                      onClick={() => decrementQuantity(item)} 
+                      className="w-8 h-8 flex items-center text-[#343330] justify-center text-lg font-medium hover:bg-gray-50"
+                    >
+                      −
+                    </button>
+                    <span className="w-8 text-center text-sm font-normal text-[#000000]">{item.quantity}</span>
+                    <button 
+                      onClick={() => incrementQuantity(item)} 
+                      className="w-8 h-8 flex items-center text-[#343330] justify-center text-lg font-medium hover:bg-gray-50"
+                    >
+                      +
+                    </button>
+                  </div>
+                  
+                  {/* Action Buttons */}
+                  <div className="flex items-center gap-4">
+                    <button 
+                      onClick={() => onSaveForLater(item.id)} 
+                      className="flex items-center gap-1 text-sm font-semibold text-[#191818] hover:text-black"
+                    >
+                      <FiHeart size={14} color='#191818' />
+                      Favourite
+                    </button>
+                    
+                    <button 
+                      onClick={() => onRemove(item.id)}
+                      className="flex items-center gap-1 text-sm text-[#191818] font-semibold hover:text-red-600"
+                    >
+                      <FiTrash2 size={14} color='#191818' />
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+        </div>
+      </div>
+      
+    );
+  }
+
 
   return (
     // <div className=" px-4 border border-red-500 w-[748px] h-[497px]">
@@ -215,9 +312,11 @@ const ReusableCartTable = ({
       
       <div className="flex flex-col gap-4 ">
         {safeItems.map((item, index) => (
-          <div key={`${item.id}-${index}`} className="flex items-start justify-between py-4 border-b gap-4">
-            {/* Product Image */}
-            <div className="w-20 h-24 mr-4">
+          <div key={`${item.id}-${index}`} 
+          // className="flex items-start justify-between py-4 border-b gap-4"
+            className="flex flex-col sm:flex-row sm:items-start sm:justify-between py-4 border-b gap-4"
+          >
+            <div className="w-20 h-24 shrink-0">
               <img
                 src={item.image || '/placeholder.jpg'}
                 alt={item.name || 'Product'}
@@ -253,10 +352,9 @@ const ReusableCartTable = ({
                 </button>
               </div>
             
-              {/* Action Buttons */}
               <div className="flex ml-6 ">
                 <button 
-                  onClick={() => onRemove({ productId: item.id}) }
+                  onClick={() => onRemove(item.id) }
                   className="p-2 text-[#191818]"
                   aria-label="Remove item"
                 >

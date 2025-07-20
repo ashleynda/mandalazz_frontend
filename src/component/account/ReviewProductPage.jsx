@@ -3,6 +3,9 @@
 import React, { useState } from 'react';
 import { ChevronLeft, Star } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import useSnackbarStore from "@/src/lib/store/useSnackbarStore";
+import { usePostReview } from '../../lib/hooks/account/useComment';
+import { useParams } from 'react-router-dom';
 
 const ReviewProductPage = () => {
   const [rating, setRating] = useState(0);
@@ -10,6 +13,28 @@ const ReviewProductPage = () => {
   const [name, setName] = useState('Martins');
   const [review, setReview] = useState('');
   const router = useRouter();
+  const { showSnackbar } = useSnackbarStore();
+   const params = useParams();
+  const productId = params?.productId;
+
+    // Hook for posting review
+  const { mutate, isPending, isSuccess, isError } = usePostReview();
+
+  const handleSubmit = () => {
+    // const productId = "684776e12715270ce228fa53"; // Replace with actual product ID (could come from route params)
+    mutate(
+      { productId, review, rating, name },
+      {
+        onSuccess: () => {
+          alert("Review submitted successfully!");
+          router.push('/dashboard/reviews');
+        },
+        onError: () => {
+          alert("Failed to submit review.");
+        },
+      }
+    );
+  };
 
   const handleStarClick = (starIndex) => {
     setRating(starIndex);
@@ -104,9 +129,19 @@ const ReviewProductPage = () => {
       </div>
 
       {/* Submit Button */}
-      <button className="w-full bg-[#26735B] hover:bg-green-700 text-white text-sm font-bold py-3 px-4 rounded-lg transition-colors">
+      {/* <button className="w-full bg-[#26735B] hover:bg-green-700 text-white text-sm font-bold py-3 px-4 rounded-lg transition-colors">
         Submit Review
+      </button> */}
+            <button
+        onClick={handleSubmit}
+        disabled={isPending}
+        className={`w-full ${
+          isPending ? 'bg-gray-400' : 'bg-[#26735B] hover:bg-green-700'
+        } text-white text-sm font-bold py-3 px-4 rounded-lg transition-colors`}
+      >
+        {isPending ? 'Submitting...' : 'Submit Review'}
       </button>
+
     </div>
   );
 };

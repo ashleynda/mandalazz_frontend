@@ -13,7 +13,7 @@ export const sidebarItems = [
   { name: "Address Book", icon: BookOpen, route: "/dashboard/address-book" },
   { name: "My Orders", icon: ShoppingBag, route: "/dashboard/orders" },
   { name: "Reviews", icon: FileText, route: "/dashboard/reviews" },
-  { name: "Favourites", icon: Heart, route: "/favourites" },
+  { name: "Favourites", icon: Heart, route: "/dashboard/favourites" },
   { name: "Settings", icon: Settings, route: "/dashboard/settings" },
 ];
 const SideBar = ({ menuItems }) => {

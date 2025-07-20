@@ -1,21 +1,43 @@
-import { useMutation } from '@tanstack/react-query';
+// import { useQuery } from '@tanstack/react-query';
 
-const useFetchMyOrders = () => {
-  return useMutation({
-    mutationFn: async () => {
-      const response = await fetch("https://mandelazz-webapp.azurewebsites.net/api/checkout/my-orders", {
-        method: "GET", // Normally GET requests shouldn't have a body
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "Content-Type": "text/plain",
-        },
-        body: `{
-          "userDetails": {
-            "addressId": "68568a64f014ec20f0978488"
+// export const useFetchMyOrders = (token) => {
+//   return useQuery({
+//     queryKey: ['myOrders'],
+//     queryFn: async () => {
+//       const response = await fetch("https://mandelazz-webapp.azurewebsites.net/api/checkout/my-orders", {
+//         method: "GET", // Normally GET requests shouldn't have a body
+//         headers: {
+//           "Authorization": `Bearer ${token}`,
+//         },
+       
+//       });
+
+//       if (!res.ok) {
+//         const error = await res.json();
+//         throw new Error(error.message || 'Failed to fetch orders');
+//       }
+
+//       return res.json();
+//     },
+//     enabled: !!token, // will only run if token is not null/undefined
+//   });
+// };
+
+import { useQuery } from '@tanstack/react-query';
+
+export const useFetchMyOrders = (token) => {
+  return useQuery({
+    queryKey: ['myOrders'],
+    queryFn: async () => {
+      const response = await fetch(
+        "https://mandelazz-webapp.azurewebsites.net/api/checkout/my-orders",
+        {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${token}`,
           },
-          "paymentType": "online_payment"
-        }`
-      });
+        }
+      );
 
       if (!response.ok) {
         const error = await response.json();
@@ -23,6 +45,7 @@ const useFetchMyOrders = () => {
       }
 
       return response.json();
-    }
+    },
+    enabled: !!token, // Only fetch when token is available
   });
 };

@@ -6,6 +6,10 @@ const page=()=>{
             <AccountDetails />  
           
         </div>
+//         <main className="pt-16 md:pt-24">
+//   <AccountDetails />
+// </main>
+
     )
 }
 export default page

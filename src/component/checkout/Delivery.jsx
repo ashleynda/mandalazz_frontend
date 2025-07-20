@@ -47,7 +47,6 @@ export default function Delivery() {
   const { data: cartData, isLoading: cartLoading, error: cartError } = useFetchCartQuery();
 
   const handleCheckout = () => {
-    console.log("🧪 handleCheckout triggered");
     const token = sessionStorage.getItem("authToken");
     const email = sessionStorage.getItem("userEmail");
 
@@ -55,7 +54,6 @@ export default function Delivery() {
       return showSnackbar({ message: "Not logged in", severity: "error" });
     }
 
-    // Validate required fields
     const { firstName, lastName, address, phone, city, state } = formData;
     if (!firstName || !lastName || !address || !phone || !city || !state) {
       return showSnackbar({
@@ -64,7 +62,6 @@ export default function Delivery() {
       });
     }
 
-    // Create the payload matching the backend expectations
     const payload = {
       userDetails: {
         firstName,
@@ -82,49 +79,35 @@ export default function Delivery() {
       paymentType: resolvedPaymentType,
     };
 
-    console.log("🟢 Submitting checkout with payload:", JSON.stringify(payload, null, 2));
-    console.log("🔍 Payment type resolved to:", resolvedPaymentType);
+    
 
     checkout({ token, payload }, {
       onSuccess: (data) => {
-        console.log("✅ Checkout success:", data);
-        console.log("🔍 Full response structure:", JSON.stringify(data, null, 2));
 
-        // Handle payment methods response
         if (data && typeof data === 'object') {
-          // Check if response contains payment methods
           if (data.paymentMethods || data.message?.paymentMethods) {
             const methods = data.paymentMethods || data.message?.paymentMethods;
-            console.log("💳 Payment methods received:", methods);
             setPaymentMethods(methods);
             setShowPaymentGateway(true);
             return;
           }
         }
 
-        // Check if this is an online payment
         if (resolvedPaymentType === "online_payment") {
-          console.log("💳 Processing online payment...");
 
-          // Try different possible response structures for payment URL
           let paymentUrl = null;
 
           // Check various possible paths for payment URL
           if (data?.message?.checkout?.paymentUrl) {
             paymentUrl = data.message.checkout.paymentUrl;
-            console.log("🔗 Found payment URL in data.message.checkout.paymentUrl:", paymentUrl);
           } else if (data?.paymentUrl) {
             paymentUrl = data.paymentUrl;
-            console.log("🔗 Found payment URL in data.paymentUrl:", paymentUrl);
           } else if (data?.message?.paymentUrl) {
             paymentUrl = data.message.paymentUrl;
-            console.log("🔗 Found payment URL in data.message.paymentUrl:", paymentUrl);
           } else if (data?.data?.paymentUrl) {
             paymentUrl = data.data.paymentUrl;
-            console.log("🔗 Found payment URL in data.data.paymentUrl:", paymentUrl);
           } else if (data?.checkout?.paymentUrl) {
             paymentUrl = data.checkout.paymentUrl;
-            console.log("🔗 Found payment URL in data.checkout.paymentUrl:", paymentUrl);
           }
 
           if (paymentUrl) {
@@ -134,34 +117,35 @@ export default function Delivery() {
               severity: "success"
             });
 
-            // Small delay to show the message before redirect
-            setTimeout(() => {
-              window.location.href = paymentUrl;
-            }, 1500);
+            // setTimeout(() => {
+            //   window.location.href = paymentUrl;
+            // }, 1500);
+               window.location.href = paymentUrl;
+
+    // After Paystack success (use callback page)
+    setTimeout(() => {
+      router.push('/order-confirmation');
+    }, 1000);
           } else {
-            console.warn("⚠️ Payment URL not found in response for online payment");
             showSnackbar({
               message: "Payment URL not found. Please try again.",
               severity: "error"
             });
           }
         } else {
-          // For payment on delivery
           console.log("🚚 Processing payment on delivery...");
           showSnackbar({
             message: "Checkout completed successfully!",
             severity: "success"
           });
 
-          // Optionally redirect to order confirmation page after a delay
-          setTimeout(() => {
-            // router.push('/order-confirmation');
-            console.log("📦 Order placed successfully with payment on delivery");
-          }, 2000);
+          // setTimeout(() => {
+          //   router.push('/order-confirmation');
+          //   console.log("📦 Order placed successfully with payment on delivery");
+          // }, 100);
         }
       },
       onError: (error) => {
-        console.error("❌ Checkout failed:", error);
         showSnackbar({
           message: error.message || "Checkout failed",
           severity: "error"
@@ -171,13 +155,9 @@ export default function Delivery() {
   };
 
   const handlePaymentMethodSelect = (method) => {
-    console.log("🎯 Payment method selected:", method);
     setPaymentType(method);
 
-    // If it's an online payment method, proceed with the payment
     if (method === "paystack" || method === "online_payment") {
-      // You might want to trigger a different flow here
-      // For now, we'll just close the payment gateway
       setShowPaymentGateway(false);
     }
   };

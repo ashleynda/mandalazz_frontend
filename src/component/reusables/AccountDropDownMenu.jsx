@@ -165,33 +165,49 @@ export default function ProfileDropdown() {
         }}
       >
         {/* <MenuItem onClick={handleClose} > */}
-        <MenuItem onClick={() => {
-  handleClose();
-  // Navigate to account page - replace with your routing logic
-  router.push('/dashboard/accountDetails'); 
-  // or setCurrentView('account'); // State-based routing
-}}>
+        <MenuItem 
+          onClick={() => {
+            handleClose();
+            // Navigate to account page - replace with your routing logic
+            router.push('/dashboard/accountDetails'); 
+            // or setCurrentView('account'); // State-based routing
+          }}>
           <ListItemIcon>
             <AccountCircleIcon fontSize="small" className='text-[#343330]' />
           </ListItemIcon>
           <ListItemText primary="Account" className='text-sm font-semibold text-[#05150C]' />
         </MenuItem>
 
-        <MenuItem onClick={handleClose}>
+        <MenuItem 
+          onClick={() => {
+            handleClose();
+            // Navigate to orders page - replace with your routing logic
+            router.push('/dashboard/orders');
+          }}>
           <ListItemIcon>
             <ListAltIcon fontSize="small" className='text-[#343330]'/>
           </ListItemIcon>
           <ListItemText primary="My Orders" className='text-sm font-semibold text-[#05150C]' />
         </MenuItem>
 
-        <MenuItem onClick={handleClose}>
+        <MenuItem 
+          onClick={() => {
+            handleClose();
+            // Navigate to orders page - replace with your routing logic
+            router.push('/dashboard/orders');
+          }}>
           <ListItemIcon>
             <FavoriteBorderIcon fontSize="small" className='text-[#343330]' />
           </ListItemIcon>
           <ListItemText primary="Favourites" className='text-sm font-semibold text-[#05150C]' />
         </MenuItem>
 
-        <MenuItem onClick={handleClose}>
+        <MenuItem 
+          onClick={() => {
+            handleClose();
+            // Navigate to settings page - replace with your routing logic
+            router.push('/dashboard/settings');
+          }}>
           <ListItemIcon>
             <SettingsIcon fontSize="small" className='text-[#343330]' />
           </ListItemIcon>
