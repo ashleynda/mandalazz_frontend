@@ -1,5 +1,5 @@
-import UserDashboard from "../../component/reusables/userDashboard"
+// import UserDashboard from "../../component/reusables/userDashboard"
 
-export default function DashboardPage() {
-  return <UserDashboard />
-}
+// export default function DashboardPage() {
+//   return <UserDashboard />
+// }
