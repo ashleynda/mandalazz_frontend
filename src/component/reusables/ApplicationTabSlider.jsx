@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Specifications from "../product/Specifications";
 import Reviews from "../product/Reviews";
-import { ProductDetails } from "../product/ProductDetails";
+import ProductDetails from "../product/ProductDetails";
 
 export default function ProductTabs() {
   const [activeTab, setActiveTab] = useState("details");

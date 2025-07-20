@@ -1,7 +1,7 @@
 import { useState } from "react";
 import ApplicationTabSlider from "../reusables/ApplicationTabSlider";
 import { usePathname } from "next/navigation";
-import { ProductDetails } from "./ProductDetails";
+import ProductDetails  from "./ProductDetails";
 import Reviews from "./Reviews";
 import Specifications from "./Specifications";
 import ProductTabs from "../reusables/ApplicationTabSlider";
