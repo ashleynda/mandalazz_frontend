@@ -1,4 +1,4 @@
-import { ProductDetails } from "@/src/component/product/ProductDetails"
+import ProductDetails  from "@/src/component/product/ProductDetails"
 
 
 const page=()=>{

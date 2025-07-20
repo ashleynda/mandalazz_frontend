@@ -1,5 +1,5 @@
 "use client";
-export function ProductDetails() {
+export default function ProductDetails() {
     return (
         <div>
             <p className="text-sm font-normal text-black mb-4">
