@@ -1,6 +1,8 @@
+"use client";
+
 import useSnackbarStore from "@/src/lib/store/useSnackbarStore";
 import { usePathname, useRouter } from "next/navigation";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMediaQuery } from 'react-responsive';
 
 const OrderSummary = ({ cart, checkout, isLoading = false }) => {
@@ -9,11 +11,28 @@ const OrderSummary = ({ cart, checkout, isLoading = false }) => {
     const isDelivery = pathname.includes("delivery");
     const isCart = pathname.includes("cart");
     const items = cart?.items ?? [];
-    const isMobile = useMediaQuery({ query: '(max-width: 768px)' });
-     const { showSnackbar } = useSnackbarStore();
-     console.log("cart data:", items);
+    // const [isClient, setIsClient] = useState(false);
+    // useEffect(() => {
+    // setIsClient(true);
+    // }, []);
+    const [isMobile, setIsMobile] = useState(false);
 
-console.log("cart data:", items);
+useEffect(() => {
+  const checkMobile = () => setIsMobile(window.innerWidth <= 768);
+  checkMobile();
+  window.addEventListener("resize", checkMobile);
+  return () => window.removeEventListener("resize", checkMobile);
+}, []);
+
+
+// const isMobile = isClient && useMediaQuery({ query: '(max-width: 768px)' });
+// const mediaQueryMatch = useMediaQuery({ query: '(max-width: 768px)' });
+// const isMobile = isClient && mediaQueryMatch;
+
+    const { showSnackbar } = useSnackbarStore();
+    console.log("cart data:", items);
+
+    console.log("cart data:", items);
     console.log("pathname:", pathname);
     console.log("isMobile:", isMobile);
     console.log("isCart:", isCart);
@@ -39,12 +58,12 @@ console.log("cart data:", items);
     //     return 0;
     // };
 
-   const getSubTotal = () => {
-     console.log("Items array:", items);
+    const getSubTotal = () => {
+        console.log("Items array:", items);
         console.log("Items length:", items.length);
         console.log("Is array?", Array.isArray(items));
         if (!Array.isArray(items) || items.length === 0) {
-             console.log("No items or not array, returning 0");
+            console.log("No items or not array, returning 0");
             return 0;
         }
 
@@ -74,39 +93,46 @@ console.log("cart data:", items);
             checkout();
             return;
         }
-        
+
         if (!token) {
             showSnackbar({ open: true, message: 'Please login before checkout', severity: 'info' });
-        // } else {
-            
+            // } else {
+
             setTimeout(() => {
-                const isReturningUser = sessionStorage.getItem('hasAccount') === 'true'; 
+                const isReturningUser = sessionStorage.getItem('hasAccount') === 'true';
                 if (isReturningUser) {
                     router.push('/login');
                 } else {
                     router.push('/signup');
                 }
-            }, 1000); 
+            }, 1000);
+            return;
         }
         router.push('/viewProductDetails/checkout/delivery');
     };
 
-      if (isMobile && isCart) {
-        console.log("Rendering OrderSummary for mobile cart view", subTotal);
-    return (
-      <div className="w-full flex items-center justify-between px-4 py-2 border-b border-gray-200">
-        <div>
-                    <p className="text-sm font-normal text-[#061410]">
-                        Subtotal ({items.length} {items.length === 1 ? "Item" : "Items"})
-                    </p>
-                    <p className="text-xs text-gray-600">Mobile Cart View - Debug</p>
-                </div>
-        <p className="text-base font-bold text-[#061410]">
-          ₦{subTotal.toLocaleString()}
-        </p>
-      </div>
-    );
-  }
+    // if (isMobile && isCart) {
+    //     console.log("Rendering OrderSummary for mobile cart view", subTotal);
+    //     console.log("isMobile:", isMobile, "isCart:", isCart);
+
+    //     return (
+    //         <div>
+    //         <div className="w-full flex items-center justify-between px-4 py-2 border-b border-gray-200">
+    //             <div>
+    //                 <p className="text-sm font-normal text-[#061410]">
+    //                     Subtotal ({items.length} {items.length === 1 ? "Item" : "Items"})
+    //                 </p>
+    //                 <p className="text-xs text-gray-600">Mobile Cart View - Debug</p>
+    //             </div>
+    //             <p className="text-base font-bold text-[#061410]">
+    //                 ₦{subTotal.toLocaleString()}
+    //             </p>
+    //         </div>
+         
+
+    //         </div>
+    //     );
+    // }
 
     return (
         <div className="order-summary bg-white rounded-lg flex flex-col justify-center items-start p-6 w-full max-w-md">
@@ -131,7 +157,7 @@ console.log("cart data:", items);
                         </p>
                     </div>
 
-                    
+
 
                     {isDelivery && (
                         <>
@@ -153,45 +179,38 @@ console.log("cart data:", items);
                         </p>
                     </div>
                 </div>
-                {isMobile ? (
-                    <div className="fixed bottom-0 left-0 right-0 z-50 bg-white px-4 py-2 border-t md:hidden">
-                <button
-                    className='bg-[#26735B] rounded-lg text-white text-base font-bold py-3 px-4 w-full'                  
-                    // onClick={() => {
-                    //     if (isLoading) return;
+                {/* {isMobile && (isCart || is) (
+                    <div className="fixed bottom-0 left-0 right-0 z-50 bg-white px-4 py-2 border-t">
+                        <button
+                            className="w-full bg-[#26735B] hover:bg-emerald-700 text-white font-bold text-base px-8 py-3 rounded-lg cursor-pointer transition-colors"
+                            onClick={handleCheckout}
+                        >
+                            {isDelivery ? "Confirm Order" : "Checkout"}
+                        </button>
+                    </div>
+                )} */}
 
-                    //     if (isDelivery) {
-                    //         checkout();
-                    //     } else {
-                    //         router.push('/viewProductDetails/checkout/delivery');
-                    //     }
-                    // }}
-                    // disabled={isLoading}
-                    onClick={handleCheckout}
-                >
-                    {isDelivery ? "Confirm Order" : "Checkout"}
-                </button>
-                </div>
-                ) : (
-                <button
-                    className='bg-[#26735B] rounded-lg text-white text-base font-bold py-3 px-4 w-full'                  
-                    // onClick={() => {
-                    //     if (isLoading) return;
-
-                    //     if (isDelivery) {
-                    //         checkout();
-                    //     } else {
-                    //         router.push('/viewProductDetails/checkout/delivery');
-                    //     }
-                    // }}
-                    // disabled={isLoading}
-                    onClick={handleCheckout}
-                >
-                    {isDelivery ? "Confirm Order" : "Checkout"}
-                </button>
+                {!isMobile &&  (
+                    <div>
+                        <button
+                            className='bg-[#26735B] rounded-lg text-white text-base font-bold py-3 px-4 w-full'
+                            onClick={handleCheckout}
+                        >
+                            {isDelivery ? "Confirm Order" : "Checkout"}
+                        </button>
+                    </div>
+                )}
+                {isMobile && (isCart || isDelivery) &&(
+                    <div className="fixed bottom-0 left-0 right-0 z-50 bg-white px-4 py-2 border-t">
+                        <button
+                            className="w-full bg-[#26735B] hover:bg-emerald-700 text-white font-bold text-base px-8 py-3 rounded-lg cursor-pointer transition-colors"
+                            onClick={handleCheckout}
+                        >
+                            {isDelivery ? "Confirm Order" : "Checkout"}
+                        </button>
+                    </div>
                 )}
 
-            
 
                 <p className="text-[#8D8C8C] text-xs font-medium text-center w-full mt-3">
                     Taxes and delivery calculated at checkout

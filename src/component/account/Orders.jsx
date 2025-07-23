@@ -280,8 +280,6 @@ const OrdersPage = () => {
   return (
     <div className="max-w-4xl p-4 bg-white mt-14 rounded-lg">
       <h1 className="text-lg font-bold mb-6 text-[#3E3C3C]">My Orders</h1>
-
-      {/* Tabs */}
       <div className="flex border-b border-gray-200 mb-6">
         <button
           onClick={() => setActiveTab('ongoing')}

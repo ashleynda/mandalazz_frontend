@@ -422,7 +422,7 @@ const Favourites = () => {
   };
 
   const handleViewAll = () => {
-    router.push('/favourites'); // Navigate to full favourites page
+    router.push('/dashboard/favourites'); 
   };
 
   return (
@@ -440,7 +440,6 @@ const Favourites = () => {
         )}
       </div>
 
-      {/* Products Grid */}
       {/* Mobile: 2 columns (2 items per row) | Desktop: 3 columns (3 items per row) */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
         {visibleFavorites.map((product, idx) => {
@@ -454,7 +453,6 @@ const Favourites = () => {
                 alt={product.name}
                 className="w-full h-full object-cover rounded-sm"
               />
-              {/* Heart Icon */}
               <button className="absolute bottom-2 right-2 p-1.5 text-[#4CAF50] bg-white rounded-full shadow-sm hover:bg-gray-50 transition-colors"
                 onClick={(e) => {
                   e.preventDefault();
@@ -468,9 +466,7 @@ const Favourites = () => {
               </button>
             </div>
 
-            {/* Product Details */}
             <div className="p-3">
-              {/* Product Name */}
               <h3 className="text-sm font-medium text-[#061410] mb-2 line-clamp-2 leading-tight">
                 {product.name}
               </h3>
@@ -488,7 +484,6 @@ const Favourites = () => {
                 )}
               </div>
 
-              {/* Rating and Reviews */}
               <div className="flex items-center gap-1">
                 <div className="flex items-center">
                   {renderStars(product.rating)}

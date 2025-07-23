@@ -63,7 +63,7 @@ const Cart = () => {
             <h1 className="hidden md:block text-2xl font-bold text-[#061410]">
                 Cart ({cartItems.length} item{cartItems.length !== 1 ? 's' : ''})
             </h1>
-            <div className='md:hidden flex gap-2 mb-4'>
+            <div className='md:hidden flex gap-2 mb-4' onClick={() => window.history.back()}>
                 <ArrowLeft className='w-4 h-6 text-[#061410] mb-2' />
                 <p className='text-[#3E3C3C] font-normal text-sm text-center'> Shopping Cart</p>
             </div>
@@ -98,6 +98,8 @@ const Cart = () => {
                 </div>
                 {/* )} */}
             </div>
+            
+          
         </div>
     );
 };
