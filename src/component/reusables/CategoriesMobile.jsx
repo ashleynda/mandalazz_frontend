@@ -17,6 +17,7 @@ import Link from 'next/link';
 import { useUserProfile } from "../../lib/hooks/account/useAccountDetails";
 import { Skeleton } from '@mui/material';
 import useProductsQuery from '@/src/lib/hooks/favourites/useProductMutation';
+import { logout } from '@/src/lib/utils/logout';
 
 
 
@@ -231,7 +232,7 @@ export default function MobileAccountPage({ onClose }) {
         </button>
       </div> */}
       <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t sm:hidden">
-        <button
+        <button onClick={logout}
           className="w-full bg-[#26735B] flex items-center justify-center gap-2 hover:bg-emerald-700 text-white font-bold text-base px-8 py-3 rounded-lg cursor-pointer transition-colors"
         >
           <LogOut className="w-5 h-5" />
