@@ -2,7 +2,9 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-const userId = sessionStorage.getItem('userId') || 'guest';
+const userId = typeof window !== 'undefined'
+    ? sessionStorage.getItem('userId') || 'guest'
+    : 'guest';
 
 const useCartStore = create(
     persist(
