@@ -1,12 +1,17 @@
 "use client"
 
 import { Divider } from "@mui/material"
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useUserProfile } from "../../lib/hooks/account/useAccountDetails";
+import { useUpdateUserProfile } from "../../lib/hooks/account/useUpdateProfile";
+import { Pencil } from "lucide-react";
+import AccountDetailsSkeleton from "../skeletons/AcountDetailsSkeleton";
+import AccountDetailsEmptyState from "../skeletons/AccountDetailsEmptyState";
 
 export default function AccountDetails() {
    const { data, isLoading, error } = useUserProfile();
-  // const { mutate: updateUserProfile, isPending } = useUpdateUserProfile();
+  const { mutate: updateUserProfile, isPending } = useUpdateUserProfile();
+
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -17,6 +22,7 @@ export default function AccountDetails() {
 
 
   const [initialData, setInitialData] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
 
 
 
@@ -52,21 +58,21 @@ export default function AccountDetails() {
   //     [e.target.name]: e.target.value,
   //   })
   const handleSaveChanges = () => {
-    // updateUserProfile(formData, {
-    //   onSuccess: () => {
-    //     setInitialData(formData); // update snapshot after saving
-    //   },
-    // });
+    updateUserProfile(formData, {
+      onSuccess: () => {
+        setInitialData(formData);
+        setIsEditing(false);
+      },
+    });
     console.log("Saving changes:", formData);
   };
 
-  // 🧠 Check if form is edited
-  // const isEdited = useMemo(() => {
-  //   if (!initialData) return false;
-  //   return Object.keys(formData).some(
-  //     (key) => formData[key] !== initialData[key]
-  //   );
-  // }, [formData, initialData]);
+  const isEdited = useMemo(() => {
+    if (!initialData) return false;
+    return Object.keys(formData).some(
+      (key) => formData[key] !== initialData[key]
+    );
+  }, [formData, initialData]);
   // const handleInputChange = (e) => {
   //   setFormData({
   //     ...formData,
@@ -76,37 +82,51 @@ export default function AccountDetails() {
 
     if (isLoading) {
     return (
-      <div className="p-8">
-        <div className="bg-white rounded-lg shadow-sm min-h-screen">
-          <div className="flex items-center justify-center py-20">
-            <div className="text-gray-500">Loading account details...</div>
-          </div>
-        </div>
-      </div>
+      <AccountDetailsSkeleton />
     );
   }
 
-  // Show error state
   if (error) {
     return (
-      <div className="p-8">
-        <div className="bg-white rounded-lg shadow-sm min-h-screen">
-          <div className="flex items-center justify-center py-20">
-            <div className="text-red-500">Error loading account details: {error.message}</div>
-          </div>
-        </div>
-      </div>
+      <AccountDetailsEmptyState message="Failed to load account details. Please try again later." />
+    );
+  }
+
+  if (!data?.message?.user) {
+    return (
+      <EmptyState  />
     );
   }
 
   return (
     <div className="md:p-8 w-full pt-16">
       <div className=" bg-white rounded-lg shadow-sm min-h-full w-full pb-8 overflow-y-auto">
-        <h1 className="text-lg font-bold text-[#3E3C3C] px-4 md:px-8 py-4 ">Account Details</h1>
+        <div className="flex items-center justify-between px-4 md:px-8 py-4">
+        <h1 className="text-lg font-bold text-[#3E3C3C] ">
+           {isEditing ? "Edit Account Details" : "Account Details"}
+        </h1>
+          {!isEditing ? (
+            <button
+              className="flex items-center gap-1 text-md font-normal italic text-[#26735B] hover:underline cursor-pointer"
+              onClick={() => setIsEditing(true)}
+            >
+              <Pencil size={14} /> Edit
+            </button>
+          ) : (
+            <button
+              className="text-sm text-red-500 hover:underline"
+              onClick={() => {
+                setFormData(initialData);
+                setIsEditing(false);
+              }}
+            >
+              Cancel
+            </button>
+          )}
+        </div>
         <Divider className="mb-8 w-full" />
         <div className="">
           <div className="space-y-6 ">
-            {/* Name Fields */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 px-8 mt-4">
               <div>
                 <label className="block text-xs font-medium text-[#101828] mb-2">First Name</label>
@@ -115,7 +135,11 @@ export default function AccountDetails() {
                   name="firstName"
                   value={formData.firstName}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg text-[#131735] text-sm font-normal transition-colors"
+                  disabled={!isEditing}
+                   className={`w-full px-4 py-2 border rounded-lg text-sm font-normal transition-colors ${
+                  isEditing ? "border-gray-300 text-[#131735]" : "bg-gray-100 text-gray-500"
+                }`}
+                  // className="w-full px-4 py-2 border border-gray-300 rounded-lg text-[#131735] text-sm font-normal transition-colors"
                 />
               </div>
               <div>
@@ -125,26 +149,33 @@ export default function AccountDetails() {
                   name="lastName"
                   value={formData.lastName}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg text-[#131735] text-sm font-normal transition-colors"
+                  disabled={!isEditing}
+                   className={`w-full px-4 py-2 border rounded-lg text-sm font-normal transition-colors ${
+                  isEditing ? "border-gray-300 text-[#131735]" : "bg-gray-100 text-gray-500"
+                }`}
+                  // className="w-full px-4 py-2 border border-gray-300 rounded-lg text-[#131735] text-sm font-normal transition-colors"
                 />
               </div>
             </div>
 
-            {/* Phone Numbers */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 px-8">
               <div>
                 <label className="block text-xs font-medium text-[#101828] mb-2">Phone Number</label>
                 <div className="flex">
                   <div className="flex items-center px-3 py-3 bg-gray-50 border border-r-0 border-gray-300 rounded-l-lg">
-                    <span className="w-4 h-3 bg-green-500 rounded-sm mr-2"></span>
+                    <span className="w-4 h-3 bg-[#26735B] rounded-sm mr-2"></span>
                     <span className="text-sm text-gray-600">+234</span>
                   </div>
                   <input
                     type="tel"
                     name="phoneNumber"
                     value={formData.phoneNumber}
-                    onChange={handleInputChange}                    
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-r-lg text-[#131735] text-sm font-normal transition-colors"
+                    onChange={handleInputChange}
+                    disabled={!isEditing} 
+                     className={`flex-1 px-4 py-2 border rounded-r-lg text-sm font-normal transition-colors ${
+                    isEditing ? "border-gray-300 text-[#131735]" : "bg-gray-100 text-gray-500"
+                  }`}                   
+                    // className="flex-1 px-4 py-2 border border-gray-300 rounded-r-lg text-[#131735] text-sm font-normal transition-colors"
                   />
                 </div>
               </div>
@@ -154,7 +185,7 @@ export default function AccountDetails() {
                 </label>
                 <div className="flex">
                   <div className="flex items-center px-3 py-3 bg-gray-50 border border-r-0 border-gray-300 rounded-l-lg">
-                    <span className="w-4 h-3 bg-green-500 rounded-sm mr-2"></span>
+                    <span className="w-4 h-3 bg-[#26735B] rounded-sm mr-2"></span>
                     <span className="text-sm text-gray-600">+234</span>
                   </div>
                   <input
@@ -162,7 +193,11 @@ export default function AccountDetails() {
                     name="alternateNumber"
                     value={formData.alternateNumber}
                     onChange={handleInputChange}
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-r-lg text-[#131735] text-sm font-normal transition-colors"
+                    disabled={!isEditing}
+                    className={`flex-1 px-4 py-2 border rounded-r-lg text-sm font-normal transition-colors ${
+                    isEditing ? "border-gray-300 text-[#131735]" : "bg-gray-100 text-gray-500"
+                  }`}
+                    // className="flex-1 px-4 py-2 border border-gray-300 rounded-r-lg text-[#131735] text-sm font-normal transition-colors"
                   />
                 </div>
               </div>
@@ -176,19 +211,25 @@ export default function AccountDetails() {
                 name="email"
                 value={formData.email}
                 onChange={handleInputChange}
-                className="w-full md:w-6/12 px-4 py-2 border border-gray-300 rounded-lg text-[#131735] text-sm font-normal transition-colors"
-                // className="w-6/12 px-4 py-2 border border-gray-300 rounded-lg text-[#131735] text-sm font-normal transition-colors"
+                disabled={!isEditing}
+                 className={`w-full md:w-6/12 px-4 py-2 border rounded-lg text-sm font-normal transition-colors ${
+                isEditing ? "border-gray-300 text-[#131735]" : "bg-gray-100 text-gray-500"
+              }`}
+                // className="w-full md:w-6/12 px-4 py-2 border border-gray-300 rounded-lg text-[#131735] text-sm font-normal transition-colors"
               />
             </div>
             <Divider className=" w-full" />
-            {/* Save Button */}
             <div className=" px-8 mt-4">
               <button
                 type="button"
-                disabled
-                // disabled={isPending }
-                className="w-full md:w-auto bg-[#26735B] hover:bg-emerald-700 text-white font-medium px-8 py-3 rounded-lg transition-colors"
-
+                disabled={!isEdited || isPending}
+                onClick={handleSaveChanges}
+                // className="w-full md:w-auto bg-[#26735B] hover:bg-emerald-700 text-white font-medium px-8 py-3 rounded-lg transition-colors"
+ className={`w-full md:w-auto font-medium px-8 py-3 rounded-lg transition-colors ${
+                !isEdited || isPending
+                  ? "bg-[#26735B] opacity-80 text-gray-500 cursor-not-allowed"
+                  : "bg-[#26735B] hover:bg-emerald-700 text-white"
+              }`}
                 // className="bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-8 py-3 rounded-lg transition-colors"
                 // className={`font-medium px-8 py-3 rounded-lg transition-colors focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 ${
                 //   isEdited 
@@ -196,7 +237,7 @@ export default function AccountDetails() {
                 //     : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                 // }`}
               >
-                Save Changes
+                 {isPending ? "Saving..." : "Save Changes"}
               </button>
             </div>
           </div>

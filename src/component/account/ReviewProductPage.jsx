@@ -17,7 +17,6 @@ const ReviewProductPage = () => {
    const params = useParams();
   const productId = params?.productId;
 
-    // Hook for posting review
   const { mutate, isPending, isSuccess, isError } = usePostReview();
 
   const handleSubmit = () => {
@@ -50,7 +49,6 @@ const ReviewProductPage = () => {
 
   return (
     <div className="max-w-md mx-auto p-4 bg-white">
-      {/* Header */}
       <div className="flex items-center gap-3 mb-6">
         <button className="p-1 hover:bg-gray-100 rounded">
           <ChevronLeft size={20} className="text-gray-600" onClick={() => router.push('/dashboard/reviews')}/>
@@ -58,9 +56,7 @@ const ReviewProductPage = () => {
         <h1 className="text-lg font-semibold">Review Product</h1>
       </div>
 
-      {/* Product Section */}
       <div className="flex items-center gap-4 mb-8 w-full max-w-2xl">
-        {/* Product Image */}
         <div className="w-12 h-16 bg-gray-100 rounded-lg flex-shrink-0 overflow-hidden">
           <div className="w-full h-full bg-gradient-to-br from-yellow-200 to-yellow-400 flex items-center justify-center relative">
             <div className="absolute inset-0 bg-yellow-300 opacity-80"></div>
@@ -68,13 +64,11 @@ const ReviewProductPage = () => {
           </div>
         </div>
         
-        {/* Product Name */}
         <div>
           <h3 className="font-bold text-[#061410] text-sm">Golden Yellow Butterfly Bodycon Dress</h3>
         </div>
       </div>
 
-      {/* Rating Section */}
       <div className="mb-6">
         <p className="text-sm font-normal text-[#061410] mb-3">How would you rate this product?</p>
         <div className="flex gap-1">
@@ -99,7 +93,6 @@ const ReviewProductPage = () => {
         </div>
       </div>
 
-      {/* Name Field */}
       <div className="mb-6">
         <label className="block text-xs font-medium text-[#101828] mb-2">Your Name</label>
         <div className="relative">
@@ -116,7 +109,6 @@ const ReviewProductPage = () => {
         </div>
       </div>
 
-      {/* Review Field */}
       <div className="mb-8">
         <label className="block text-xs font-medium text-[#101828] mb-2">Detailed Review</label>
         <textarea

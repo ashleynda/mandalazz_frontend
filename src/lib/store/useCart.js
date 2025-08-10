@@ -2,6 +2,10 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+const userId = typeof window !== 'undefined'
+    ? sessionStorage.getItem('userId') || 'guest'
+    : 'guest';
+
 const useCartStore = create(
     persist(
         (set, get) => ({
@@ -183,7 +187,7 @@ const useCartStore = create(
             },
         }),
         {
-            name: 'cart-storage',
+            name: `cart-storage-${userId}`, // Unique name for the cart storage
             // Store full cart data for guests
             partialize: (state) => ({
                 cartItems: state.cartItems,

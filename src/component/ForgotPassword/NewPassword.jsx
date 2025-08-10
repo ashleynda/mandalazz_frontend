@@ -18,6 +18,7 @@ const NewPassword= () => {
   const [email, setEmail] = useState(''); // or get this via router/query/props
   const [token, setToken] = useState(''); // same as above
   const [errors, setErrors] = useState({});
+  const { showSnackbar } = useLoginStore();
 
   const { mutate, isPending } = useResetPasswordMutation();
 
@@ -42,6 +43,10 @@ const NewPassword= () => {
       {
         onSuccess: (data) => {
           console.log('Password reset successful', data);
+          showSnackbar({
+            message: 'Password reset successful! Please log in with your new password.',
+            type: 'success',
+          });
           router.push('/login'); // or wherever you want to redirect
         },
         onError: (error) => {

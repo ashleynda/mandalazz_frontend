@@ -6,6 +6,7 @@ import StarIcon from '@mui/icons-material/Star';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
 import { useComments } from "../../lib/hooks/useGetReviews";
 import ReviewModal from "../../component/reusables/reviewModal";
+import { useFetchReviews } from "@/src/lib/hooks/account/useFetchReviews";
 
 
 const Stars = ({ rating }) => {
@@ -23,8 +24,18 @@ const Stars = ({ rating }) => {
 };
 
 export default function ReviewList() {
-    const { data, isLoading } = useComments();
     const [open, setOpen] = useState(false);
+     const [storedProductId, setStoredProductId] = useState(null);
+        useEffect(() => {
+            const idFromStorage = sessionStorage.getItem('selectedProductId');
+            if (idFromStorage) {
+                setStoredProductId(idFromStorage);
+            }
+        }, []);
+      const { data, error, isLoading } = useFetchReviews(storedProductId, {
+            enabled: !!storedProductId, // Only fetch if productId is available
+            // refetchOnWindowFocus: false, // Prevent refetching on window focus
+        });
 //     if (isLoading) {
 //     return (
 //       <Box className="flex justify-center items-center h-32">

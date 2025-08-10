@@ -163,6 +163,7 @@ import { useUpdateDelivery } from '../../lib/hooks/account/useOrder';
 import useSnackbarStore from '@/src/lib/store/useSnackbarStore';
 import { useFetchMyOrders } from '../../lib/hooks/account/useGetorder';
 import { useRouter } from 'next/navigation';
+import { formatDate } from '../../lib/utils/index'
 
 const OrdersPage = () => {
   const [activeTab, setActiveTab] = useState('ongoing');
@@ -228,7 +229,7 @@ const OrdersPage = () => {
       <p className="text-gray-600 text-center max-w-md mb-6">
         You haven't placed any orders yet. When you do, they'll appear here so you can track their progress.
       </p>
-      <button className="inline-flex items-center px-6 py-3 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors">
+      <button className="inline-flex items-center px-6 py-3 bg-[#26735B] text-white rounded-lg font-medium hover:bg-green-900 transition-colors cursor-pointer" onClick={() => router.push('/products')}>
         <ShoppingBag className="w-5 h-5 mr-2" />
         Start Shopping
       </button>
@@ -278,10 +279,8 @@ const OrdersPage = () => {
   );
 
   return (
-    <div className="max-w-4xl p-4 bg-white mt-14 rounded-lg">
+    <div className="max-w-full p-4 bg-white mt-8 rounded-lg">
       <h1 className="text-lg font-bold mb-6 text-[#3E3C3C]">My Orders</h1>
-
-      {/* Tabs */}
       <div className="flex border-b border-gray-200 mb-6">
         <button
           onClick={() => setActiveTab('ongoing')}
@@ -307,7 +306,8 @@ const OrdersPage = () => {
           <div className="space-y-4">
             {orders.map((order, index) => (
               <div key={index} className="border border-gray-200 rounded-lg p-4">
-                <div className="flex gap-4 items-start">
+                {/* <div className="flex gap-4 items-start"> */}
+                <div className="flex items-center">
                   {/* Product Image */}
                   <div className="w-16 h-16 bg-gray-100 rounded-lg flex-shrink-0 overflow-hidden">
                     <img
@@ -321,7 +321,7 @@ const OrdersPage = () => {
                   </div>
 
                   {/* Order Details */}
-                  <div className="flex flex-col min-w-0">
+                  <div className="flex flex-col min-w-0 ml-4">
                     <div className='flex gap-2'>
                       <h3 className="font-normal text-sm  text-[#061410] mb-2">{order.products[0]?.product?.name}</h3>
                       <span
@@ -336,12 +336,12 @@ const OrdersPage = () => {
                       <p className='text-[#667085] text-[13px] font-normal'>Order No: <span className='text-[#061410] text-[13px] font-normal'>{order._id?.slice(-6) || 'N/A'}</span></p>
                       {order.estimatedDeliveryDate && order.deliveryStatus !== 'Delivered' && (
                         <p className='text-[#667085] text-sm font-normal'>
-                          Expected Delivery:<span className='text-[#061410] text-sm font-normal'> {new Date(order.estimatedDeliveryDate).toLocaleDateString()}</span>
+                          Expected Delivery:<span className='text-[#061410] text-sm font-normal'> {formatDate(order.estimatedDeliveryDate)}</span>
                         </p>
                       )}
                       {order.deliveredOn && order.deliveryStatus === 'Delivered' && (
                         <span>
-                          Delivered On: {new Date(order.deliveredOn).toLocaleDateString()}
+                          Delivered On: {formatDate(order.deliveredOn)}
                         </span>
                       )}
                     </div>
@@ -351,7 +351,8 @@ const OrdersPage = () => {
                   </div>
 
                   {/* Status and Actions */}
-                  <div className="flex flex-col items-end gap-3">
+                  {/* <div className="flex flex-col items-end gap-3"> */}
+                  <div className="ml-auto">
                     <button className="px-4 py-2 border border-[#26735B] rounded-lg text-xs font-bold text-[#26735B] hover:bg-gray-50 transition-colors cursor-pointer" onClick={() => handleUpdateDelivery(order._id)}>
                       View Details
                     </button>

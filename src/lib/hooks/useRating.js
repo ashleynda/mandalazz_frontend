@@ -1,7 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 
-const postRating = async ({ productId, rating, comment }) => {
-  const res = await fetch(`http://localhost:3030/api/rate/${productId}`, {
+export const postRating = async ({ productId, rating, comment, token }) => {
+  const res = await fetch(`https://mandelazz-webapp.azurewebsites.net/api/rate/${productId}`, {
     method: 'POST',
     headers: {
       Authorization:
@@ -16,10 +16,9 @@ const postRating = async ({ productId, rating, comment }) => {
     throw new Error(errorText || 'Failed to post rating');
   }
 
-  return res.json(); // Assuming the API returns JSON
+  return res.json();
 };
 
-// React Query hook
 export const usePostRating = () => {
   return useMutation({
     mutationFn: postRating,

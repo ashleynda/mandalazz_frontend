@@ -63,7 +63,7 @@ const Cart = () => {
             <h1 className="hidden md:block text-2xl font-bold text-[#061410]">
                 Cart ({cartItems.length} item{cartItems.length !== 1 ? 's' : ''})
             </h1>
-            <div className='md:hidden flex gap-2 mb-4'>
+            <div className='md:hidden flex gap-2 mb-4' onClick={() => window.history.back()}>
                 <ArrowLeft className='w-4 h-6 text-[#061410] mb-2' />
                 <p className='text-[#3E3C3C] font-normal text-sm text-center'> Shopping Cart</p>
             </div>
@@ -93,11 +93,22 @@ const Cart = () => {
 
                 {/* Right Side - Order Summary */}
                 {/* {data?.cart && ( */}
-                <div className="hidden lg:block lg:w-80">
+                <div className="md:hidden block lg:w-80">
                     <OrderSummary cart={data.cart} />
                 </div>
+               
                 {/* )} */}
             </div>
+              {/* <div className="fixed bottom-0 left-0 right-0 z-50 bg-white px-4 py-2 border-t">
+                        <button
+                            className="w-full bg-[#26735B] hover:bg-emerald-700 text-white font-bold text-base px-8 py-3 rounded-lg cursor-pointer transition-colors"
+                            // onClick={handleCheckout}
+                        >
+                            checkout
+                        </button>
+                    </div> */}
+            
+          
         </div>
     );
 };

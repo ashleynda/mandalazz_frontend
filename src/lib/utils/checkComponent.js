@@ -12,3 +12,8 @@ export function checkComponent(component, name) {
   }
   return component;
 }
+// import UserDashboard from "../../component/reusables/userDashboard"
+
+// export default function DashboardPage() {
+//   return <UserDashboard />
+// }

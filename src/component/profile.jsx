@@ -1,9 +1,18 @@
 import * as React from 'react';
 import Avatar from '@mui/material/Avatar';
 import ButtonBase from '@mui/material/ButtonBase';
+import { useUserProfile } from '../lib/hooks/account/useAccountDetails';
 
 export default function UploadAvatars() {
   const [avatarSrc, setAvatarSrc] = React.useState(undefined);
+    const { data: userProfile } = useUserProfile();
+
+    let initials = "";
+  
+  if (userProfile?.message?.user) {
+    const { firstName = "", lastName = "" } = userProfile.message.user;
+    initials = `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+  }
 
   const handleAvatarChange = (event) => {
     const file = event.target.files?.[0];
@@ -21,7 +30,7 @@ export default function UploadAvatars() {
     <ButtonBase
       component="label"
       role={undefined}
-      tabIndex={-1} // prevent label from tab focus
+      tabIndex={-1} 
       aria-label="Avatar image"
       sx={{
         borderRadius: '40px',
@@ -31,7 +40,17 @@ export default function UploadAvatars() {
         },
       }}
     >
-      <Avatar alt="Upload new avatar" src={avatarSrc} />
+      {/* <Avatar alt="Upload new avatar" src={avatarSrc} /> */}
+       <Avatar
+        alt="User Avatar"
+        src={avatarSrc || undefined} // Only use src if we have an image
+        sx={{
+          bgcolor: '#26735B', // background color for initials
+          color: '#fff',
+        }}
+      >
+        {!avatarSrc && initials} {/* Show initials when no image */}
+      </Avatar>
       <input
         type="file"
         accept="image/*"

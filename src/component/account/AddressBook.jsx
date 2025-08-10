@@ -6,6 +6,7 @@ import { useUserAddresses } from '../../lib/hooks/account/useGetAddresses';
 import { useRouter } from 'next/navigation';
 import AddressCardSkeleton from '../skeletons/AddressCardSkeleton';
 import { Divider } from '@mui/material';
+import AccountDetailsEmptyState from '../skeletons/AccountDetailsEmptyState';
 
 export default function AddressBook() {
   const { data: fetchAddresses, isLoading, isError } = useUserAddresses();
@@ -54,7 +55,7 @@ export default function AddressBook() {
         <h1 className="text-center text-[#3E3C3C] text-sm font-normal">Delivery Addresses</h1>
       </div>
 
-      <div className=" bg-[#FFFFFF] min-h-screen rounded-sm mt-4 md:mt-14 max-w-full overflow-y-auto">
+      <div className=" bg-[#FFFFFF] min-h-screen rounded-sm mt-4 md:mt-8 max-w-full overflow-y-auto">
         <div className='flex justify-between md:py-4 px-5'>
           <h1 className="text-lg font-bold text-[#3E3C3C] px-4 py-2">Addresses</h1>
           <button className='hidden sm:flex bg-[#26735B] text-center items-center gap-2 px-4 py-2 text-xs font-bold text-[#FFFFFF] rounded-lg hover:bg-emerald-700 transition-colors cursor-pointer' onClick={handleCreateNewAddress}>
@@ -78,7 +79,7 @@ export default function AddressBook() {
           </div>
         ) :
           addresses.length === 0 ? (
-            <p className="text-gray-600">No addresses found. Please add an address.</p>
+            <p className="text-gray-600"><AccountDetailsEmptyState message="No addresses found. Please add an address." /></p>
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 gap-4 sm:gap-6 px-4 sm:px-6 pb-24 py-4">
 
@@ -122,14 +123,14 @@ export default function AddressBook() {
                       <button
                         key={address._id}
                         onClick={() => handleEdit(address._id)}
-                        className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition-colors cursor-pointer"
+                        className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-[#26735B] border border-[#26735B] rounded-lg hover:bg-green-200 transition-colors cursor-pointer"
                       >
                         <Edit className="w-4 h-4" />
                         Edit
                       </button>
                       <button
                         onClick={() => handleDelete(address.id)}
-                        className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-700 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors cursor-pointer"
+                        className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-700 border border-red-700 rounded-lg hover:bg-red-100 transition-colors cursor-pointer"
                       >
                         <Trash2 className="w-4 h-4" />
                         Delete
@@ -138,13 +139,13 @@ export default function AddressBook() {
                     <div className='flex gap-2'>
                       <button
                         onClick={() => handleEdit(address._id)}
-                        className="sm:hidden gap-2 px-4 py-2 text-sm font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition-colors cursor-pointer"
+                        className="sm:hidden gap-2 px-4 py-2 text-sm font-medium text-[#26735B] border border-[#26735B] rounded-lg hover:bg-green-100 transition-colors cursor-pointer"
                       >
                         <Edit className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => handleDelete(address.id)}
-                        className="sm:hidden p-2 gap-2 px-4 py-2 text-sm font-medium text-red-700 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors cursor-pointer"
+                        className="sm:hidden p-2 gap-2 px-4 py-2 text-sm font-medium text-red-700 border border-red-700 rounded-lg hover:bg-red-700 transition-colors cursor-pointer"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>

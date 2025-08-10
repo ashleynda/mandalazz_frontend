@@ -4,17 +4,27 @@ import { useRouter } from "next/navigation";
 import useVerifyMutation from "../../lib/hooks/useVerifyMutation";
 import { useEffect, useRef, useState } from "react";
 import { Button } from '@mui/material';
+import useSnackbarStore from "@/src/lib/store/useSnackbarStore";
+import useResetPasswordMutation from "@/src/lib/hooks/Auth/useRestPassword";
 
 export default function Verify() {
     const router = useRouter();
     const [otp, setOtp] = useState(['']);
     const inputRefs = useRef([]);
     const [email, setEmail] = useState('');
+     const [cameFromReset, setCameFromReset] = useState(false);
+    const { showSnackbar } = useSnackbarStore();
     const {
         mutate: verifyEmail,
         isPending: isLoading,
         error: verifyEmailError,
     } = useVerifyMutation();
+
+    const {
+        mutate: resetPassword,
+        isPending: isResetting,
+        error: resetPasswordError,
+    } = useResetPasswordMutation();
 
         useEffect(() => {
         const storedEmail = sessionStorage.getItem("email");
@@ -60,12 +70,44 @@ export default function Verify() {
 
         const token = otp.join('');
 
+        if (pathname === "/resetPassword") {
+      // ✅ Call resetPassword API
+      const newPassword = sessionStorage.getItem("newPassword"); // adjust source
+      if (!newPassword) {
+        showSnackbar({ message: 'Missing new password.', type: 'error' });
+        return;
+      }
+       resetPassword(
+        { token, newPassword },
+        {
+          onSuccess: () => {
+            showSnackbar({ message: 'Password reset successful!', type: 'success' });
+            router.push('/login');
+          },
+          onError: (error) => {
+            showSnackbar({ message: error.message, type: 'error' });
+          }
+        }
+      );
+    } else {
+
+
         verifyEmail(
             { email, token },
             {
                 onSuccess: () => {
+                    const token = data?.token; 
+
+                    if (token) {
+                        sessionStorage.setItem('authToken', token);
+                        window.dispatchEvent(new Event("storage"));
+                    }
                     console.log('Verification successful!');
                     // navigate or show success toast
+                    showSnackbar({
+                        message: 'Email verified successfully!',
+                        type: 'success',
+                    });
                     router.push('/products');
                 },
                 onError: (error) => {
@@ -73,6 +115,7 @@ export default function Verify() {
                 },
             }
         );
+    }
     };
 
     const handleResendCode = () => {
@@ -130,7 +173,7 @@ export default function Verify() {
 
                     <div className="flex flex-col gap-4">
                         <button
-                            className={`w-full h-[37px] rounded-4xl text-sm font-extrabold ${isOtpValid ? 'bg-[#26735B] hover:bg-[#E04800]' : 'bg-[#D7D7D7]'
+                            className={`w-full h-[37px] rounded-4xl text-sm font-extrabold ${isOtpValid ? 'bg-[#26735B] hover:bg-[#26735B] cursor-pointer' : 'bg-[#D7D7D7]'
                                 } text-white`}
                             type="submit"
                             disabled={!isOtpValid || isLoading}

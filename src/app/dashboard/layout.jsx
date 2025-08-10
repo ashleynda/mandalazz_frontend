@@ -6,10 +6,10 @@ import SideBar from '../../component/reusables/SideBar';
 
 export default function dashboardLayout({ children }) {
   return (
-    <>
+    <div className='min-h-screen flex flex-col'>
       <Navbar />
       <Categories />
-      <div className="flex">
+      <div className="flex flex-1">
         <div className='hidden md:block'>
         <SideBar />
         </div>
@@ -20,6 +20,6 @@ export default function dashboardLayout({ children }) {
       <div className="hidden md:block">
         <Footer />
       </div>
-    </>
+    </div>
   );
 }

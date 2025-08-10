@@ -18,31 +18,7 @@ const Signup = () => {
   const [loading, setLoading] = useState(false);
   const { formData, setFormData, errors, setErrors } = useSignupStore();
   const signupMutation = useSignupMutation();
-  // const {
-  //   formData,
-  //   errors,
-  //   isLoading,
-  //   setFormData,
-  //   setErrors,
-  //   setIsLoading,
-  // } = useSignupStore();
-
-  // const [formData, setFormData] = useState<FormData>({
-  //   firstName: '',
-  //   lastName: '',
-  //   email: '',
-  //   password: '',
-  // });
-
-  // const [errors, setErrors] = useState<FormErrors>({
-  //   firstName: '',
-  //   lastName: '',
-  //   email: '',
-  //   password: '',
-  // });
-
   const [showPassword, setShowPassword] = useState(false);
-  // const [isLoading, setIsLoading] = useState(false);
 
   const validate = () => {
     let valid = true;
