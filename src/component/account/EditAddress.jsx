@@ -149,10 +149,11 @@ export default function EditAddressForm() {
         <h1 className="text-center text-[#3E3C3C] text-sm font-normal">Delivery Addresses</h1>
       </div>
       {/* </div> */}
-      <div className="h-[calc(100vh-110px)] md:h-[calc(100vh-320px)] w-full bg-gray-50 md:mt-14 mt-4 rounded-lg">
+      <div className="h-[calc(100vh-110px)] md:h-[calc(100vh-320px)] w-full bg-gray-50 md:mt-8 mt-4 rounded-lg">
         {/* Header */}
         <div className="bg-white border-b border-gray-200 px-6 py-4">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 cursor-pointer" onClick={() => router.back('/dashboard/address-book')}>
+            <ArrowLeft className="w-5 h-5 text-gray-900" />
             <h1 className="text-lg font-semibold text-gray-900">Address</h1>
           </div>
         </div>
@@ -198,7 +199,7 @@ export default function EditAddressForm() {
                 </label>
                 <div className="flex">
                   <div className="flex items-center px-3 py-2 bg-gray-50 border border-r-0 border-gray-300 rounded-l-lg">
-                    <span className="w-4 h-3 bg-green-500 rounded-sm mr-2"></span>
+                    <span className="w-4 h-3 bg-[#26735B] rounded-sm mr-2"></span>
                     <span className="text-sm text-gray-600">+234</span>
                     <ChevronDown className="w-4 h-4 text-gray-400 ml-1" />
                   </div>
@@ -217,7 +218,7 @@ export default function EditAddressForm() {
                 </label>
                 <div className="flex">
                   <div className="flex items-center px-3 py-2 bg-gray-50 border border-r-0 border-gray-300 rounded-l-lg">
-                    <span className="w-4 h-3 bg-green-500 rounded-sm mr-2"></span>
+                    <span className="w-4 h-3 bg-[#26735B] rounded-sm mr-2"></span>
                     <span className="text-sm text-gray-600">+234</span>
                     <ChevronDown className="w-4 h-4 text-gray-400 ml-1" />
                   </div>
@@ -295,7 +296,7 @@ export default function EditAddressForm() {
                         key={lga}
                         type="button"
                         onClick={() => handleDropdownSelect('lga', lga)}
-                        className="w-full px-3 py-2 text-left hover:bg-gray-50 focus:bg-gray-50 focus:outline-none"
+                        className="w-full px-3 py-2 text-left text-[#131735] hover:bg-gray-50 focus:bg-gray-50 focus:outline-none"
                       >
                         {lga}
                       </button>
@@ -322,7 +323,7 @@ export default function EditAddressForm() {
                         key={state}
                         type="button"
                         onClick={() => handleDropdownSelect('state', state)}
-                        className="w-full px-3 py-2 text-left hover:bg-gray-50 focus:bg-gray-50 focus:outline-none"
+                        className="w-full px-3 py-2 text-left text-[#131735] hover:bg-gray-50 focus:bg-gray-50 focus:outline-none"
                       >
                         {state}
                       </button>
@@ -374,7 +375,7 @@ export default function EditAddressForm() {
             <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t sm:hidden">
               <button
                 onClick={handleSubmit}
-                className="w-full bg-[#26735B] hover:bg-emerald-700 text-white font-bold text-base px-8 py-3 rounded-lg transition-colors"
+                className="w-full bg-[#26735B] hover:bg-emerald-800 text-white font-bold text-base px-8 py-3 rounded-lg transition-colors"
                 disabled={isCreating || isPending}
               >
                 {/* {isEditMode ? 'Save Changes' : "Add"} */}

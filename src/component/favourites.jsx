@@ -364,33 +364,74 @@
 import React, { useEffect, useState } from 'react';
 import { Heart, ChevronRight } from 'lucide-react';
 import useFavoritesQuery from '../lib/hooks/useFavouritesQuery';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useMediaQuery } from 'react-responsive';
+import { Rating } from '@mui/material';
+import { useFetchRateQuery } from '../lib/hooks/useFetchRating';
 
 const Favourites = () => {
-   const [token, setToken] = useState(null);
+  const [token, setToken] = useState(null);
   const [showAll, setShowAll] = useState(false);
   const router = useRouter();
   const isDesktop = useMediaQuery({ query: '(min-width: 768px)' });
+  const params = useParams();
+  const id = params?.id;
 
-      useEffect(() => {
-        const storedToken = sessionStorage.getItem('authToken');
-        if (storedToken) setToken(storedToken);
-    }, []);
+  useEffect(() => {
+    const storedToken = sessionStorage.getItem('authToken');
+    if (storedToken) setToken(storedToken);
+  }, []);
 
-    const {
-        data,
-        isLoading,
-        isError,
-        error,
-    } = useFavoritesQuery(token || '');
+  // const { data: rateData, isLoading: rateLoading, isError: rateError } = useFetchRateQuery(token, id);
+  // // const productRating = rateData?.rating ?? 0;
+  // const productRating = rateData?.data?.[0]?.rating
+  //   ? Number(rateData.data[0].rating)
+  //   : 0;
+  // const totalReviews = rateData?.reviewsCount ?? 0;
+  // console.log('Product Rating:', productRating);
+  // console.log('Total Reviews:', totalReviews);
+  // console.log('Rate Data:', rateData);
 
-    const favoritesList = Array.isArray(data?.data)
-        ? data.data.filter(item => item && item.variations?.[0]?.images?.[0])
-        : [];
+  const ProductRating = ({ productId, token }) => {
+  const { data, isLoading, isError } = useFetchRateQuery(token, productId);
 
-    // const visibleFavorites = showAll ? favoritesIds : favoritesIds.slice(0, 4);
-    const visibleFavorites = isDesktop
+  const rating = data?.data?.[0]?.rating ? Number(data.data[0].rating) : 0;
+  const reviewCount = data?.reviewsCount ?? 0;
+
+  if (isLoading) return <span className="text-xs text-gray-400">Loading...</span>;
+  if (isError) return <span className="text-xs text-red-400">Error</span>;
+
+  return (
+    <div className="flex items-center gap-1">
+      <Rating
+        value={rating}
+        precision={0.5}
+        size="small"
+        readOnly
+      />
+      <p className="text-[#061410] text-xs font-medium">{rating.toFixed(1)}</p>
+      <p className="text-[#061410] text-xs font-medium hidden md:block">
+        ({reviewCount}+ Reviews)
+      </p>
+    </div>
+  );
+};
+
+
+
+  const {
+    data,
+    isLoading,
+    isError,
+    error,
+  } = useFavoritesQuery(token || '');
+
+  const favoritesList = Array.isArray(data?.data)
+    ? data.data.filter(item => item && item.variations?.[0]?.images?.[0])
+    : [];
+
+  // const visibleFavorites = showAll ? favoritesIds : favoritesIds.slice(0, 4);
+  const visibleFavorites = isDesktop
     ? favoritesList.slice(0, 3)
     : favoritesList;
 
@@ -422,7 +463,7 @@ const Favourites = () => {
   };
 
   const handleViewAll = () => {
-    router.push('/dashboard/favourites'); 
+    router.push('/dashboard/favourites');
   };
 
   return (
@@ -431,12 +472,12 @@ const Favourites = () => {
       <div className="flex items-center justify-between mb-4 md:mb-6">
         <h2 className="text-lg md:text-xl font-bold text-[#061410]">Favourites</h2>
         {favoritesList.length > 0 && (
-        <button className="flex items-center gap-1 text-sm text-[#26735B] font-medium hover:underline"
-          onClick={handleViewAll}
-        >
-          View All
-          <ChevronRight className="w-4 h-4" />
-        </button>
+          <button className="flex items-center gap-1 text-sm text-[#26735B] font-medium hover:underline cursor-pointer"
+            onClick={handleViewAll}
+          >
+            View All
+            <ChevronRight className="w-4 h-4" />
+          </button>
         )}
       </div>
 
@@ -445,55 +486,59 @@ const Favourites = () => {
         {visibleFavorites.map((product, idx) => {
           const imageUrl = product?.variations?.[0]?.images?.[0] || '/fallback.png';
           return (
-          <div key={product._id || idx} className="relative bg-white rounded-lg border border-gray-100 hover:shadow-md transition-shadow duration-200">
-            {/* Product Image */}
-            <div className="relative aspect-square rounded-t-lg overflow-hidden bg-gray-100">
-              <img 
-                src={imageUrl} 
-                alt={product.name}
-                className="w-full h-full object-cover rounded-sm"
-              />
-              <button className="absolute bottom-2 right-2 p-1.5 text-[#4CAF50] bg-white rounded-full shadow-sm hover:bg-gray-50 transition-colors"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  handleAddToFavorites(product._id);
-              }}
-              >
-                <Heart 
-                  className={`w-4 h-4 ${product._id ? 'fill-[#4CAF50] text-[#4CAF50]' : 'text-gray-400'}`}
+            <div key={product._id || idx} className="relative bg-white rounded-lg border border-gray-100 hover:shadow-md transition-shadow duration-200">
+              {/* Product Image */}
+              <div className="relative aspect-square rounded-t-lg overflow-hidden bg-gray-100">
+                <img
+                  src={imageUrl}
+                  alt={product.name}
+                  className="w-full h-full object-cover rounded-sm"
                 />
-              </button>
-            </div>
+                <button className="absolute bottom-2 right-2 p-1.5 text-[#4CAF50] bg-white rounded-full shadow-sm hover:bg-gray-50 transition-colors"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleAddToFavorites(product._id);
+                  }}
+                >
+                  <Heart
+                    className={`w-4 h-4 ${product._id ? 'fill-[#4CAF50] text-[#4CAF50]' : 'text-gray-400'}`}
+                  />
+                </button>
+              </div>
 
-            <div className="p-3">
-              <h3 className="text-sm font-medium text-[#061410] mb-2 line-clamp-2 leading-tight">
-                {product.name}
-              </h3>
+              <div className="p-3">
+                <h3 className="text-sm font-medium text-[#061410] mb-2 line-clamp-2 leading-tight">
+                  {product.name}
+                </h3>
 
-              {/* Price */}
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-base md:text-lg font-bold text-[#061410]">
-                  {/* ₦{item.price.toLocaleString()} */}
-                   ₦{Number(product.price?.$numberDecimal || 0).toLocaleString()}
-                </span>
-                {product.originalPrice && (
-                  <span className="text-xs md:text-sm text-gray-500 line-through">
-                    ₦{product.originalPrice.toLocaleString()}
+                {/* Price */}
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-base md:text-lg font-bold text-[#061410]">
+                    {/* ₦{item.price.toLocaleString()} */}
+                    ₦{Number(product.price?.$numberDecimal || 0).toLocaleString()}
                   </span>
-                )}
-              </div>
-
-              <div className="flex items-center gap-1">
-                <div className="flex items-center">
-                  {renderStars(product.rating)}
+                  {product.originalPrice && (
+                    <span className="text-xs md:text-sm text-gray-500 line-through">
+                      ₦{product.originalPrice.toLocaleString()}
+                    </span>
+                  )}
                 </div>
-                <span className="text-xs text-gray-600 ml-1">
+
+                <div className="flex items-center gap-1">
+                  <div className="flex items-center">
+                    {/* {renderStars(product.rating)} */}
+                    <ProductRating productId={product._id} token={token} />
+
+                   
+                  </div>
+              
+                  {/* <span className="text-xs text-gray-600 ml-1">
                   {product.rating} ({product.reviews}+ Reviews)
-                </span>
+                </span> */}
+                </div>
               </div>
             </div>
-          </div>
           )
         })}
       </div>

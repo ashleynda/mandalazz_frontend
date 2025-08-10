@@ -153,7 +153,7 @@
 
 "use client";
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useFetchReviews } from '../../lib/hooks/account/useFetchReviews';
@@ -162,10 +162,19 @@ const ReviewsPage = ({ productId }) => {
     const [activeTab, setActiveTab] = useState('pending');
     const router = useRouter();
     const pathname = usePathname();
-
+    const [storedProductId, setStoredProductId] = useState(null);
+    useEffect(() => {
+        const idFromStorage = sessionStorage.getItem('selectedProductId');
+        if (idFromStorage) {
+            setStoredProductId(idFromStorage);
+        }
+    }, []);
     const isPending = pathname.includes('/pending');
     const isCompleted = pathname.includes('/completed');
-    const { data, error, isLoading } = useFetchReviews(productId);
+    const { data, error, isLoading } = useFetchReviews(storedProductId, {
+        enabled: !!storedProductId, // Only fetch if productId is available
+        // refetchOnWindowFocus: false, // Prevent refetching on window focus
+    });
     console.log('fue', data);
 
     const handleReviews = (productId) => {
@@ -193,7 +202,7 @@ const ReviewsPage = ({ productId }) => {
     ];
 
     return (
-        <div className="h-screen flex flex-col max-w-screen p-4 mt-14 rounded-lg bg-white border-2 border-[#F2F4F7]">
+        <div className="h-screen flex flex-col max-w-screen p-4 mt-8 rounded-lg bg-white border-2 border-[#F2F4F7]">
             <div className="flex-shrink-0">
                 <h1 className="text-xl font-semibold mb-6 text-[#3E3C3C]">My Orders</h1>
 
@@ -237,7 +246,7 @@ const ReviewsPage = ({ productId }) => {
 
                 {!isLoading && !error && (
                     <>
-                        {(!data?.comments || data.comments.length === 0) && (!mockOrders || mockOrders.length === 0) ? (
+                        {!data?.data?.length ? (
                             <div className="flex-1 flex items-center justify-center">
                                 <div className="text-center">
                                     <div className="text-gray-500 mb-2">No reviews available</div>
@@ -250,14 +259,14 @@ const ReviewsPage = ({ productId }) => {
                             <div className="flex-1 overflow-y-auto">
                                 <div className="space-y-4">
                                     {/* Use mockOrders for now - replace with actual data mapping */}
-                                    {mockOrders.map((order, index) => (
-                                        <div key={order.id || index} className="flex items-center gap-4 p-4 border border-gray-200 rounded-lg bg-white">
+                                    {data?.data?.map((item, index) => (
+                                        <div key={item.id || index} className="flex items-center gap-4 p-4 border border-gray-200 rounded-lg bg-white">
                                             {/* Product Image */}
                                             <div className="w-20 h-24 bg-gray-100 rounded-lg flex-shrink-0 overflow-hidden">
-                                                {order.image ? (
-                                                    <img 
-                                                        src={order.image} 
-                                                        alt={order.productName}
+                                                {item.image ? (
+                                                    <img
+                                                        src={item.image}
+                                                        alt={item.productName}
                                                         className="w-full h-full object-cover"
                                                     />
                                                 ) : (
@@ -271,14 +280,14 @@ const ReviewsPage = ({ productId }) => {
                                             {/* Product Details */}
                                             <div className="flex-1 min-w-0">
                                                 <h3 className="font-medium text-[#061410] mb-2 text-base">
-                                                    {order.productName}
+                                                    {item.productName}
                                                 </h3>
                                                 <div className="space-y-1">
                                                     <p className="text-sm text-gray-600">
-                                                        Order No: <span className="font-medium">{order.orderNumber}</span>
+                                                        Order No: <span className="font-medium">{item.orderNumber}</span>
                                                     </p>
                                                     <p className="text-sm text-gray-600">
-                                                        Delivered On: <span className="font-medium">{order.deliveredOn}</span>
+                                                        Delivered On: <span className="font-medium">{item.deliveredOn}</span>
                                                     </p>
                                                 </div>
                                             </div>
@@ -286,12 +295,12 @@ const ReviewsPage = ({ productId }) => {
                                             {/* Status and Action */}
                                             <div className="flex flex-col items-end gap-3">
                                                 <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
-                                                    {order.status}
+                                                    {item.status}
                                                 </span>
                                                 {activeTab === 'pending' && (
                                                     <button
                                                         className="px-4 py-2 border border-[#319B79] text-[#319B79] rounded-lg text-sm font-medium hover:bg-[#319B79] hover:text-white transition-colors cursor-pointer"
-                                                        onClick={() => handleReviews(order.id)}
+                                                        onClick={() => handleReviews(item.id)}
                                                     >
                                                         Review Product
                                                     </button>

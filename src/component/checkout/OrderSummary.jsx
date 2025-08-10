@@ -17,17 +17,17 @@ const OrderSummary = ({ cart, checkout, isLoading = false }) => {
     // }, []);
     const [isMobile, setIsMobile] = useState(false);
 
-useEffect(() => {
-  const checkMobile = () => setIsMobile(window.innerWidth <= 768);
-  checkMobile();
-  window.addEventListener("resize", checkMobile);
-  return () => window.removeEventListener("resize", checkMobile);
-}, []);
+    useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth <= 768);
+        checkMobile();
+        window.addEventListener("resize", checkMobile);
+        return () => window.removeEventListener("resize", checkMobile);
+    }, []);
 
 
-// const isMobile = isClient && useMediaQuery({ query: '(max-width: 768px)' });
-// const mediaQueryMatch = useMediaQuery({ query: '(max-width: 768px)' });
-// const isMobile = isClient && mediaQueryMatch;
+    // const isMobile = isClient && useMediaQuery({ query: '(max-width: 768px)' });
+    // const mediaQueryMatch = useMediaQuery({ query: '(max-width: 768px)' });
+    // const isMobile = isClient && mediaQueryMatch;
 
     const { showSnackbar } = useSnackbarStore();
     console.log("cart data:", items);
@@ -87,6 +87,7 @@ useEffect(() => {
 
 
 
+
     const handleCheckout = () => {
         const token = sessionStorage.getItem('authToken');
         if (isDelivery && typeof checkout === 'function') {
@@ -128,16 +129,18 @@ useEffect(() => {
     //                 ₦{subTotal.toLocaleString()}
     //             </p>
     //         </div>
-         
+
 
     //         </div>
     //     );
     // }
+    
+    // {!isMobile && !isCart &&
 
     return (
         <div className="order-summary bg-white rounded-lg flex flex-col justify-center items-start p-6 w-full max-w-md">
             <div className="w-full">
-                <div className="flex items-center justify-between mb-4 border-b border-[#F7F7F7] pb-2">
+                 <div className="flex items-center justify-between mb-4 border-b border-[#F7F7F7] pb-2">
                     <h2 className="text-lg font-bold text-[#061410] mb-2">Order Summary</h2>
                     <p className="text-sm text-[#061410] mb-2">{items.length} item{items.length !== 1 ? 's' : ''}</p>
                 </div>
@@ -190,7 +193,7 @@ useEffect(() => {
                     </div>
                 )} */}
 
-                {!isMobile &&  (
+                {!isMobile && (
                     <div>
                         <button
                             className='bg-[#26735B] rounded-lg text-white text-base font-bold py-3 px-4 w-full'
@@ -200,22 +203,21 @@ useEffect(() => {
                         </button>
                     </div>
                 )}
-                {isMobile && (isCart || isDelivery) &&(
-                    <div className="fixed bottom-0 left-0 right-0 z-50 bg-white px-4 py-2 border-t">
-                        <button
-                            className="w-full bg-[#26735B] hover:bg-emerald-700 text-white font-bold text-base px-8 py-3 rounded-lg cursor-pointer transition-colors"
-                            onClick={handleCheckout}
-                        >
-                            {isDelivery ? "Confirm Order" : "Checkout"}
-                        </button>
-                    </div>
-                )}
-
-
                 <p className="text-[#8D8C8C] text-xs font-medium text-center w-full mt-3">
                     Taxes and delivery calculated at checkout
                 </p>
             </div>
+
+            {(isMobile && (isCart || isDelivery)) && (
+                <div className="fixed bottom-0 left-0 right-0 z-50 bg-white px-4 py-2 border-t">
+                    <button
+                        className="w-full bg-[#26735B] hover:bg-emerald-700 text-white font-bold text-base px-8 py-3 rounded-lg cursor-pointer transition-colors"
+                        onClick={handleCheckout}
+                    >
+                        {isDelivery ? "Confirm Order" : "Checkout"}
+                    </button>
+                </div>
+            )}
         </div>
     );
 };

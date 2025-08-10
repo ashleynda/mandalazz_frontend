@@ -36,6 +36,7 @@ const Navbar = () => {
   const { data, isLoading, error, refetch } = useProductSearch(searchTerm, false);
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false)
+  
 
   useEffect(() => {
     const timeout = setTimeout(() => setLoading(false), 1000);
@@ -346,7 +347,7 @@ const Navbar = () => {
             alt="logo"
             width={isMobile ? 80 : 100}
             height={isMobile ? 32 : 40}
-            className="h-10 w-auto border-t-2 border-b-1 border-gray-200 z-10"
+            className="h-10 w-auto border-t-2 border-b-1 border-gray-200 z-10 cursor-pointer"
             onClick={() => router.push('/products')}
           />
         </div>

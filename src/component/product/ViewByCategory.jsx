@@ -211,15 +211,18 @@ export default function ViewProductsByCategory() {
                       handleAddToFavorites(product._id);
                     }}
                     className={`absolute bottom-2 right-2 p-2 rounded-full shadow-md transition hover:scale-105
-                      // ${favorites.includes(product._id) ? "bg-[#26735B]" : "bg-white"}
+                      ${favorites.includes(product._id) ? "bg-[#26735B]" : "bg-white"}
                       `}
                     aria-label="Save for later"
                   >
-                    {favorites.includes(product._id) ? (
+                    {/* {favorites.includes(product._id) ? (
                       <FaHeart className="text-[#26735B]" size={16} />
                     ) : (
                       <FiHeart className="text-[#26735B]" size={16} />
-                    )}
+                    )} */}
+                     <FiHeart className={
+                        favorites.includes(product._id) ? "text-white" : "text-[#191818]"
+                      } />
                     {/* <FiHeart className={favorites.includes(product._id) ? "bg-[#26735B]" : "text-[#191818]"} /> */}
                   </button>
                 </div>

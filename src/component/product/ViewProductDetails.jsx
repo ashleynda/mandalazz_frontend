@@ -18,6 +18,8 @@ import useFavoritesQuery from '@/src/lib/hooks/useFavouritesQuery';
 import useSnackbarStore from '@/src/lib/store/useSnackbarStore';
 import ProductTabs from '../reusables/ApplicationTabSlider';
 import RecentlyViewed from '../../component/recentlyViewed';
+import { useFetchRateQuery } from '../../lib/hooks/useFetchRating';
+
 
 const ViewProductDetails = () => {
   const [selectedSize, setSelectedSize] = useState(null);
@@ -33,7 +35,7 @@ const ViewProductDetails = () => {
   const router = useRouter();
   const params = useParams();
   const id = params?.id;
-  const [ratingValue, setRatingValue] = useState(3.5);
+  // const [ratingValue, setRatingValue] = useState(3.5);
 
   const { addToCart, findCartItem } = useCartStore();
   const { data, isLoading } = useProductsQuery();
@@ -104,6 +106,16 @@ const ViewProductDetails = () => {
       setToken(storedToken || '');
     }
   }, []);
+
+  const { data: rateData, isLoading: rateLoading, isError: rateError } = useFetchRateQuery(token, id);
+  // const productRating = rateData?.rating ?? 0;
+  const productRating = rateData?.data?.[0]?.rating
+    ? Number(rateData.data[0].rating)
+    : 0;
+  const totalReviews = rateData?.reviewsCount ?? 0;
+  console.log('Product Rating:', productRating);
+  console.log('Total Reviews:', totalReviews);
+  console.log('Rate Data:', rateData);
 
   // Initialize selected color and variation
   useEffect(() => {
@@ -278,7 +290,7 @@ const ViewProductDetails = () => {
       <h1 className="text-2xl md:text-3xl font-bold text-[#061410] text-left">{product.name}</h1>
       <p className="text-left text-[#061410] text-lg font-bold">{product.price?.$numberDecimal ?? "N/A"}</p>
 
-      <div className="card-content flex justify-left gap-2">
+      {/* <div className="card-content flex justify-left gap-2">
         <Rating
           value={ratingValue}
           onChange={(event, newValue) => setRatingValue(newValue ?? 0)}
@@ -287,7 +299,31 @@ const ViewProductDetails = () => {
         />
         <p className='text-[#061410] text-xs font-medium'>{ratingValue ? Math.round(ratingValue).toFixed(1) : 'N/A'}</p>
         <p className='text-[#061410] text-xs font-medium'>(400 + Reviews)</p>
+      </div> */}
+      <div className="card-content flex justify-left gap-2">
+        {rateLoading ? (
+          <p>Loading rating...</p>
+        ) : (
+          <>
+            <Rating
+              value={productRating}
+              onChange={(event, newValue) => setRatingValue(newValue ?? 0)}
+              precision={0.5}
+              size="small"
+              readOnly
+            />
+            <p className='text-[#061410] text-xs font-medium'>
+              {/* {productRating.toFixed(1) } */}
+              {productRating ? productRating.toFixed(1) : 'N/A'}
+            </p>
+            <p className='text-[#061410] text-xs font-medium'>(400 + Reviews)</p>
+            {/* <p className='text-[#061410] text-xs font-medium'>
+        ({totalReviews} Reviews)
+      </p> */}
+          </>
+        )}
       </div>
+
 
       <div className='hidden md:block'>
         <p className='text-[#061410] text-sm font-bold font-figtree mt-4'>About this item</p>
@@ -306,8 +342,8 @@ const ViewProductDetails = () => {
                 key={index}
                 onClick={() => handleColorSelect(variation.color, variation)}
                 className={`px-2 md:px-4 py-2 border rounded-lg text-black text-xs flex-1 min-w-0 ${selectedColor === variation.color.toLowerCase()
-                    ? 'border-[#26735B] bg-[#26735B] text-white'
-                    : 'border-gray-200'
+                  ? 'border-[#26735B] bg-[#26735B] text-white'
+                  : 'border-gray-200'
                   }`}
               >
                 {variation.color}
@@ -352,7 +388,7 @@ const ViewProductDetails = () => {
           </div>
         </div>
       </div>
-    
+
 
       <div className="hidden md:flex flex-row gap-4 mb-6">
         <div className="flex-1">
@@ -454,9 +490,9 @@ const ViewProductDetails = () => {
 
         <div className="px-4 flex flex-col gap-4">
           <ProductTabs />
-        <RecentlyViewed test="hello"/>
+          <RecentlyViewed test="hello" />
         </div>
-          {/* <div>
+        {/* <div>
       </div> */}
       </div>
 
@@ -512,6 +548,9 @@ const ViewProductDetails = () => {
               <div className="min-h-[400px] w-full">
                 <ProductTabs />
               </div>
+              {/* <div className='max-w-7xl'>
+                <RecentlyViewed className=" mt-4" />
+              </div> */}
             </div>
           </div>
 

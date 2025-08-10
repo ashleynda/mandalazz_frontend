@@ -4,14 +4,15 @@ import { useRouter } from "next/navigation";
 import RegNavbar from "../reusables/RegNavBar";
 import { useState } from "react";
 import useForgotPasswordMutation from "../../lib/hooks/Auth/useForgotPassword";
+import useSnackbarStore from "@/src/lib/store/useSnackbarStore";
 
 
 const ResetPassword = () => {
     const router = useRouter();
     const [email, setEmail] = useState("");
     const forgotPassword = useForgotPasswordMutation();
-    
-   
+    const { showSnackbar } = useSnackbarStore();
+
    const handleSubmit = async (e) => {
   e.preventDefault();
 
@@ -20,12 +21,20 @@ const ResetPassword = () => {
     {
       onSuccess: (data) => {
         console.log('Success:', data);
-        alert('Password reset link sent to your email!');
-        router.push('/checkEmai')
+        showSnackbar({
+          message: 'Password reset code sent to your email!',
+          type: 'success',
+        });
+        sessionStorage.setItem('cameFromResetPassword', 'true'); 
+         sessionStorage.setItem('email', email);
+        router.push('/verify')
       },
       onError: (error) => {
         console.error('Error:', error);
-        alert(error.message || 'An error occurred. Please try again.');
+        showSnackbar({
+          message: error.message || 'An error occurred. Please try again.',
+          type: 'error',
+        });
       },
     }
   );
@@ -38,7 +47,6 @@ const ResetPassword = () => {
     }
   return (
     <>
-        {/* <RegNavbar /> */}
         <div className="mt-44 px-4 sm:px-6 md:px-8">
         <form
           onSubmit={handleSubmit}

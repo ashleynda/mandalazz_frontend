@@ -82,7 +82,7 @@ const FavouritesPage = () => {
   return (
     <div className="w-full min-h-screen bg-white flex flex-col rounded-lg mt-12">
       <div className="flex-1 px-6 py-6">
-        <h1 className="text-xl font-semibold text-[#061410] mb-8 ">Favourites</h1>
+        <h1 className="text-xl font-semibold text-[#061410] mb-4 ">Favourites</h1>
         {/* <Divider className="mt-4 w-full" /> */}
          <div className="-mx-6 md:-mx-6 hidden md:block">
               <Divider className="border-gray-200" />
@@ -113,7 +113,7 @@ const FavouritesPage = () => {
                   </div>
 
                   {/* Product Details */}
-                  <div className="flex-1 min-w-0">
+                  <div className="flex-1 min-w-0 mb-8">
                     <h3 className="text-base font-medium text-[#061410] mb-2">
                       {product.name || "Crocs"}
                     </h3>
@@ -151,7 +151,7 @@ const FavouritesPage = () => {
                             <button
                                 onClick={() => handleRemoveFromFavorites(product._id)}
                                 className="p-2 text-gray-400 hover:text-[#26735B] transition-colors rounded-md cursor-pointer"
-                                title="Add to Cart"
+                                title="Remove from Favourites"
                             >
                                 <Trash2 className="w-4 h-4" />
                             </button>
@@ -163,7 +163,7 @@ const FavouritesPage = () => {
                             >
                                 <Heart 
                                 // className="w-4 h-4 fill-current" 
-                                className={`w-4 h-4 ${product._id ? 'fill-[#4CAF50] text-[#4CAF50]' : 'text-gray-400'}`}
+                                className={`w-4 h-4 ${product._id ? 'fill-[#26735B] text-[#26735B]' : 'text-gray-400'}`}
                                 />
                             </button>
                         </div>
@@ -177,81 +177,153 @@ const FavouritesPage = () => {
       </div>
 
       {/* Pagination Controls - Always at bottom, only show if there are multiple pages */}
-      {totalPages > 1 && (
-        <div className="px-6 py-6 border-t border-gray-100">
-          <div className="flex items-center justify-center gap-2">
-            <button
-              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-              disabled={currentPage === 1}
-              className={`p-2 ${
-                currentPage === 1
-                  ? 'text-gray-300 cursor-not-allowed'
-                  : 'text-gray-600 hover:text-gray-800'
-              }`}
-            >
-              <ChevronLeft size={16} />
-            </button>
-            <span className="text-xs text-gray-500 mx-2">Previous</span>
+      <div className="px-6 py-6 border-t border-gray-100">
+  <div className="flex items-center justify-center gap-2">
+    <button
+      onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+      disabled={currentPage === 1}
+      className={`p-2 ${
+        currentPage === 1
+          ? 'text-gray-300 cursor-not-allowed'
+          : 'text-gray-600 hover:text-gray-800'
+      }`}
+    >
+      <ChevronLeft size={16} />
+    </button>
+    <span className="text-xs text-gray-500 mx-2">Previous</span>
 
-            <div className="flex gap-1 mx-4">
-              {/* Page Numbers */}
-              {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-                let pageNumber;
-                if (totalPages <= 5) {
-                  pageNumber = i + 1;
-                } else if (currentPage <= 3) {
-                  pageNumber = i + 1;
-                } else if (currentPage >= totalPages - 2) {
-                  pageNumber = totalPages - 4 + i;
-                } else {
-                  pageNumber = currentPage - 2 + i;
-                }
+    <div className="flex gap-1 mx-4">
+      {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+        let pageNumber;
+        if (totalPages <= 5) {
+          pageNumber = i + 1;
+        } else if (currentPage <= 3) {
+          pageNumber = i + 1;
+        } else if (currentPage >= totalPages - 2) {
+          pageNumber = totalPages - 4 + i;
+        } else {
+          pageNumber = currentPage - 2 + i;
+        }
 
-                return (
-                  <button
-                    key={pageNumber}
-                    onClick={() => setCurrentPage(pageNumber)}
-                    className={`w-8 h-8 rounded text-xs transition-colors ${
-                      currentPage === pageNumber
-                        ? 'bg-black text-white'
-                        : 'text-gray-600 hover:bg-gray-100'
-                    }`}
-                  >
-                    {pageNumber}
-                  </button>
-                );
-              })}
-              
-              {totalPages > 5 && currentPage < totalPages - 2 && (
-                <>
-                  <span className="w-8 h-8 flex items-center justify-center text-gray-400 text-xs">...</span>
-                  <button
-                    onClick={() => setCurrentPage(totalPages)}
-                    className="w-8 h-8 rounded text-gray-600 hover:bg-gray-100 text-xs"
-                  >
-                    {totalPages}
-                  </button>
-                </>
-              )}
-            </div>
+        return (
+          <button
+            key={pageNumber}
+            onClick={() => setCurrentPage(pageNumber)}
+            className={`w-8 h-8 rounded text-xs transition-colors ${
+              currentPage === pageNumber
+                ? 'bg-black text-white'
+                : 'text-gray-600 hover:bg-gray-100'
+            }`}
+          >
+            {pageNumber}
+          </button>
+        );
+      })}
 
-            <span className="text-xs text-gray-500 mx-2">Next</span>
-            <button
-              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-              disabled={currentPage === totalPages}
-              className={`p-2 ${
-                currentPage === totalPages
-                  ? 'text-gray-300 cursor-not-allowed'
-                  : 'text-gray-600 hover:text-gray-800'
-              }`}
-            >
-              <ChevronRight size={16} />
-            </button>
-          </div>
-        </div>
+      {totalPages > 5 && currentPage < totalPages - 2 && (
+        <>
+          <span className="w-8 h-8 flex items-center justify-center text-gray-400 text-xs">...</span>
+          <button
+            onClick={() => setCurrentPage(totalPages)}
+            className="w-8 h-8 rounded text-gray-600 hover:bg-gray-100 text-xs"
+          >
+            {totalPages}
+          </button>
+        </>
       )}
+    </div>
+
+    <span className="text-xs text-gray-500 mx-2">Next</span>
+    <button
+      onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+      disabled={currentPage === totalPages}
+      className={`p-2 ${
+        currentPage === totalPages
+          ? 'text-gray-300 cursor-not-allowed'
+          : 'text-gray-600 hover:text-gray-800'
+      }`}
+    >
+      <ChevronRight size={16} />
+    </button>
+  </div>
+</div>
+
     </div>
   );
 };
 
 export default FavouritesPage;
+
+// {totalPages > 1 && (
+//         <div className="px-6 py-6 border-t border-gray-100">
+//           <div className="flex items-center justify-center gap-2">
+//             <button
+//               onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+//               disabled={currentPage === 1}
+//               className={`p-2 ${
+//                 currentPage === 1
+//                   ? 'text-gray-300 cursor-not-allowed'
+//                   : 'text-gray-600 hover:text-gray-800'
+//               }`}
+//             >
+//               <ChevronLeft size={16} />
+//             </button>
+//             <span className="text-xs text-gray-500 mx-2">Previous</span>
+
+//             <div className="flex gap-1 mx-4">
+//               {/* Page Numbers */}
+//               {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+//                 let pageNumber;
+//                 if (totalPages <= 5) {
+//                   pageNumber = i + 1;
+//                 } else if (currentPage <= 3) {
+//                   pageNumber = i + 1;
+//                 } else if (currentPage >= totalPages - 2) {
+//                   pageNumber = totalPages - 4 + i;
+//                 } else {
+//                   pageNumber = currentPage - 2 + i;
+//                 }
+
+//                 return (
+//                   <button
+//                     key={pageNumber}
+//                     onClick={() => setCurrentPage(pageNumber)}
+//                     className={`w-8 h-8 rounded text-xs transition-colors ${
+//                       currentPage === pageNumber
+//                         ? 'bg-black text-white'
+//                         : 'text-gray-600 hover:bg-gray-100'
+//                     }`}
+//                   >
+//                     {pageNumber}
+//                   </button>
+//                 );
+//               })}
+              
+//               {totalPages > 5 && currentPage < totalPages - 2 && (
+//                 <>
+//                   <span className="w-8 h-8 flex items-center justify-center text-gray-400 text-xs">...</span>
+//                   <button
+//                     onClick={() => setCurrentPage(totalPages)}
+//                     className="w-8 h-8 rounded text-gray-600 hover:bg-gray-100 text-xs"
+//                   >
+//                     {totalPages}
+//                   </button>
+//                 </>
+//               )}
+//             </div>
+
+//             <span className="text-xs text-gray-500 mx-2">Next</span>
+//             <button
+//               onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+//               disabled={currentPage === totalPages}
+//               className={`p-2 ${
+//                 currentPage === totalPages
+//                   ? 'text-gray-300 cursor-not-allowed'
+//                   : 'text-gray-600 hover:text-gray-800'
+//               }`}
+//             >
+//               <ChevronRight size={16} />
+//             </button>
+//           </div>
+//         </div>
+//       )}

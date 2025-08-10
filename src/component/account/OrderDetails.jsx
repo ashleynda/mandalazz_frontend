@@ -162,6 +162,7 @@ import { ChevronLeft } from "lucide-react";
 import { useRouter, useParams } from "next/navigation";
 import useSnackbarStore from "@/src/lib/store/useSnackbarStore";
 import { useFetchMyOrders } from "../../lib/hooks/account/useGetorder";
+import { formatDate } from "@/src/lib/utils";
 
 const OrderDetailsPage = () => {
   const [token, setToken] = useState(null);
@@ -284,14 +285,14 @@ const OrderDetailsPage = () => {
           <div>
             <p className="text-[#667085] text-[13px] font-normal mb-1">Order Date</p>
             <p className="font-semibold text-[13px] text-[#061410]">
-              {new Date(order.createdAt).toLocaleDateString()}
+              {formatDate(order.createdAt)}
             </p>
           </div>
           <div>
             <p className="text-[#667085] text-[13px] font-normal mb-1">Delivery Date</p>
             <p className="font-semibold text-[13px] text-[#061410]">
               {order.estimatedDeliveryDate
-                ? new Date(order.estimatedDeliveryDate).toLocaleDateString()
+                ? formatDate(order.estimatedDeliveryDate)
                 : "Pending"}
             </p>
           </div>

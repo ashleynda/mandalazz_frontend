@@ -11,7 +11,7 @@ const Footer = () => {
         
         {/* Logo and Address Section */}
         <div className="flex flex-col items-center sm:items-start text-center sm:text-left md:text-center">
-          <Image src={logo} alt="Company Logo" className="h-10 mb-4" width={100} height={40} />
+          <Image src={logo} alt="Company Logo" className="mb-4" width={100} height={40} />
           <p className="text-sm text-white text-left font-normal">
             17 Sapphire Street, Commerce Plaza, Suite 401, Metroville, New York.
           </p>
