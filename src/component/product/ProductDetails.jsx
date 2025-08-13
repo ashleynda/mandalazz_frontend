@@ -10,8 +10,9 @@ export default function ProductDetails() {
     const product = data?.data?.products.find(p => p._id === id);
     return (
         <div>
+            
             <p className="text-sm font-normal text-black mb-4">
-                 {product?.description || "No description available."}
+                {product?.description || "No description available."}
             </p>
         </div>
     )
