@@ -1,4 +1,5 @@
 import Verify from "@/src/component/user/Verify";
+import { Suspense } from "react";
 
 
 const page=()=>{
