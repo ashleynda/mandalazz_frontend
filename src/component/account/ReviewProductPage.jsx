@@ -1,35 +1,53 @@
 "use client";
 
-import React, { useState } from 'react';
-import { ChevronLeft, Star } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import React, { useEffect, useState } from 'react';
+import { ArrowLeft, ChevronLeft, Star } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import useSnackbarStore from "@/src/lib/store/useSnackbarStore";
 import { usePostReview } from '../../lib/hooks/account/useComment';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'next/navigation';
+import useDeliveredOrders from '../../lib/hooks/account/useGetReviews';
+import Divider from '@mui/material/Divider';
+import { formatName, truncateText } from '../../lib/utils';
+import { useQueryClient } from '@tanstack/react-query';
 
 const ReviewProductPage = () => {
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
-  const [name, setName] = useState('Martins');
+  const [name, setName] = useState('');
   const [review, setReview] = useState('');
   const router = useRouter();
   const { showSnackbar } = useSnackbarStore();
-   const params = useParams();
-  const productId = params?.productId;
+  const { data: orders = [] } = useDeliveredOrders();
+  const { id: productId } = useParams();
+  const searchParams = useSearchParams();
+  const productImage = searchParams.get("image");
+  const firstNameFromQuery = searchParams.get("firstName");
 
   const { mutate, isPending, isSuccess, isError } = usePostReview();
+  const products = orders.flatMap(order => order.products ?? []);
+
+  const product = products.find(p => p.product === productId);
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+  if (firstNameFromQuery) {
+    setName(firstNameFromQuery);
+  }
+}, [firstNameFromQuery]);
 
   const handleSubmit = () => {
-    // const productId = "684776e12715270ce228fa53"; // Replace with actual product ID (could come from route params)
     mutate(
-      { productId, review, rating, name },
+      { productId, commentText: review },
+
       {
         onSuccess: () => {
-          alert("Review submitted successfully!");
-          router.push('/dashboard/reviews');
+          showSnackbar({ message: "Review submitted successfully!", severity: "success" });
+          queryClient.invalidateQueries(["reviews"]);
+          router.push('/dashboard/reviews/completed-reviews');
         },
         onError: () => {
-          alert("Failed to submit review.");
+          showSnackbar({ message: "Failed to submit review.", severity: "error" });
         },
       }
     );
@@ -48,25 +66,38 @@ const ReviewProductPage = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto p-4 bg-white">
-      <div className="flex items-center gap-3 mb-6">
+    <div className="max-w-4xl p-4 mt-8 bg-white">
+      <div className="flex items-center gap-3 mb-4 ">
         <button className="p-1 hover:bg-gray-100 rounded">
-          <ChevronLeft size={20} className="text-gray-600" onClick={() => router.push('/dashboard/reviews')}/>
+          <ArrowLeft size={20} className="text-gray-600" onClick={() => router.push('/dashboard/reviews')} />
         </button>
-        <h1 className="text-lg font-semibold">Review Product</h1>
+        <h1 className="text-lg font-bold text-[#3E3C3C]">Review Product</h1>
+      </div>
+      <div className="-mx-6 md:-mx-4 hidden md:block">
+        <Divider className="border-gray-200" />
       </div>
 
       <div className="flex items-center gap-4 mb-8 w-full max-w-2xl">
-        <div className="w-12 h-16 bg-gray-100 rounded-lg flex-shrink-0 overflow-hidden">
-          <div className="w-full h-full bg-gradient-to-br from-yellow-200 to-yellow-400 flex items-center justify-center relative">
-            <div className="absolute inset-0 bg-yellow-300 opacity-80"></div>
-            <div className="relative z-10 w-6 h-10 bg-yellow-500 rounded-sm"></div>
-          </div>
+        <div className="w-18 h-22 bg-gray-100 rounded-lg flex-shrink-0 overflow-hidden mt-6">
+          {productImage ? (
+            <img
+              src={productImage}
+              alt={product?.name || "Product"}
+              className="object-cover w-full h-full"
+            />
+          ) : (
+            <div className="w-full h-full bg-gray-200 flex items-center justify-center text-xs text-gray-500">
+              No Image
+            </div>
+          )}
         </div>
-        
         <div>
-          <h3 className="font-bold text-[#061410] text-sm">Golden Yellow Butterfly Bodycon Dress</h3>
+          <h2 className="text-sm font-bold text-[#061410]">{product?.name}</h2>
+          {/* <p className="text-xs text-gray-500 line-clamp-3">{product?.description || "No description available."}</p> */}
         </div>
+      </div>
+      <div className="-mx-6 md:-mx-4 hidden md:block mb-6">
+        <Divider className="border-gray-200" />
       </div>
 
       <div className="mb-6">
@@ -82,11 +113,10 @@ const ReviewProductPage = () => {
             >
               <Star
                 size={24}
-                className={`transition-colors ${
-                  starIndex <= (hoverRating || rating)
+                className={`transition-colors ${starIndex <= (hoverRating || rating)
                     ? 'fill-yellow-400 text-yellow-400'
                     : 'text-gray-300'
-                }`}
+                  }`}
               />
             </button>
           ))}
@@ -98,13 +128,14 @@ const ReviewProductPage = () => {
         <div className="relative">
           <input
             type="text"
-            value={name}
+            value={formatName(name)}
             onChange={(e) => setName(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+            className="w-full px-3 py-2 text-black border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
             placeholder="Enter your name"
+            disabled
           />
           <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+            <div className="w-2 h-2 bg-[#26735B] rounded-full"></div>
           </div>
         </div>
       </div>
@@ -115,7 +146,7 @@ const ReviewProductPage = () => {
           value={review}
           onChange={(e) => setReview(e.target.value)}
           rows={4}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm resize-none"
+          className="w-full px-3 py-2 text-black border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm resize-none"
           placeholder="Tell us about the product..."
         />
       </div>
@@ -124,12 +155,15 @@ const ReviewProductPage = () => {
       {/* <button className="w-full bg-[#26735B] hover:bg-green-700 text-white text-sm font-bold py-3 px-4 rounded-lg transition-colors">
         Submit Review
       </button> */}
-            <button
+      <div className="-mx-6 md:-mx-4 hidden md:block mb-6">
+        <Divider className="border-gray-200" />
+      </div>
+
+      <button
         onClick={handleSubmit}
         disabled={isPending}
-        className={`w-full ${
-          isPending ? 'bg-gray-400' : 'bg-[#26735B] hover:bg-green-700'
-        } text-white text-sm font-bold py-3 px-4 rounded-lg transition-colors`}
+        className={` ${isPending ? 'bg-gray-400' : 'bg-[#26735B] hover:bg-[#26735B] cursor-pointer'
+          } text-white text-sm font-bold py-3 px-4 rounded-lg transition-colors`}
       >
         {isPending ? 'Submitting...' : 'Submit Review'}
       </button>

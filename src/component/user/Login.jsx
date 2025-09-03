@@ -45,22 +45,44 @@ const Login = () => {
     setLoading(true);
 
     loginMutation.mutate({ email, password }, {
+      // onSuccess: (data) => {
+      //   console.log('Login successful:', data)
+      //   const token = data?.message?.token;
+      //   const userId = data?.message?.user?.id || data?.message?.userId || data?.user?.id; 
+      //   if (token) {
+      //     sessionStorage.setItem('authToken', token);
+      //     sessionStorage.setItem("userEmail", email);
+      //     if (userId) {
+      //       sessionStorage.setItem('userId', userId);
+      //       setCurrentUser(userId);
+      //     } else {
+      //       console.warn('No userId found in login response');
+      //       setCurrentUser(null);
+      //     }
+      //     showSnackbar({ message: 'Login successful', severity: 'success' });
+      //     // setTimeout(() => {
+      //       router.push('/products');
+      //     // }, 3000);
+      //   }
+      //   setLoading(false);
+      // },
       onSuccess: (data) => {
-        console.log('Login successful:', data)
         const token = data?.message?.token;
         if (token) {
           sessionStorage.setItem('authToken', token);
           sessionStorage.setItem("userEmail", email);
+
+          window.dispatchEvent(new Event("login"));
+          
           showSnackbar({ message: 'Login successful', severity: 'success' });
           // router.push('/products')
-          setTimeout(() => {
+          // setTimeout(() => {
             router.push('/products');
-          }, 3000);
+          // }, 3000);
         }
         setLoading(false);
       },
       onError: (error) => {
-        console.error('Login failed:', error)
         setErrors({ ...errors, general: 'Email or password is incorrect' });
         showSnackbar({ message: 'Login failed. Please check your credentials.', severity: 'error' });
         setLoading(false);

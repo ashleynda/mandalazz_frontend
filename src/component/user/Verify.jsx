@@ -1,40 +1,62 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import useVerifyMutation from "../../lib/hooks/useVerifyMutation";
 import { useEffect, useRef, useState } from "react";
 import { Button } from '@mui/material';
 import useSnackbarStore from "@/src/lib/store/useSnackbarStore";
 import useResetPasswordMutation from "@/src/lib/hooks/Auth/useRestPassword";
+import useVerifyResetCodeMutation, { useValidateResetToken } from "../../lib/hooks/Auth/useVerifyResetCodeMutataion";
 
 export default function Verify() {
     const router = useRouter();
-    const [otp, setOtp] = useState(['']);
+    // const [otp, setOtp] = useState(['']);
+    const [otp, setOtp] = useState(new Array(6).fill(''));
+      const [code, setCode] = useState("");
+  const searchParams = useSearchParams();
+
     const inputRefs = useRef([]);
     const [email, setEmail] = useState('');
-     const [cameFromReset, setCameFromReset] = useState(false);
+    const [cameFromReset, setCameFromReset] = useState(false);
     const { showSnackbar } = useSnackbarStore();
+    const pathname = usePathname();
+    const type = searchParams.get("type");
     const {
         mutate: verifyEmail,
         isPending: isLoading,
         error: verifyEmailError,
     } = useVerifyMutation();
 
-    const {
-        mutate: resetPassword,
-        isPending: isResetting,
-        error: resetPasswordError,
-    } = useResetPasswordMutation();
+    // const {
+    //     mutate: resetPassword,
+    //     isPending: isResetting,
+    //     error: resetPasswordError,
+    // } = useResetPasswordMutation();
+ const { mutate: verifyResetCode, isPending, isError, error, data } = useValidateResetToken();
 
-        useEffect(() => {
-        const storedEmail = sessionStorage.getItem("email");
-        if (storedEmail) {
-            setEmail(storedEmail);
-        } else {
-            // Optional: redirect or show message if email is missing
-            console.error("No email found in sessionStorage.");
-        }
-    }, []);
+    // useEffect(() => {
+    //     const storedEmail = sessionStorage.getItem("email");
+    //     if (storedEmail) {
+    //         setEmail(storedEmail);
+    //     } else {
+    //         // Optional: redirect or show message if email is missing
+    //         console.error("No email found in sessionStorage.");
+    //     }
+    // }, []);
+ useEffect(() => {
+  const storedEmail = sessionStorage.getItem("email");
+  if (storedEmail) {
+    setEmail(storedEmail);
+  } else {
+    console.error("No email found in sessionStorage.");
+  }
+
+  const resetFlag = sessionStorage.getItem("cameFromResetPassword");
+  console.log("Came from reset:", resetFlag);
+  setCameFromReset(resetFlag === "true"); // 👈 set it properly here
+}, []);
+
+
 
     const handleChange = (index, value) => {
         if (!/^\d*$/.test(value)) return; // allow only numbers
@@ -66,56 +88,55 @@ export default function Verify() {
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        if (!isOtpValid || isLoading) return;
+        if (!isOtpValid || isLoading || isPending) return;
 
         const token = otp.join('');
 
-        if (pathname === "/resetPassword") {
-      // ✅ Call resetPassword API
-      const newPassword = sessionStorage.getItem("newPassword"); // adjust source
-      if (!newPassword) {
-        showSnackbar({ message: 'Missing new password.', type: 'error' });
-        return;
+        if (cameFromReset) {
+            verifyResetCode(
+      { email, token },
+      {
+        onSuccess: () => {
+          // Save token in sessionStorage to use in reset-password page
+          sessionStorage.setItem("resetToken", token);
+          showSnackbar({ message: "Code verified, set your new password.", type: "success" });
+          router.push("/new-password");
+        },
+        onError: (error) => {
+          showSnackbar({ message: error.message, type: "error" });
+        },
       }
-       resetPassword(
-        { token, newPassword },
-        {
-          onSuccess: () => {
-            showSnackbar({ message: 'Password reset successful!', type: 'success' });
-            router.push('/login');
-          },
-          onError: (error) => {
-            showSnackbar({ message: error.message, type: 'error' });
-          }
-        }
-      );
-    } else {
-
-
-        verifyEmail(
-            { email, token },
-            {
-                onSuccess: () => {
-                    const token = data?.token; 
-
-                    if (token) {
-                        sessionStorage.setItem('authToken', token);
-                        window.dispatchEvent(new Event("storage"));
-                    }
-                    console.log('Verification successful!');
-                    // navigate or show success toast
-                    showSnackbar({
-                        message: 'Email verified successfully!',
-                        type: 'success',
-                    });
-                    router.push('/products');
-                },
-                onError: (error) => {
-                    console.error(error);
-                },
+            );
+        } else {
+            if (!email) {
+                showSnackbar({ message: 'No email found. Please restart verification.', type: 'error' });
+                return;
             }
-        );
-    }
+            verifyEmail(
+                { email, token },
+                {
+                    onSuccess: (data) => {
+                        const token = data?.token;
+
+                        if (token) {
+                            sessionStorage.setItem('authToken', token);
+                            window.dispatchEvent(new Event("storage"));
+                        }
+                        console.log('Verification successful!');
+                        // navigate or show success toast
+                        showSnackbar({
+                            message: 'Email verified successfully!',
+                            type: 'success',
+                        });
+                        router.push('/products');
+                    },
+                    onError: (error) => {
+                        console.error(error);
+                        showSnackbar({ message: error.message, type: "error" });
+                    },
+                }
+            );
+        }
     };
 
     const handleResendCode = () => {
@@ -125,8 +146,8 @@ export default function Verify() {
     return (
         <>
             <form onSubmit={handleSubmit}>
-                <div   className="flex flex-col gap-4 w-[343px] md:w-full bg-white mx-auto border-2 border-[#E4E7EC] shadow-none rounded-lg p-6 md:p-8 mt-30 md:mt-60">
-                {/* // className="flex flex-col justify-center h-[calc(70vh-115px)] w-[343px] md:w-full md:overflow-y-auto gap-4 mt-[45px] border border-[#E4E7EC] bg-white"> */}
+                <div className="flex flex-col gap-4 w-[343px] md:w-full bg-white mx-auto border-2 border-[#E4E7EC] shadow-none rounded-lg p-6 md:p-8 mt-30 md:mt-60">
+                    {/* // className="flex flex-col justify-center h-[calc(70vh-115px)] w-[343px] md:w-full md:overflow-y-auto gap-4 mt-[45px] border border-[#E4E7EC] bg-white"> */}
                     <h1 className="text-3xl font-bold text-start text-[#191818]">Verify Your Email</h1>
                     <p className="text-sm font-normal text-[#212221]">
                         Enter the 6-digit verification code sent to your email
@@ -176,9 +197,10 @@ export default function Verify() {
                             className={`w-full h-[37px] rounded-4xl text-sm font-extrabold ${isOtpValid ? 'bg-[#26735B] hover:bg-[#26735B] cursor-pointer' : 'bg-[#D7D7D7]'
                                 } text-white`}
                             type="submit"
-                            disabled={!isOtpValid || isLoading}
+                            disabled={!isOtpValid || isLoading || isPending}
                         >
-                            {isLoading ? 'Verifying...' : 'Verify'}
+                            {isLoading || isPending
+                             ? cameFromReset ? 'Verifying reset code...' : 'Verifying email...' : 'Verify'}
                         </button>
 
                         <p className="text-sm font-normal text-[#212221] text-center">

@@ -34,15 +34,12 @@ const Cart = () => {
     if (!Array.isArray(cartItems)) return <div>Cart items not loaded properly</div>;
 
     const handleRemove = (productId) => {
-        console.log("Removing product with ID:", productId);
         removeItem({ productId }, {
             onSuccess: () => {
-                console.log("Successfully removed from server, updating local state");
                 removeFromCart(productId);
 
             },
             onError: (err) => {
-                console.error("Remove from cart failed:", err);
             }
         });
     };
@@ -52,7 +49,6 @@ const Cart = () => {
     };
 
     const handleSaveForLater = (id) => {
-        // Placeholder for future "Save for later" logic
         console.log('Saving for later:', id);
     };
 
@@ -75,7 +71,6 @@ const Cart = () => {
 
 
             <div className="flex flex-col lg:flex-row gap-8 mt-2">
-                {/* Left Side - Cart Table + Favourites + RecentlyViewed */}
                 <div className='flex flex-col gap-8 w-full lg:w-[748px]'>
                     <div className="md:bg-white">
                         <ReusableCartTable
@@ -90,14 +85,8 @@ const Cart = () => {
                     <Favourites />
                     <RecentlyViewed />
                 </div>
-
-                {/* Right Side - Order Summary */}
-                {/* {data?.cart && ( */}
-                <div className="md:hidden block lg:w-80">
                     <OrderSummary cart={data.cart} />
-                </div>
                
-                {/* )} */}
             </div>
               {/* <div className="fixed bottom-0 left-0 right-0 z-50 bg-white px-4 py-2 border-t">
                         <button

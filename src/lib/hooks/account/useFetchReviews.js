@@ -25,6 +25,6 @@ export const useFetchReviews = (productId) => {
   return useQuery({
     queryKey: ["comments", productId],
     queryFn: () => fetchComments(productId),
-    // enabled: !!productId, // Only fetch if productId is provided
+    enabled: !!productId, // Only fetch if productId is provided
   });
 };

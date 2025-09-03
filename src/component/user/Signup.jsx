@@ -67,10 +67,14 @@ const Signup = () => {
     if (!validate()) return;
 
     signupMutation.mutate(formData, {
-      onSuccess: () => {
-         console.log('Signup successful!');
-        router.push('/validation');
+      onSuccess: (data) => {
+        console.log('Signup successful!');
         sessionStorage.setItem("email", formData.email); 
+        if (data?.token) {
+          sessionStorage.setItem("authToken", data.token);
+          window.dispatchEvent(new Event("login")); // ✅ Tell Navbar
+        }
+        router.push('/validation');
       },
       onError: (error) => {
         alert(error.message);

@@ -1,6 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 
 const postComment = async ({ productId, commentText }) => {
+  const token = sessionStorage.getItem("authToken");
   const response = await fetch(`https://mandelazz-webapp.azurewebsites.net/api/comment/${productId}/comment`, {
     method: "POST",
     headers: {

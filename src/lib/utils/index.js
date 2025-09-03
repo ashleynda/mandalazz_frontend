@@ -39,3 +39,21 @@ export const formatDate = (date) => {
       });
 };
 
+export const formatName = (name) => {
+  if (!name) return "";
+
+  return name
+    .split(" ")
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
+};
+
+// Example usage:
+console.log(formatName("john DOE"));   // "John Doe"
+console.log(formatName("MARY ann SMITH")); // "Mary Ann Smith"
+console.log(formatName("aSHley01"));   // "Ashley01"
+
+export function capitalizeFirstLetter(name) {
+  if (!name) return '';
+  return name.charAt(0).toUpperCase() + name.slice(1);
+}
