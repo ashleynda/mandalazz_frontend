@@ -3,8 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import RegNavbar from '../reusables/RegNavBar';
-import { LoadingButton } from '@mui/lab';
-import { CircularProgress } from '@mui/material';
+import { Button, CircularProgress } from '@mui/material';
 import useSignupStore from '../../lib/store/useSignupStore';
 import useSignupMutation from '../../lib/hooks/Auth/useSignupMutation';
 // import RegNavbar from '@/components/reusables/RegNavbar'; // adjust the path to your project structure
