@@ -48,11 +48,6 @@ export const formatName = (name) => {
     .join(" ");
 };
 
-// Example usage:
-console.log(formatName("john DOE"));   // "John Doe"
-console.log(formatName("MARY ann SMITH")); // "Mary Ann Smith"
-console.log(formatName("aSHley01"));   // "Ashley01"
-
 export function capitalizeFirstLetter(name) {
   if (!name) return '';
   return name.charAt(0).toUpperCase() + name.slice(1);
