@@ -227,7 +227,7 @@ export default function AccountDetails() {
                 // className="w-full md:w-auto bg-[#26735B] hover:bg-emerald-700 text-white font-medium px-8 py-3 rounded-lg transition-colors"
  className={`w-full md:w-auto font-medium px-8 py-3 rounded-lg transition-colors ${
                 !isEdited || isPending
-                  ? "bg-[#26735B] opacity-80 text-gray-500 cursor-not-allowed"
+                  ? "bg-[#26735B] opacity-80 text-gray-400 cursor-not-allowed"
                   : "bg-[#26735B] hover:bg-emerald-700 text-white"
               }`}
                 // className="bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-8 py-3 rounded-lg transition-colors"

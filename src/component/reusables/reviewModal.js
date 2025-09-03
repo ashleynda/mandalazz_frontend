@@ -10,6 +10,7 @@ import {
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import StarIcon from '@mui/icons-material/Star';
+import { formatName } from '@/src/lib/utils';
 
 const filters = ['Most Recent', 'Oldest', 'Highest Rating', 'Lowest Rating'];
 
@@ -58,7 +59,7 @@ export default function ReviewModal({ open, onClose, reviews = [] }) {
                     {reviews.map((review, index) => (
                         <Box key={index} className="">
                             <p className="font-bold text-base text-[#000000]">
-                                {review.name}
+                                 {formatName(review.user?.firstName)} {formatName(review.user?.lastName)}
                             </p>
                             <Box className="flex items-center space-x-2 text-sm text-gray-500">
                                 <Box className="flex space-x-1">
@@ -70,10 +71,10 @@ export default function ReviewModal({ open, onClose, reviews = [] }) {
                                         />
                                     ))}
                                 </Box>
-                                <span className='text-xs font-medium text-[#8D8C8C]'>{review.date}</span>
+                                <span className='text-xs font-medium text-[#8D8C8C]'>{new Date(review.createdAt).toLocaleDateString()}</span>
                             </Box>
                             <p variant="body2" className="text-[#000000] text-sm font-normal">
-                                {review.content}
+                                {review.comment}
                             </p>
                         </Box>
                     ))}

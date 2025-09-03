@@ -1,13 +1,13 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import RegNavbar from '../reusables/RegNavBar'
 import useLoginMutation from '../../lib/hooks/Auth/useLoginMutation'
 import useLoginStore from '../../lib/store/useLoginStore'
-
 import { Button, CircularProgress } from '@mui/material';
-import useResetPasswordMutation from '../../lib/hooks/Auth/useRestPassword'
+import { useResetPassword } from '@/src/lib/hooks/Auth/useRestPassword'
+import useSnackbarStore from '@/src/lib/store/useSnackbarStore'
 
 
 const NewPassword= () => {
@@ -18,9 +18,45 @@ const NewPassword= () => {
   const [email, setEmail] = useState(''); // or get this via router/query/props
   const [token, setToken] = useState(''); // same as above
   const [errors, setErrors] = useState({});
-  const { showSnackbar } = useLoginStore();
+  const { showSnackbar } = useSnackbarStore();
 
-  const { mutate, isPending } = useResetPasswordMutation();
+  const { mutate: resetPassword, isPending } = useResetPassword();
+//       const {
+//   mutate: resetPassword,
+//   isPending: isResetting,
+//   error: resetPasswordError,
+// } = useResetPasswordMutation();
+
+// const handleReset = (e) => {
+//   e.preventDefault();
+//   const token = sessionStorage.getItem("resetToken");
+
+//   resetPassword(
+//     { token, newPassword },
+//     {
+//       onSuccess: () => {
+//         sessionStorage.removeItem("resetToken");
+//         showSnackbar({ message: "Password reset successful!", type: "success" });
+//         router.push("/login");
+//       },
+//       onError: (error) => {
+//         showSnackbar({ message: error.message, type: "error" });
+//       },
+//     }
+//   );
+// };
+  useEffect(() => {
+    const storedToken = sessionStorage.getItem('resetToken')
+    if (storedToken) {
+      setToken(storedToken)
+    } else {
+      showSnackbar({
+        message: 'An error occurred. Please restart the reset process.',
+        type: 'error',
+      })
+      router.push('/resetPassword')
+    }
+  }, [router, showSnackbar])
 
   const checkFormValidity = () =>
     email.trim() !== '' &&
@@ -38,11 +74,12 @@ const NewPassword= () => {
       return;
     }
 
-    mutate(
-      { email, token, newPassword },
+    resetPassword(
+      { token, newPassword },
       {
-        onSuccess: (data) => {
-          console.log('Password reset successful', data);
+        onSuccess: () => {
+          console.log('Password reset successful');
+          sessionStorage.removeItem('resetToken');
           showSnackbar({
             message: 'Password reset successful! Please log in with your new password.',
             type: 'success',
@@ -67,7 +104,7 @@ const NewPassword= () => {
           <p className="text-xs text-[#667085] font-normal mb-6">Please create a new password.</p>
         
           <form
-            // onSubmit={handleSubmit}
+            onSubmit={handleSubmit}
             className="flex flex-col gap-4 
             "
             // max-w-md mx-auto border rounded shadow-none p-4 sm:p-6 md:p-8
@@ -132,7 +169,7 @@ const NewPassword= () => {
               // onClick={handleClick}
               type='submit'
               className='px-4 py-2 rounded-lg w-full transition-all duration-200 bg-[#26735B] text-white cursor-pointer'
-              disabled={!checkFormValidity()}
+              disabled={isPending}
           >
               Sign In
           </Button>

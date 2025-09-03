@@ -33,7 +33,6 @@ import useProductsQuery from '@/src/lib/hooks/favourites/useProductMutation';
 
 
 const Categories = () => {
-  // State for each dropdown menu
   const [foreignAnchorEl, setForeignAnchorEl] = useState(null);
   const [localAnchorEl, setLocalAnchorEl] = useState(null);
   const [menAnchorEl, setMenAnchorEl] = useState(null);
@@ -58,21 +57,10 @@ const Categories = () => {
     enabled: !!selectedBrand, // Only run when brand is selected
   });
   const router = useRouter();
-  console.log("Products:", products);
   const [category, setCategory] = useState('foreign'); // State to hold selected category
-
-
-
-  //   const foreignBrands = brandsData?.data?.foreign || [];
-  // const localBrands = brandsData?.data?.local || [];
-  // const brands = brandsData?.products || [];
-
-  // const foreignBrands = brands.filter((b) => b.brandType === 'foreign');
-  // const localBrands = brands.filter((b) => b.brandType === 'local');
   const { data: allProductsData, isLoading: loadingAllProducts } = useProductsQuery();
   const productsList = allProductsData?.data?.products || [];
 
-  // Extract unique foreign and local brands
   const foreignBrands = Array.from(
     new Set(
       productsList
@@ -89,11 +77,8 @@ const Categories = () => {
     )
   ).map((brand, index) => ({ id: index, name: brand }));
 
-  console.log("Foreign Brands:", foreignBrands);
-  console.log("Local Brands:", localBrands);
-  const { data: productsByBrand, isLoading: loadingBrandProducts } = useProductsByBrand(selectedBrand);
 
-  console.log("Products for Brand:", productsByBrand);
+  const { data: productsByBrand, isLoading: loadingBrandProducts } = useProductsByBrand(selectedBrand);
 
   if (loadingAllProducts) return <p>Loading brands...</p>;
 
@@ -101,9 +86,6 @@ const Categories = () => {
     const param = type === 'brand' ? 'brand' : 'category';
     router.push(`/viewProductByCategory?${param}=${encodeURIComponent(value)}`);
   };
-
-
-
 
   const toggleDrawer = (open) => (event) => {
     if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
@@ -144,11 +126,10 @@ const Categories = () => {
 
 
   if (isMobile) {
-    return null; // Hide AppBar and dropdowns on mobile
+    return null; 
   }
 
   return (
-    // <div className=''>
     <AppBar position="fixed" sx={{ backgroundColor: '#0B261F', color: 'white', top: 50, zIndex: 999, height: 50, overflowX: 'none', whiteSpace: 'nowrap' }}>
       <Container maxWidth="xl">
         <Toolbar disableGutters sx={{ justifyContent: 'center', gap: 4 }}>
@@ -216,43 +197,12 @@ const Categories = () => {
               </Menu>
             </Box>
 
-            {/* <Menu
-                anchorEl={localAnchorEl}
-                open={Boolean(localAnchorEl)}
-                onClose={handleLocalClose}
-                anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'left',
-                }}
-                transformOrigin={{
-                  vertical: 'top',
-                  horizontal: 'left',
-                }}
-                sx={{ mt: 1 }}
-              >
-                {localBrands.map((brand) => (
-                  <MenuItem
-                    key={brand}
-                    onClick={() => {
-                      handleLocalClose();
-                      handleCategoryClick("brand"); // ✅ map to "general"
-                    }}
-                    sx={{ minWidth: '150px' }}
-                  >
-                    {brand}
-                  </MenuItem>
-                ))}
-              </Menu> */}
-            {/* </Box> */}
-
-            {/* Men */}
             <Box sx={{ position: 'relative' }}>
               <Button
                 onClick={() => handleCategoryClick('men')}
                 sx={{
                   color: 'white',
                   backgroundColor: menAnchorEl ? '#f0f0f0' : 'transparent',
-                  // borderRight: '1px solid #e0e0e0'
                 }}
               >
                 Men
@@ -266,7 +216,6 @@ const Categories = () => {
                 sx={{
                   color: 'white',
                   backgroundColor: womenAnchorEl ? '#f0f0f0' : 'transparent',
-                  // borderRight: '1px solid #e0e0e0'
                 }}
               >
                 Women
@@ -274,14 +223,12 @@ const Categories = () => {
 
             </Box>
 
-            {/* Unisex */}
             <Box sx={{ position: 'relative' }}>
               <Button
                 onClick={() => handleCategoryClick('unisex')}
                 sx={{
                   color: 'white',
                   backgroundColor: unisexAnchorEl ? '#f0f0f0' : 'transparent',
-                  // borderRight: '1px solid #e0e0e0'
                 }}
               >
                 Unisex
@@ -289,7 +236,6 @@ const Categories = () => {
 
             </Box>
 
-            {/* Accessories */}
             <Box sx={{ position: 'relative' }}>
               <Button
                 onClick={() => handleCategoryClick('accessories')}

@@ -75,7 +75,6 @@ const OrderSummary = ({ cart, checkout, isLoading = false }) => {
     };
 
 
-    // Memoize calculations to prevent unnecessary re-renders
     const { subTotal, vat, delivery, total } = useMemo(() => {
         const subTotal = getSubTotal();
         const vat = 1000;
@@ -138,9 +137,9 @@ const OrderSummary = ({ cart, checkout, isLoading = false }) => {
     // {!isMobile && !isCart &&
 
     return (
-        <div className="order-summary bg-white rounded-lg flex flex-col justify-center items-start p-6 w-full max-w-md">
+        <div className="order-summary bg-white rounded-lg h-full flex flex-col justify-center items-start p-6 w-full max-w-md">
             <div className="w-full">
-                 <div className="flex items-center justify-between mb-4 border-b border-[#F7F7F7] pb-2">
+                <div className="flex items-center justify-between mb-4 border-b border-[#F7F7F7] pb-2">
                     <h2 className="text-lg font-bold text-[#061410] mb-2">Order Summary</h2>
                     <p className="text-sm text-[#061410] mb-2">{items.length} item{items.length !== 1 ? 's' : ''}</p>
                 </div>

@@ -64,8 +64,8 @@
     "src/component/checkout/Cart.jsx",
     "src/app/products/(with-layout)/checkout/delivery/page.jsx",
     "src/app/user/page",
-    "src/app/newPassword/page.jsx",
-    "src/app/newPassword/layout.jsx"
+    "src/app/new-password/page.jsx",
+    "src/app/new-password/layout.jsx"
 , "src/app/dashboard/layout.jsx", "src/app/dashboard/address-book/add/page.jsx"  ],
   "exclude": ["node_modules"]
 }

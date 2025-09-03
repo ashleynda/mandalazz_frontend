@@ -5,8 +5,7 @@ import { useState } from 'react'
 import RegNavbar from '../reusables/RegNavBar'
 import useLoginMutation from '../../lib/hooks/Auth/useLoginMutation'
 import useLoginStore from '../../lib/store/useLoginStore'
-import { LoadingButton } from '@mui/lab';
-import { CircularProgress } from '@mui/material';
+import { Button, CircularProgress } from '@mui/material';
 import useSnackbarStore from '../../lib/store/useSnackbarStore';
 
 const Login = () => {
@@ -45,22 +44,44 @@ const Login = () => {
     setLoading(true);
 
     loginMutation.mutate({ email, password }, {
+      // onSuccess: (data) => {
+      //   console.log('Login successful:', data)
+      //   const token = data?.message?.token;
+      //   const userId = data?.message?.user?.id || data?.message?.userId || data?.user?.id; 
+      //   if (token) {
+      //     sessionStorage.setItem('authToken', token);
+      //     sessionStorage.setItem("userEmail", email);
+      //     if (userId) {
+      //       sessionStorage.setItem('userId', userId);
+      //       setCurrentUser(userId);
+      //     } else {
+      //       console.warn('No userId found in login response');
+      //       setCurrentUser(null);
+      //     }
+      //     showSnackbar({ message: 'Login successful', severity: 'success' });
+      //     // setTimeout(() => {
+      //       router.push('/products');
+      //     // }, 3000);
+      //   }
+      //   setLoading(false);
+      // },
       onSuccess: (data) => {
-        console.log('Login successful:', data)
         const token = data?.message?.token;
         if (token) {
           sessionStorage.setItem('authToken', token);
           sessionStorage.setItem("userEmail", email);
+
+          window.dispatchEvent(new Event("login"));
+          
           showSnackbar({ message: 'Login successful', severity: 'success' });
           // router.push('/products')
-          setTimeout(() => {
+          // setTimeout(() => {
             router.push('/products');
-          }, 3000);
+          // }, 3000);
         }
         setLoading(false);
       },
       onError: (error) => {
-        console.error('Login failed:', error)
         setErrors({ ...errors, general: 'Email or password is incorrect' });
         showSnackbar({ message: 'Login failed. Please check your credentials.', severity: 'error' });
         setLoading(false);
@@ -171,29 +192,28 @@ const Login = () => {
             </div>
 
             <div className="flex flex-col gap-4 mt-4">
-              {/* <button
-                type="submit"
-                className="bg-[#26735B] text-white px-4 py-2 rounded-lg w-full cursor-pointer hover:bg-[#1f5a4a] transition-colors duration-200"
-              >
-                Sign In
-              </button> */}
-              <LoadingButton
-                loading={loading}
-                loadingIndicator={<CircularProgress size={24} />}
+              <Button
+                // loading={loading}
+                // loadingIndicator={<CircularProgress size={24} />}
                 variant="contained"
                 sx={{
-                  backgroundColor: '#26735B', // Set the background color
+                  backgroundColor: '#26735B', 
                   '&:hover': {
-                    backgroundColor: '#1f5f4a', // Set a darker color on hover (optional)
+                    backgroundColor: '#1f5f4a',
                   },
                 }}
                 // onClick={handleClick}
                 type='submit'
                 className='px-4 py-2 rounded-lg w-full transition-all duration-200 bg-[#26735B] text-white cursor-pointer'
-                disabled={!checkFormValidity()}
+                disabled={!checkFormValidity() || loading}
               >
-                Sign In
-              </LoadingButton>
+                {/* Sign In */}
+                {loading ? (
+                  <CircularProgress size={24} sx={{ color: 'white' }} />
+                ) : (
+                  'Sign In'
+                )}
+              </Button>
               <p className="text-sm font-normal text-black text-center">
                 Don&apos;t have an account?{' '}
                 <span

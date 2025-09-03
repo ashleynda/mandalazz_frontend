@@ -3,8 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import RegNavbar from '../reusables/RegNavBar';
-import { LoadingButton } from '@mui/lab';
-import { CircularProgress } from '@mui/material';
+import { Button, CircularProgress } from '@mui/material';
 import useSignupStore from '../../lib/store/useSignupStore';
 import useSignupMutation from '../../lib/hooks/Auth/useSignupMutation';
 // import RegNavbar from '@/components/reusables/RegNavbar'; // adjust the path to your project structure
@@ -67,10 +66,14 @@ const Signup = () => {
     if (!validate()) return;
 
     signupMutation.mutate(formData, {
-      onSuccess: () => {
-         console.log('Signup successful!');
-        router.push('/validation');
+      onSuccess: (data) => {
+        console.log('Signup successful!');
         sessionStorage.setItem("email", formData.email); 
+        if (data?.token) {
+          sessionStorage.setItem("authToken", data.token);
+          window.dispatchEvent(new Event("login")); // ✅ Tell Navbar
+        }
+        router.push('/validation');
       },
       onError: (error) => {
         alert(error.message);
@@ -209,9 +212,9 @@ const Signup = () => {
       {/* <button type="submit" disabled={signupMutation.isPending}>
         {signupMutation.isPending ? 'Loading...' : 'Sign Up'}
       </button> */}
-        <LoadingButton
-            loading={loading}
-            loadingIndicator={<CircularProgress size={24} />}
+        <Button
+            // loading={loading}
+            // loadingIndicator={<CircularProgress size={24} />}
             variant="contained"
             sx={{
                 backgroundColor: '#26735B', // Set the background color
@@ -222,10 +225,15 @@ const Signup = () => {
             // onClick={handleClick}
             type='submit'
             className='px-4 py-2 rounded-lg w-full transition-all duration-200 bg-[#26735B] text-white cursor-pointer'
-            disabled={!checkFormValidity()}
+            disabled={!checkFormValidity() || loading}
         >
-            Sign Up
-        </LoadingButton>
+          {loading ? (
+            <CircularProgress size={24} sx={{ color: 'white' }} />
+          ) : (
+            'Sign Up'
+          )}
+            {/* Sign Up */}
+        </Button>
       </div>
 
       <p className="text-sm mt-4 text-center text-gray-600">

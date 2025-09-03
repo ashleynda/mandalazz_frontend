@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { use } from 'react';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { FiShoppingCart, FiBell, FiMenu } from 'react-icons/fi';
@@ -15,6 +15,7 @@ import MobileAccountPage from '../../component/reusables/CategoriesMobile';
 import NavbarSkeleton from '../skeletons/NavbarSkeleton';
 import SearchResultsSkeleton from '../skeletons/SearchResultsSkeleton';
 import SearchDropdown from '../../component/reusables/SearchDropdown';
+import { useAuthStore } from '../../lib/store/useAuthStore';
 
 const Navbar = () => {
   const router = useRouter();
@@ -23,7 +24,7 @@ const Navbar = () => {
   const [notificationCount, setNotificationCount] = useState(0);
   const pathname = usePathname();
   const isOnlyProductsPage = pathname === '/products';
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  // const [isLoggedIn, setIsLoggedIn] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -35,7 +36,29 @@ const Navbar = () => {
   const open = Boolean(anchorEl);
   const { data, isLoading, error, refetch } = useProductSearch(searchTerm, false);
   const [results, setResults] = useState([]);
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
+  const { isLoggedIn, setIsLoggedIn } = useAuthStore();
+
+  useEffect(() => {
+    const checkAuth = () => {
+      const token = sessionStorage.getItem("authToken");
+      setIsLoggedIn(!!token);
+    };
+
+    checkAuth();
+
+    window.addEventListener("login", checkAuth);
+    window.addEventListener("logout", checkAuth);
+    window.addEventListener("storage", checkAuth);
+
+    return () => {
+      window.removeEventListener("login", checkAuth);
+      window.removeEventListener("logout", checkAuth);
+      window.removeEventListener("storage", checkAuth);
+    };
+  }, []);
+
+
   
 
   useEffect(() => {
