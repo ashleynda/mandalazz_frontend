@@ -213,9 +213,9 @@ const Signup = () => {
       {/* <button type="submit" disabled={signupMutation.isPending}>
         {signupMutation.isPending ? 'Loading...' : 'Sign Up'}
       </button> */}
-        <LoadingButton
-            loading={loading}
-            loadingIndicator={<CircularProgress size={24} />}
+        <Button
+            // loading={loading}
+            // loadingIndicator={<CircularProgress size={24} />}
             variant="contained"
             sx={{
                 backgroundColor: '#26735B', // Set the background color
@@ -226,10 +226,15 @@ const Signup = () => {
             // onClick={handleClick}
             type='submit'
             className='px-4 py-2 rounded-lg w-full transition-all duration-200 bg-[#26735B] text-white cursor-pointer'
-            disabled={!checkFormValidity()}
+            disabled={!checkFormValidity() || loading}
         >
-            Sign Up
-        </LoadingButton>
+          {loading ? (
+            <CircularProgress size={24} sx={{ color: 'white' }} />
+          ) : (
+            'Sign Up'
+          )}
+            {/* Sign Up */}
+        </Button>
       </div>
 
       <p className="text-sm mt-4 text-center text-gray-600">
